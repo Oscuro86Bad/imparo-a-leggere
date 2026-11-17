@@ -1,8 +1,10 @@
 /* Service Worker di "Imparo a Leggere"
  * - Precarica l'intera applicazione (app shell): funziona completamente offline.
- * - Cache-first con aggiornamento in background.
+ * - ONLINE: serve sempre la versione più recente (network-first) →
+ *   una sola ricarica della pagina basta per vedere gli aggiornamenti.
+ * - OFFLINE: usa la copia salvata in cache.
  */
-const CACHE_NAME = 'imparo-a-leggere-v1';
+const CACHE_NAME = 'imparo-a-leggere-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -40,18 +42,19 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  let url;
+  try { url = new URL(event.request.url); } catch (e) { return; }
+  if (url.origin !== self.location.origin) return;
+
+  // Online: sempre l'ultima versione (e aggiorna la cache in background).
+  // Offline: risponde con la copia in cache.
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const fetched = fetch(event.request)
-        .then((response) => {
-          if (response && response.ok && new URL(event.request.url).origin === self.location.origin) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || fetched;
-    })
+    fetch(event.request).then((response) => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+      }
+      return response;
+    }).catch(() => caches.match(event.request))
   );
 });
