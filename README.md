@@ -1,5 +1,7 @@
 # 🦉 IMPARO A LEGGERE
 
+**App online:** https://oscuro86bad.github.io/imparo-a-leggere/
+
 Applicazione educativa **PWA (Progressive Web App)** per aiutare i bambini di prima elementare
 (circa 6 anni) a imparare a leggere: riconoscimento delle lettere, sillabe, parole reali e
 inventate, associazione parola-immagine.
@@ -123,8 +125,8 @@ IMPARO A LEGGERE/
 3. In GitHub → **Settings → Pages** → Source: **GitHub Actions**.
 4. Il workflow incluso (`.github/workflows/deploy.yml`) pubblica l'app a ogni aggiornamento:
    il link resterà sempre
-   `https://<tuo-utente>.github.io/imparo-a-leggere/`
-   anche dopo le successive modifiche.
+   **https://oscuro86bad.github.io/imparo-a-leggere/**
+   anche dopo le successive modifiche. Repository: https://github.com/Oscuro86Bad/imparo-a-leggere
 5. Condividi il link nel gruppo WhatsApp della classe: ogni famiglia crea il proprio profilo.
 
 Gli aggiornamenti del codice **non cancellano i dati**: sono nel localStorage dei dispositivi
