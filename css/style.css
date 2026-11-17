@@ -212,6 +212,43 @@ body {
   display: inline-block;
 }
 
+/* ---------- VEDI E SCEGLI (scelta multipla) ---------- */
+.choice-img {
+  font-size: clamp(90px, 28vw, 170px);
+  line-height: 1.15;
+  margin: 4px 0 8px;
+}
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+.choice-btn {
+  font-family: var(--font);
+  font-size: clamp(30px, 9vw, 48px);
+  font-weight: bold;
+  border: none;
+  border-radius: 20px;
+  min-height: 76px;
+  cursor: pointer;
+  background: #fff;
+  color: var(--primary-dark);
+  box-shadow: 0 5px 0 rgba(0,0,0,0.10);
+  letter-spacing: 2px;
+}
+.choice-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.10); }
+.choice-btn:disabled { cursor: default; }
+.choice-btn.good {
+  background: linear-gradient(180deg, #66BB6A, #43A047);
+  color: #fff;
+}
+.choice-btn.ko {
+  background: linear-gradient(180deg, #EF9A9A, #E57373);
+  color: #fff;
+  opacity: 0.85;
+}
+
 .big-word {
   font-size: clamp(64px, 20vw, 130px);
   letter-spacing: clamp(4px, 2vw, 14px);

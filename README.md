@@ -23,7 +23,8 @@ inventate, associazione parola-immagine.
    (es. vocali + P + M).
 4. Entra in **AREA GENITORI → Combinazioni** e attiva solo le sillabe davvero studiate
    (es. PA, PE, PI, PO, PU…).
-5. Il bambino usa **SOLO LETTURA**, **LEGGI E GUARDA** e **DICO LA PAROLA**.
+5. Il bambino usa **SOLO LETTURA**, **LEGGI E GUARDA**, **DICO LA PAROLA**
+   e **VEDI E SCEGLI**.
 
 > Nota: per l'installazione come PWA e l'offline completo serve servire l'app via `http(s)`
 > (GitHub Pages, o un mini-server locale, vedi sotto). Aprendo il file direttamente
@@ -72,6 +73,15 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 5. Se il microfono non è disponibile (es. iPhone/Safari), il genitore conferma
    con i pulsanti ✅ / ❌.
 6. Il riconoscimento vocale richiede internet; il resto dell'app resta offline.
+
+### VEDI E SCEGLI
+1. Compare **solo l'immagine** della parola (senza scriverla), es. ⚽.
+2. Sotto, **scelta multipla** con 2–4 opzioni: l'inizio della parola
+   (prime due lettere), es. **PA / PE / MA / PU** per ⚽ PALLA.
+3. Le opzioni sono **solo sillabe studiate e attive** nell'Area Genitori.
+4. Risposta giusta → opzione **VERDE**, stellina, **parola completa rivelata**
+   e pronunciata, poi **passaggio automatico** alla parola successiva.
+5. Risposta sbagliata → opzione **ROSSA** disabilitata; si riprova sulle altre.
 
 ### AREA GENITORI (protetta da PIN opzionale a 4 cifre)
 - **Profili**: profili multipli indipendenti, modifica, eliminazione.

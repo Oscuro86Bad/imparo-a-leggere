@@ -228,6 +228,38 @@ IAL.Engine = (function () {
     return chosen;
   }
 
+  // ---------- Esercizi VEDI E SCEGLI (inizio della parola) ----------
+  function shuffleArr(a) {
+    const r = a.slice();
+    for (let i = r.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = r[i]; r[i] = r[j]; r[j] = t;
+    }
+    return r;
+  }
+
+  // Immagine della parola + scelta multipla dell'inizio (prime due lettere).
+  // I distrattori vengono SOLO dalle sillabe studiate e attive del profilo.
+  function nextChoice(p, opts) {
+    const letters = enabledLetters(p);
+    const candidates = realWords(p, opts && opts.lengths).filter(function (e) {
+      return !!e.img && e.s.length && e.s[0].length === 2 && canShowSyllable(p, e.s[0], letters);
+    });
+    if (!candidates.length) return null;
+    const entry = pick(candidates, recent);
+    if (!entry) return null;
+    remember({ text: entry.w });
+    const distractors = shuffleArr(studiedSyllables(p).filter(function (s) {
+      return s.length === 2 && s !== entry.s[0] && canShowSyllable(p, s, letters);
+    })).slice(0, 3);
+    const options = shuffleArr([entry.s[0]].concat(distractors));
+    return {
+      kind: 'choice', text: entry.w, invented: false,
+      word: entry.w, img: entry.img, syllable: entry.s[0],
+      options: options, typeLabel: 'Inizio della parola'
+    };
+  }
+
   // Descrizione leggibile di ciò che il profilo rende disponibile
   function availability(p) {
     const letters = enabledLetters(p);
@@ -250,6 +282,7 @@ IAL.Engine = (function () {
     realWords: realWords,
     nextReading: nextReading,
     nextMatch: nextMatch,
+    nextChoice: nextChoice,
     makeInvented: makeInvented,
     availability: availability
   };

@@ -141,6 +141,23 @@
   const avail = E.availability(p2);
   check('availability: conta solo le sillabe con consonante attiva (5, non 7)', avail.syllables === 5);
 
+  // 6c. Vedi e scegli: immagine + scelta multipla dell'inizio
+  // (arricchisce le sillabe per avere parole complete disponibili)
+  p2.syllables = { P: ['PA','PE','PI','PO','PU'], M: ['MA','ME','MI','MO','MU'], N: ['NA','NE','NI','NO','NU'], R: ['RA','RE'] };
+  IAL.Store.save();
+  let chOk = true, chDetail = '';
+  for (let i = 0; i < 100; i++) {
+    const ex = E.nextChoice(p2, { lengths: [2,3,4,5,6] });
+    if (!ex) { chOk = false; chDetail = 'nessun esercizio'; break; }
+    if (!ex.img || !ex.word) { chOk = false; chDetail = 'manca immagine/parola'; break; }
+    if (!ex.options || ex.options.length < 2 || ex.options.length > 4) { chOk = false; chDetail = 'opzioni: ' + (ex.options || []).join('/'); break; }
+    if (ex.options.indexOf(ex.syllable) === -1) { chOk = false; chDetail = 'corretta mancante'; break; }
+    if (ex.options.some(o => o.length !== 2)) { chOk = false; chDetail = 'opzione non di 2 lettere'; break; }
+    if (ex.options.some(o => ['P','M','N'].indexOf(o[0]) === -1)) { chOk = false; chDetail = 'opzione con consonante disattivata: ' + ex.options.join('/'); break; }
+    if (IAL.WORDS_BY_KEY[ex.word].s[0] !== ex.syllable) { chOk = false; chDetail = 'sillaba errata per ' + ex.word; break; }
+  }
+  check('Vedi e scegli: opzioni valide (2-4), corretta inclusa, solo sillabe attive' + (chDetail ? ' → ' + chDetail : ''), chOk);
+
   // 7. Disattivando tutto: zero esercizi
   p.letters = { vowels: [], consonants: [] };
   p.syllables = {};

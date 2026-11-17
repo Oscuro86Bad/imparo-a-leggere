@@ -33,6 +33,10 @@ IAL.Home = (function () {
         el('span', { class: 'emoji' }, ['🎤']),
         el('span', { class: 'txt' }, ['DICO LA PAROLA', el('span', { class: 'small' }, ['Pronuncia la parola: l’app ti ascolta'])])
       ]),
+      el('button', { class: 'btn btn-green btn-block', onclick: function () { IAL.Choice.show(); } }, [
+        el('span', { class: 'emoji' }, ['🔍']),
+        el('span', { class: 'txt' }, ['VEDI E SCEGLI', el('span', { class: 'small' }, ['Indovina l’inizio della parola'])])
+      ]),
       el('button', { class: 'btn btn-purple btn-block', onclick: function () { IAL.Parent.show(); } }, [
         el('span', { class: 'emoji' }, ['🔒']),
         el('span', { class: 'txt' }, ['AREA GENITORI', el('span', { class: 'small' }, ['Lettere, combinazioni, progressi'])])

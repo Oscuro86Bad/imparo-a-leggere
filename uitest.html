@@ -16,6 +16,7 @@
 <script src="js/ui/reading.js"></script>
 <script src="js/ui/match.js"></script>
 <script src="js/ui/speech.js"></script>
+<script src="js/ui/choice.js"></script>
 <script src="js/ui/parent.js"></script>
 <script src="js/app.js"></script>
 <script>
@@ -35,7 +36,7 @@
   nameInput.value = 'Sofia';
   startBtn.click();
   await wait(50);
-  check('Profilo creato → home con le tre modalità', body().indexOf('SOLO LETTURA') !== -1 && body().indexOf('LEGGI E GUARDA') !== -1 && body().indexOf('DICO LA PAROLA') !== -1);
+  check('Profilo creato → home con le quattro modalità', body().indexOf('SOLO LETTURA') !== -1 && body().indexOf('LEGGI E GUARDA') !== -1 && body().indexOf('DICO LA PAROLA') !== -1 && body().indexOf('VEDI E SCEGLI') !== -1);
 
   // Configura lettere: vocali + P + M + N, sillabe studiate
   IAL.Store.updateActive(pr => {
@@ -93,6 +94,19 @@
   btnWith('SALTA').click(); await wait(50);
   check('SALTA → nuova parola', !!document.getElementById('sp-word') && document.getElementById('sp-word').textContent !== spWord0);
   IAL.Speech.hide();
+
+  // --- VEDI E SCEGLI ---
+  IAL.Choice.show();
+  await wait(100);
+  check('Schermata "Vedi e scegli" con immagine', !!document.getElementById('vc-img') && document.getElementById('vc-img').textContent.length >= 1);
+  const vcOpts = Array.from(document.querySelectorAll('#vc-options button'));
+  check('Scelta multipla con 2-4 opzioni', vcOpts.length >= 2 && vcOpts.length <= 4);
+  check('Opzioni: solo sillabe di 2 lettere con consonante abilitata', vcOpts.every(b => /^[A-Z]{2}$/.test(b.textContent) && ok.indexOf(b.textContent[0]) !== -1));
+  let solved = false, wrongTapOk = false;
+  for (const b of vcOpts) { b.click(); await wait(40); if (document.getElementById('vc-reveal').textContent.trim()) { solved = true; break; } else { wrongTapOk = true; } }
+  check('Opzione sbagliata → rossa e disabilitata, si riprova', wrongTapOk);
+  check('Opzione giusta → parola completa rivelata', solved);
+  IAL.Choice.hide();
 
   // --- AREA GENITORI ---
   IAL.Parent.show();
