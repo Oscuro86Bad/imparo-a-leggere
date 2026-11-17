@@ -16,7 +16,7 @@
 <script src="js/ui/home.js?v=8"></script>
 <script src="js/ui/reading.js?v=8"></script>
 <script src="js/ui/match.js?v=8"></script>
-<script src="js/ui/speech.js?v=9"></script>
+<script src="js/ui/speech.js?v=10"></script>
 <script src="js/ui/choice.js?v=8"></script>
 <script src="js/ui/custom.js?v=8"></script>
 <script src="js/ui/parent.js?v=8"></script>
@@ -108,6 +108,23 @@
   check('DICO LA PAROLA: sempre parole complete (anche con solo sillabe attive)', !!IAL.WORDS_BY_KEY[spWord2] && sylsStudied.indexOf(spWord2) === -1);
   IAL.Speech.hide();
   IAL.Store.updateActive(pr => { pr.settings.categories = { letters: true, syllables: true, words: true }; });
+
+  // Errore di pronuncia: NESSUNA voce che rivela la parola, solo segnale acustico
+  IAL.Speech.show();
+  await wait(100);
+  const spWrongWord = document.getElementById('sp-word').textContent;
+  const origSpeak = window.speechSynthesis && window.speechSynthesis.speak;
+  let spoken = 0;
+  if (window.speechSynthesis) window.speechSynthesis.speak = function () { spoken++; };
+  IAL.Speech.wrongForTest('');
+  await wait(60);
+  check('Errore → messaggio di incoraggiamento (sa ciò che ha sentito)', document.getElementById('sp-msg').textContent.length > 0);
+  await wait(1500);
+  if (window.speechSynthesis) window.speechSynthesis.speak = origSpeak;
+  check('Errore → l’app NON pronuncia la parola corretta (solo segnale acustico)', spoken === 0);
+  check('Errore → resta la STESSA parola per riprovare', document.getElementById('sp-word').textContent === spWrongWord);
+  check('Errore → torna il pulsante per riprovare (VERIFICA o CORRETTO)', !!btnWith('VERIFICA') || !!btnWith('CORRETTO'));
+  IAL.Speech.hide();
 
   // --- VEDI E SCEGLI ---
   IAL.Choice.show();

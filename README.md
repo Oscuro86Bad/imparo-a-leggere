@@ -71,9 +71,11 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    debba ripremere.
 3. Feedback immediato: la parola si **illumina di VERDE** se pronunciata bene
    (passaggio automatico alla successiva), di **ROSSO** se sbagliata.
-4. In caso di errore l'app **ripete la pronuncia corretta** della parola
-   (sintesi vocale) e torna il pulsante **🎤 VERIFICA** per riprovare
-   sulla stessa parola.
+4. In caso di errore **nessuna voce rivela la parola**: parte solo un breve
+   **segnale acustico di errore** (due note discendenti, generato dall'app,
+   funziona anche offline), il messaggio dice «Ho sentito: …» e torna il
+   pulsante **🎤 VERIFICA** per riprovare sulla stessa parola — a pronunciarla
+   bene pensa il genitore leggendola a schermo.
 5. La valutazione è **tollerante con le voci infantili**: usa tutte le
    alternative del riconoscitore e un confronto "fuzzy" (distanza di
    Levenshtein), così piccoli errori di trascrizione (P/B, T/D…) non fanno

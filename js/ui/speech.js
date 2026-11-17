@@ -13,8 +13,10 @@
       trascritta con piccoli errori (P/B, T/D…). Un fotogramma
       di rumore (interiezioni, "eh") viene ignorato.
    4. Feedback: parola VERDE → passa alla successiva; ROSSA →
-      l'app ripete la parola corretta ("Ho sentito: …") e torna
-      il pulsante 🎤 per riprovare sulla stessa parola.
+      solo un SEGNALE ACUSTICO di errore (nessuna voce che
+      rivela la parola corretta: la legge il genitore a
+      schermo) e torna il pulsante 🎤 per riprovare sulla
+      stessa parola.
    5. Se il microfono non è disponibile (iPhone/iPad Safari)
       il genitore conferma con ✅ / ❌.
    ============================================================ */
@@ -150,6 +152,7 @@ IAL.Speech = (function () {
   function startListening() {
     if (!sessionOn || !current || judged) return;
     if (!SR) { manualMode = true; setActions(); return; }
+    primeAudio();            // sblocca l'audio dentro il gesto (per l'eventuale errore)
     stopListening();
     pressSeq += 1;          // ogni pressione ha il suo "canale"
     listenFails = 0;
@@ -343,20 +346,59 @@ IAL.Speech = (function () {
     setMsg((heardPrefix || '') + IAL.UI.retryMsg(), 'try');
     setStatus('Ci riproviamo! 💪', 'off');
 
-    // Ripete la pronuncia corretta, poi torna il pulsante 🎤
-    // per riprovare sulla STESSA parola.
-    hearAgain(function () {
-      if (!sessionOn) return;
+    // NIENTE voce che rivela la parola: solo il segnale acustico
+    // di errore; poi torna il pulsante 🎤 per riprovare sulla
+    // STESSA parola (il genitore può pronunciarla leggendola).
+    const ex = current;
+    errorBeep();
+    setTimeout(function () {
+      if (!sessionOn || current !== ex || !judged) return;
       judged = false;
       setStatus('Premi 🎤 quando sei pronto', 'ready');
       setActions();
-    });
+    }, 1300);
     updateNote();
   }
 
   // Conferma manuale (microfono non disponibile)
   function manualCorrect() { if (!judged) correct(); }
-  function manualWrong() { if (!judged) wrong(''); }
+  function manualWrong() { if (!judged) { primeAudio(); wrong(''); } }
+
+  // ---------- Segnale acustico di errore (Web Audio, offline) ----------
+  let audioCtx = null;
+
+  // Crea/riattiva il contesto audio DENTRO il gesto dell'utente
+  // (policy autoplay di Chrome/Safari): il segnale poi parte sicuro.
+  function primeAudio() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!audioCtx) audioCtx = new AC();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { /* dispositivo senza audio: si prosegue */ }
+  }
+
+  // Due note discendenti: il classico suono dell'errore
+  function errorBeep() {
+    try {
+      primeAudio();
+      if (!audioCtx || audioCtx.state !== 'running') return;
+      const now = audioCtx.currentTime + 0.02;
+      [[523, 0], [392, 0.16]].forEach(function (n) {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(n[0], now + n[1]);
+        g.gain.setValueAtTime(0.0001, now + n[1]);
+        g.gain.exponentialRampToValueAtTime(0.22, now + n[1] + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + n[1] + 0.13);
+        o.connect(g);
+        g.connect(audioCtx.destination);
+        o.start(now + n[1]);
+        o.stop(now + n[1] + 0.15);
+      });
+    } catch (e) { /* audio non disponibile: si prosegue senza suono */ }
+  }
 
   // ---------- Sintesi vocale ----------
   function hearAgain(done) {
@@ -388,5 +430,10 @@ IAL.Speech = (function () {
     return matchQuality(normalize(target), [heard]) === 'good';
   }
 
-  return { show: show, hide: hide, matchTest: matchTest };
+  return {
+    show: show,
+    hide: hide,
+    matchTest: matchTest,
+    wrongForTest: wrong   // usato solo dai test (simula l'errore di pronuncia)
+  };
 })();
