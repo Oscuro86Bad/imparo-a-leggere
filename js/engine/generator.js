@@ -209,7 +209,7 @@ IAL.Engine = (function () {
     return null; // nessun esercizio possibile con le impostazioni attuali
   }
 
-  // ---------- Esercizi LEGGI E ASSOCIA ----------
+  // ---------- Esercizi LEGGI E GUARDA ----------
   // SOLO parole reali e complete con immagine associata: il bambino legge
   // la parola, il genitore conferma e compare l'immagine corrispondente.
   function nextMatch(p, opts) {

@@ -351,7 +351,7 @@ IAL.Parent = (function () {
       el('h2', {}, ['Impostazioni esercizi']),
       el('p', { class: 'hint' }, [
         'Le scelte valgono per SOLO LETTURA e si salvano automaticamente. ',
-        'In LEGGI E ASSOCIA si usano sempre parole reali complete con immagine.'
+        'In LEGGI E GUARDA si usano sempre parole reali complete con immagine.'
       ]),
 
       el('h3', {}, ['Tipo di parole']),

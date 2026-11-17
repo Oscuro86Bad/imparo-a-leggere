@@ -23,7 +23,7 @@ inventate, associazione parola-immagine.
    (es. vocali + P + M).
 4. Entra in **AREA GENITORI → Combinazioni** e attiva solo le sillabe davvero studiate
    (es. PA, PE, PI, PO, PU…).
-5. Il bambino usa **SOLO LETTURA** e **LEGGI E ASSOCIA**.
+5. Il bambino usa **SOLO LETTURA** e **LEGGI E GUARDA**.
 
 > Nota: per l'installazione come PWA e l'offline completo serve servire l'app via `http(s)`
 > (GitHub Pages, o un mini-server locale, vedi sotto). Aprendo il file direttamente
@@ -52,7 +52,7 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 - Stelle e messaggi incoraggianti, senza obiettivi né premi: l'app serve solo come ripasso.
 - Anti-ripetizione: gli ultimi 15 esercizi non vengono riproposti subito.
 
-### LEGGI E ASSOCIA
+### LEGGI E GUARDA
 1. Compare una sillaba o parola → il bambino legge ad alta voce.
 2. Il genitore conferma con **CORRETTO**.
 3. Compare l'immagine associata con la parola completa (PA → 🦆 PAPERA).
@@ -106,7 +106,7 @@ IMPARO A LEGGERE/
 │   ├── data/associations.js# associazioni sillaba→parola→immagine
 │   ├── state/store.js      # profili, impostazioni, progressi (localStorage)
 │   ├── engine/generator.js # motore di generazione con controlli didattici
-│   ├── ui/*.js             # schermate: home, lettura, associa, area genitori
+│   ├── ui/*.js             # schermate: home, lettura, leggi e guarda, area genitori
 │   └── app.js              # avvio
 ├── icons/                  # icone (generate con scripts/make-icon.ps1)
 ├── scripts/make-icon.ps1   # rigenera le icone (Windows, senza dipendenze)
@@ -165,7 +165,7 @@ Due pagine di collaudo automatico (apribili da browser, anche da `file://`):
 - `test.html` — motore di generazione: nessuna lettera non abilitata, nessuna combinazione
   non studiata, correttezza reali/inventate, filtro lunghezza, zero esercizi se tutto spento.
 - `uitest.html` — interfaccia completa: creazione profilo, 30 esercizi in SOLO LETTURA con
-  controllo delle lettere, ciclo CORRETTO/AVANTI in LEGGI E ASSOCIA, tutte le schede
+  controllo delle lettere, ciclo CORRETTO/AVANTI in LEGGI E GUARDA, tutte le schede
   dell'Area Genitori, PIN, stelline e statistiche.
 
 Checklist manuale consigliata (2 minuti):

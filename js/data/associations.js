@@ -1,6 +1,6 @@
 /* ============================================================
    IMPARO A LEGGERE — associazioni sillaba/parola → immagine
-   Usate nella modalità LEGGI E ASSOCIA.
+   Usate nella modalità LEGGI E GUARDA.
    L'associazione viene usata SOLO se la parola associata è
    proponibile con le lettere/combinazioni abilitate
    (verifica fatta dal motore di generazione).

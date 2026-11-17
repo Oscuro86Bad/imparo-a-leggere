@@ -1,9 +1,8 @@
 /* ============================================================
-   IMPARO A LEGGERE — MODO B: LEGGI E ASSOCIA
-   1. Compare una sillaba o parola → il bambino legge ad alta voce.
+   IMPARO A LEGGERE — MODO B: LEGGI E GUARDA
+   1. Compare una parola → il bambino legge ad alta voce.
    2. Il genitore conferma con CORRETTO.
-   3. Compare l'immagine associata (parola reale) o una mascotte
-      divertente (parola inventata, senza significato).
+   3. Compare l'immagine associata (parola reale completa).
    ============================================================ */
 window.IAL = window.IAL || {};
 
@@ -38,7 +37,7 @@ IAL.Match = (function () {
 
     IAL.UI.renderScreen([
       topbar,
-      el('h1', { class: 'app-title' }, ['LEGGI E ASSOCIA']),
+      el('h1', { class: 'app-title' }, ['LEGGI E GUARDA']),
       card,
       el('p', { class: 'progress-note', id: 'mx-note' }, ['']),
       el('button', { class: 'btn btn-soft btn-block', style: 'margin-top:10px', onclick: function () { IAL.Home.show(); } }, ['🏠 TORNA AL MENU'])
@@ -61,7 +60,7 @@ IAL.Match = (function () {
 
     if (!ex) {
       current = null;
-      if (typeEl) typeEl.textContent = 'Nessuna associazione disponibile';
+      if (typeEl) typeEl.textContent = 'Nessuna parola disponibile';
       if (wordEl) wordEl.textContent = '🤔';
       if (msgEl) msgEl.textContent = '';
       if (revealEl) revealEl.innerHTML = '';

@@ -97,7 +97,7 @@
   }
   check('Le inventate usano solo sillabe studiate', sylOk);
 
-  // 5. Leggi e associa: SOLO parole reali complete con immagine
+  // 5. Leggi e guarda: SOLO parole reali complete con immagine
   let matchOk = true;
   for (let i = 0; i < 200; i++) {
     const ex = E.nextMatch(p, { wordType:'invented', lengths:[2,3,4,5,6] });
@@ -105,7 +105,7 @@
     const word = IAL.WORDS_BY_KEY[ex.text];
     if (ex.invented || !word || !word.img || ex.text !== ex.assocWord || !E.canShowWord(p, word)) { matchOk = false; break; }
   }
-  check('LEGGI E ASSOCIA: solo parole reali complete con immagine (anche se impostate le inventate)', matchOk);
+  check('LEGGI E GUARDA: solo parole reali complete con immagine (anche se impostate le inventate)', matchOk);
 
   // 6. Coppie di vocali: mai lettere singole
   let pairOk = true;

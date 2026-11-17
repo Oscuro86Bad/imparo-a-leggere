@@ -34,7 +34,7 @@
   nameInput.value = 'Sofia';
   startBtn.click();
   await wait(50);
-  check('Profilo creato → home con le due modalità', body().indexOf('SOLO LETTURA') !== -1 && body().indexOf('LEGGI E ASSOCIA') !== -1);
+  check('Profilo creato → home con le due modalità', body().indexOf('SOLO LETTURA') !== -1 && body().indexOf('LEGGI E GUARDA') !== -1);
 
   // Configura lettere: vocali + P + M + N, sillabe studiate
   IAL.Store.updateActive(pr => {
@@ -58,7 +58,7 @@
   check('RITENTA registrato (da ripetere)', IAL.Store.active().stats.retried >= 1);
   check('RIPETI presente', !!btnWith('RIPETI'));
 
-  // --- LEGGI E ASSOCIA ---
+  // --- LEGGI E GUARDA ---
   IAL.Match.show();
   await wait(1200); // attende l'eventuale avanzamento automatico in sospeso da SOLO LETTURA
   IAL.Match.show(); // riapre pulita
