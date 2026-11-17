@@ -13,11 +13,11 @@
 <body>
 <h1>🧪 Collaudo automatico del motore</h1>
 <pre id="out">In corso…</pre>
-<script src="js/config.js"></script>
-<script src="js/data/words.js"></script>
-<script src="js/data/associations.js"></script>
-<script src="js/state/store.js"></script>
-<script src="js/engine/generator.js"></script>
+<script src="js/config.js?v=8"></script>
+<script src="js/data/words.js?v=8"></script>
+<script src="js/data/associations.js?v=8"></script>
+<script src="js/state/store.js?v=8"></script>
+<script src="js/engine/generator.js?v=8"></script>
 <script>
 (function () {
   const out = [];
@@ -304,6 +304,28 @@
   check('DICO LA PAROLA: solo parole reali complete leggibili', spOk);
   check('DICO LA PAROLA: svincolata dalla lunghezza selezionata', spLong);
   check('DICO LA PAROLA: mai la stessa parola due volte di seguito', !spRepeat);
+
+  // 15. PAROLE MIE: lista del genitore, ordine casuale, mai ripetute di seguito
+  let cwOk = true, cwRep = false, cwPrev = '';
+  const cwList = ['MAMMA', 'GATTO', 'FORCHETTA'];
+  const savedCats = p.settings.categories;
+  p.customWords = cwList.slice();
+  p.settings.categories = { letters: false, syllables: false, words: false }; // non influisce
+  IAL.Store.save();
+  for (let i = 0; i < 100; i++) {
+    const ex = E.nextCustom(p);
+    if (!ex) { cwOk = false; break; }
+    if (cwList.indexOf(ex.text) === -1) { cwOk = false; break; }  // solo parole inserite
+    if (ex.text === cwPrev) cwRep = true;
+    cwPrev = ex.text;
+  }
+  p.settings.categories = savedCats;
+  IAL.Store.save();
+  check('PAROLE MIE: propone solo le parole inserite dal genitore (anche con tutto disattivato)', cwOk);
+  check('PAROLE MIE: mai la stessa parola due volte di seguito', !cwRep);
+  p.customWords = [];
+  IAL.Store.save();
+  check('PAROLE MIE: lista vuota → nessun esercizio', E.nextCustom(p) === null);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));

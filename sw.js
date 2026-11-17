@@ -4,7 +4,7 @@
  *   una sola ricarica della pagina basta per vedere gli aggiornamenti.
  * - OFFLINE: usa la copia salvata in cache.
  */
-const CACHE_NAME = 'imparo-a-leggere-v7';
+const CACHE_NAME = 'imparo-a-leggere-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -21,6 +21,7 @@ const ASSETS = [
   './js/ui/match.js',
   './js/ui/speech.js',
   './js/ui/choice.js',
+  './js/ui/custom.js',
   './js/ui/parent.js',
   './js/app.js',
   './icons/icon-192.png',

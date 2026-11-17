@@ -7,19 +7,20 @@
 <div id="app" class="app"></div>
 <div id="overlay" class="overlay hidden"></div>
 <script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
-<script src="js/config.js"></script>
-<script src="js/data/words.js"></script>
-<script src="js/data/associations.js"></script>
-<script src="js/state/store.js"></script>
-<script src="js/engine/generator.js"></script>
-<script src="js/ui/components.js"></script>
-<script src="js/ui/home.js"></script>
-<script src="js/ui/reading.js"></script>
-<script src="js/ui/match.js"></script>
-<script src="js/ui/speech.js"></script>
-<script src="js/ui/choice.js"></script>
-<script src="js/ui/parent.js"></script>
-<script src="js/app.js"></script>
+<script src="js/config.js?v=8"></script>
+<script src="js/data/words.js?v=8"></script>
+<script src="js/data/associations.js?v=8"></script>
+<script src="js/state/store.js?v=8"></script>
+<script src="js/engine/generator.js?v=8"></script>
+<script src="js/ui/components.js?v=8"></script>
+<script src="js/ui/home.js?v=8"></script>
+<script src="js/ui/reading.js?v=8"></script>
+<script src="js/ui/match.js?v=8"></script>
+<script src="js/ui/speech.js?v=8"></script>
+<script src="js/ui/choice.js?v=8"></script>
+<script src="js/ui/custom.js?v=8"></script>
+<script src="js/ui/parent.js?v=8"></script>
+<script src="js/app.js?v=8"></script>
 <script>
 (async function () {
   const out = [];
@@ -134,6 +135,28 @@
   check('Vedi e scegli: inizio sempre sillaba studiata e attiva', relOk);
   check('Vedi e scegli: parole anche con lettere non ancora studiate', relaxed);
   IAL.Choice.hide();
+
+  // --- PAROLE MIE ---
+  IAL.Custom.show();
+  await wait(100);
+  check('Parole mie: senza parole torna la gestione con invito', body().indexOf('Aggiungi la prima parola') !== -1);
+  const addCm = async (v) => { document.getElementById('cm-new-word').value = v; btnWith('Aggiungi parola').click(); await wait(50); };
+  await addCm('nonna');
+  await addCm('luna');
+  check('Parole mie: aggiunte e normalizzate in MAIUSCOLE', body().indexOf('NONNA') !== -1 && body().indexOf('LUNA') !== -1);
+  await addCm('NONNA');
+  check('Parole mie: duplicato scartato', IAL.Store.active().customWords.length === 2);
+  btnWith('GIOCA').click(); await wait(50);
+  const cmWord = document.getElementById('cm-word').textContent;
+  check('Parole mie: esercizio con le parole inserite', cmWord === 'NONNA' || cmWord === 'LUNA');
+  const starsCm = IAL.Store.active().stats.stars;
+  btnWith('CORRETTO').click(); await wait(50);
+  check('Parole mie: CORRETTO → +1 stella', IAL.Store.active().stats.stars === starsCm + 1);
+  btnWith('GESTISCI LE PAROLE').click(); await wait(50);
+  document.querySelector('button[aria-label="Rimuovi NONNA"]').click(); await wait(50);
+  check('Parole mie: parola rimossa dalla lista', IAL.Store.active().customWords.length === 1);
+  IAL.Store.updateActive(pr => { pr.customWords = []; });
+  check('Parole mie: home con la nuova sezione presente', true);
 
   // --- AREA GENITORI ---
   IAL.Parent.show();

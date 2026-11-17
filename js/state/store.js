@@ -23,6 +23,7 @@ IAL.Store = (function () {
       letters: { vowels: ['A', 'E', 'I', 'O', 'U'], consonants: [] },
       syllables: {},                 // es. { P: ['PA','PE'] }
       flags: { doppie: false, gruppi: false, sc: false, gn: false, gli: false },
+      customWords: [],               // PAROLE MIE: parole scelte dal genitore
       settings: {
         wordType: 'mixed',           // 'real' | 'invented' | 'mixed'
         lengths: [2, 3, 4, 5, 6],    // lunghezze ammesse (in lettere)
@@ -57,6 +58,7 @@ IAL.Store = (function () {
       p.letters.consonants = p.letters.consonants || [];
       p.syllables = p.syllables || {};
       p.flags = Object.assign({}, def.flags, p.flags || {});
+      p.customWords = Array.isArray(p.customWords) ? p.customWords : [];
       p.settings = Object.assign({}, def.settings, p.settings || {});
       p.settings.categories = Object.assign({}, def.settings.categories, p.settings.categories || {});
       p.settings.lengths = p.settings.lengths || def.settings.lengths;

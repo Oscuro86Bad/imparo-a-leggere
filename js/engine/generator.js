@@ -280,6 +280,26 @@ IAL.Engine = (function () {
     return ex;
   }
 
+  // ---------- Esercizi PAROLE MIE ----------
+  // Parole inserite manualmente dal genitore: girano in ordine casuale,
+  // senza mai ripetersi di seguito. Sezione svincolata da lettere attive,
+  // livelli e categorie: sono una scelta consapevole del genitore.
+  function customWords(p) {
+    return (p.customWords || []).filter(function (w) {
+      return typeof w === 'string' && w.length >= 2;
+    });
+  }
+
+  function nextCustom(p) {
+    const pool = customWords(p);
+    if (!pool.length) return null;
+    const text = pick(pool, recent);
+    if (!text) return null;
+    const ex = { kind: 'word', text: text, invented: false, img: null, typeLabel: 'Parola mia' };
+    remember(ex);
+    return ex;
+  }
+
   // ---------- Esercizi VEDI E SCEGLI (inizio della parola) ----------
   function shuffleArr(a) {
     const r = a.slice();
@@ -342,6 +362,7 @@ IAL.Engine = (function () {
     nextReading: nextReading,
     nextMatch: nextMatch,
     nextSpeech: nextSpeech,
+    nextCustom: nextCustom,
     nextChoice: nextChoice,
     makeInvented: makeInvented,
     availability: availability

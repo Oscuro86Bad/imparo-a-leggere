@@ -89,6 +89,15 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    e pronunciata, poi **passaggio automatico** alla parola successiva.
 5. Risposta sbagliata → opzione **ROSSA** disabilitata; si riprova sulle altre.
 
+### PAROLE MIE
+1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,
+   parole del quaderno…): restano salvate sul dispositivo.
+2. Le parole girano **in ordine casuale**, senza mai ripetersi di seguito.
+3. Pulsanti **CORRETTO** (+stellina), **RITENTA** e **NUOVO**.
+4. Si possono aggiungere o togliere parole a piacere da 📝 GESTISCI LE PAROLE.
+5. Sezione svincolata da lettere attive e livelli: la parola è scelta
+   apposta da un adulto.
+
 ### AREA GENITORI (protetta da PIN opzionale a 4 cifre)
 - **Profili**: profili multipli indipendenti, modifica, eliminazione.
 - **Lettere**: alfabeto italiano completo, vocali e consonanti distinte, attivazione
@@ -138,7 +147,7 @@ IMPARO A LEGGERE/
 │   ├── data/associations.js# associazioni sillaba→parola→immagine
 │   ├── state/store.js      # profili, impostazioni, progressi (localStorage)
 │   ├── engine/generator.js # motore di generazione con controlli didattici
-│   ├── ui/*.js             # schermate: home, lettura, leggi e guarda, area genitori
+│   ├── ui/*.js             # schermate: home, lettura, leggi e guarda, area genitori, parole mie
 │   └── app.js              # avvio
 ├── icons/                  # icone (generate con scripts/make-icon.ps1)
 ├── scripts/make-icon.ps1   # rigenera le icone (Windows, senza dipendenze)
