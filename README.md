@@ -55,15 +55,16 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 - Anti-ripetizione: gli ultimi 15 esercizi non vengono riproposti subito.
 
 ### LEGGI E GUARDA
-1. Compare una sillaba o parola → il bambino legge ad alta voce.
+1. Compare **una parola completa reale** → il bambino legge ad alta voce.
 2. Il genitore conferma con **CORRETTO**.
-3. Compare l'immagine associata con la parola completa (PA → 🦆 PAPERA).
-4. Le parole inventate mostrano una mascotte divertente, **mai** un falso significato.
-5. Le associazioni vengono proposte **solo** se la parola associata rispetta le lettere
-   e le combinazioni abilitate.
+3. Compare l'immagine associata con la parola completa (PANE → 🍞).
+4. Solo parole che la bambina può leggere con le **lettere e le sillabe conosciute**.
+5. Sezione **svincolata dalla lunghezza** selezionata nell'Area Genitori; mai la
+   stessa parola due volte di seguito.
 
 ### DICO LA PAROLA
-1. Compare una parola → il bambino la pronuncia a voce alta.
+1. Compare **una parola completa reale** (mai sillabe) → il bambino la pronuncia
+   a voce alta.
 2. L'app **ascolta con il microfono** (riconoscimento vocale in italiano) e dà
    un **feedback immediato**: la parola si **illumina di VERDE** se pronunciata
    bene, di **ROSSO** se sbagliata.
@@ -73,13 +74,17 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    Parola sbagliata → **ripropone automaticamente** la stessa parola da ripetere.
 5. Se il microfono non è disponibile (es. iPhone/Safari), il genitore conferma
    con i pulsanti ✅ / ❌.
-6. Il riconoscimento vocale richiede internet; il resto dell'app resta offline.
+6. Sezione **svincolata dalla lunghezza** selezionata nell'Area Genitori: valgono
+   solo le lettere e le sillabe conosciute.
+7. Il riconoscimento vocale richiede internet; il resto dell'app resta offline.
 
 ### VEDI E SCEGLI
 1. Compare **solo l'immagine** della parola (senza scriverla), es. ⚽.
 2. Sotto, **scelta multipla** con 2–4 opzioni: l'inizio della parola
    (prime due lettere), es. **PA / PE / MA / PU** per ⚽ PALLA.
 3. Le opzioni sono **solo sillabe studiate e attive** nell'Area Genitori.
+4. La parola deve iniziare con una sillaba conosciuta: il resto può contenere
+   lettere ancora da studiare → archivio molto ricco (oltre 200 parole con immagine).
 4. Risposta giusta → opzione **VERDE**, stellina, **parola completa rivelata**
    e pronunciata, poi **passaggio automatico** alla parola successiva.
 5. Risposta sbagliata → opzione **ROSSA** disabilitata; si riprova sulle altre.
@@ -93,8 +98,9 @@ In alternativa basta l'estensione *Live Server* di VS Code.
   ortografiche speciali: doppie, gruppi consonantici, sillabe vocalica+consonante
   (ER, OR, AL), SC, GN, GLI.
 - **Esercizi**: tipo di parole, lunghezze, categorie e 6 livelli di progressione che limitano
-  automaticamente lunghezza e difficoltà degli esercizi in TUTTE le sezioni dell'app
-  (sempre sotto controllo del genitore, niente avanzamento automatico).
+  automaticamente lunghezza e difficoltà degli esercizi (sempre sotto controllo del genitore,
+  niente avanzamento automatico). **LEGGI E GUARDA** e **DICO LA PAROLA** usano solo parole
+  complete reali con le lettere conosciute e sono svincolate da lunghezze e categorie.
 - **Progressi**: stelline, corretti, da ripetere, statistiche
   per lettera e per giorno.
 - **Sicurezza**: PIN opzionale a 4 cifre per proteggere l'Area Genitori.
@@ -113,7 +119,7 @@ Nessuna parola casuale: il motore verifica **prima** di proporre qualunque eserc
    **solo con sillabe studiate** e se per caso coincidono con una parola reale
    dell'archivio vengono classificate come reali (es. PUMA).
 
-Archivio incluso: ~80 parole italiane reali, classificate per lunghezza, difficoltà,
+Archivio incluso: oltre 200 parole italiane reali, classificate per lunghezza, difficoltà,
 struttura sillabica e disponibilità di immagine (`js/data/words.js`).
 
 ---

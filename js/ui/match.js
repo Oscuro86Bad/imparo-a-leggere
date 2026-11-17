@@ -46,10 +46,9 @@ IAL.Match = (function () {
 
   function next() {
     const p = IAL.Store.active();
-    const ex = IAL.Engine.nextMatch(p, {
-      wordType: p.settings.wordType,
-      lengths: p.settings.lengths
-    });
+    // LEGGI E GUARDA: SEMPRE parole reali complete con immagine, svincolate
+    // da lunghezze e categorie dell'Area Genitori.
+    const ex = IAL.Engine.nextMatch(p);
     revealed = false;
 
     const typeEl = document.getElementById('mx-type');
@@ -67,7 +66,7 @@ IAL.Match = (function () {
       if (actions) {
         actions.innerHTML = '';
         actions.appendChild(el('div', { class: 'span2 note' },
-          ['Nessun esercizio con le impostazioni attuali. Attiva lettere, sillabe e parole nell’Area Genitori 🔒 (es. PA → 🦆 PAPERA).']));
+          ['Servono parole reali con immagine: attiva più lettere e sillabe (nell’Area Genitori) per parole come PANE, MELA, PALLA…']));
       }
       return;
     }

@@ -67,13 +67,10 @@ IAL.Speech = (function () {
 
   function next() {
     const p = IAL.Store.active();
-    // Le categorie scelte dall'Area Genitori valgono anche qui:
-    // solo sillabe → sillabe, solo coppie di vocali → coppie, ecc.
-    const ex = IAL.Engine.nextReading(p, {
-      categories: p.settings.categories,
-      wordType: p.settings.wordType,
-      lengths: p.settings.lengths
-    });
+    // DICO LA PAROLA: SEMPRE parole reali complete (mai sillabe o coppie di
+    // vocali). Sezione svincolata da lunghezze e categorie: conta solo ciò
+    // che la bambina sa leggere (lettere e sillabe conosciute).
+    const ex = IAL.Engine.nextSpeech(p);
 
     const typeEl = document.getElementById('sp-type');
     const wordEl = document.getElementById('sp-word');
@@ -87,7 +84,7 @@ IAL.Speech = (function () {
       wordEl.textContent = '🤔';
       wordEl.className = 'big-word';
       setMsg('', '');
-      setStatus('Nessun esercizio con le impostazioni attuali: attiva lettere, sillabe o parole nell’Area Genitori 🔒', 'off');
+      setStatus('Nessuna parola disponibile: attiva più lettere e sillabe nell’Area Genitori 🔒', 'off');
       if (actions) actions.innerHTML = '';
       updateNote();
       return;
@@ -147,7 +144,6 @@ IAL.Speech = (function () {
     const actions = document.getElementById('sp-actions');
     if (!actions) return;
     actions.innerHTML = '';
-    actions.appendChild(el('button', { class: 'btn btn-purple', onclick: hearAgain }, ['🔊', 'ASCOLTA']));
     if (SR) {
       actions.appendChild(el('button', { class: 'btn btn-primary', onclick: retryListen }, ['🎤', 'RIPROVA']));
     } else {

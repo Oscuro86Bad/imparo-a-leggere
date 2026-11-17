@@ -71,7 +71,7 @@
   for (let i = 0; i < 30; i++) {
     try {
       const t = document.getElementById('mx-type').textContent;
-      if (t !== 'Parola' && t !== 'Sillaba') { allValid = false; break; }
+      if (t !== 'Parola') { allValid = false; break; }
       btnWith('CORRETTO').click(); await wait(20);
       const reveal = document.getElementById('mx-reveal').textContent;
       if (!reveal) { assocOK = false; out.push('  stato: ' + document.getElementById('app').textContent.slice(0, 120)); break; }
@@ -83,7 +83,7 @@
       break;
     }
   }
-  check('Associa: solo parole reali complete o sillabe con associazione (mai inventate)', allValid);
+  check('Associa: solo parole reali complete con immagine (mai sillabe o inventate)', allValid);
   check('Associa: dopo CORRETTO compare sempre immagine/parola', assocOK);
 
   // --- DICO LA PAROLA ---
@@ -91,19 +91,19 @@
   await wait(100);
   check('Schermata "Dico la parola" con esercizio', !!document.getElementById('sp-word') && document.getElementById('sp-word').textContent.length >= 1);
   check('Stato microfono/istruzioni visibile', document.getElementById('sp-status-txt').textContent.length > 0);
-  check('Pulsanti ASCOLTA e SALTA presenti', !!btnWith('ASCOLTA') && !!btnWith('SALTA'));
+  check('Pulsante SALTA presente, ASCOLTA rimosso', !!btnWith('SALTA') && !btnWith('ASCOLTA'));
   const spWord0 = document.getElementById('sp-word').textContent;
   btnWith('SALTA').click(); await wait(50);
   check('SALTA → nuova parola', !!document.getElementById('sp-word') && document.getElementById('sp-word').textContent !== spWord0);
   IAL.Speech.hide();
 
-  // Categorie: solo sillabe → DICO LA PAROLA mostra sillabe, non parole
+  // DICO LA PAROLA è svincolata dalle categorie: mostra sempre parole complete
   const sylsStudied = ['PA','PE','PI','PO','PU','RA','RE','MA','ME','MI','MO','MU','NA','NE','NI','NO','NU'];
   IAL.Store.updateActive(pr => { pr.settings.categories = { letters: false, syllables: true, words: false }; });
   IAL.Speech.show();
   await wait(100);
-  const spSyl = document.getElementById('sp-word').textContent;
-  check('Solo sillabe: DICO LA PAROLA mostra sillabe studiate', sylsStudied.indexOf(spSyl) !== -1);
+  const spWord2 = document.getElementById('sp-word').textContent;
+  check('DICO LA PAROLA: sempre parole complete (anche con solo sillabe attive)', !!IAL.WORDS_BY_KEY[spWord2] && sylsStudied.indexOf(spWord2) === -1);
   IAL.Speech.hide();
   IAL.Store.updateActive(pr => { pr.settings.categories = { letters: true, syllables: true, words: true }; });
 
@@ -122,6 +122,16 @@
   check('Opzione sbagliata → rossa e disabilitata, si riprova', wrongBtn.disabled && wrongBtn.classList.contains('ko'));
   rightBtn.click(); await wait(60);
   check('Opzione giusta → parola completa rivelata', !!document.getElementById('vc-reveal').textContent.trim());
+  // Vedi e scegli: inizio sempre con sillaba studiata; ammesse lettere nuove nel resto
+  let relOk = true, relaxed = false;
+  for (let i = 0; i < 40; i++) {
+    const ex = IAL.Engine.nextChoice(IAL.Store.active(), { lengths: [2,3,4,5,6] });
+    if (!ex) continue;
+    if (!IAL.Engine.canShowSyllable(IAL.Store.active(), ex.syllable, IAL.Engine.enabledLetters(IAL.Store.active()))) { relOk = false; break; }
+    if ([...ex.word].some(L => ok.indexOf(L) === -1)) relaxed = true;
+  }
+  check('Vedi e scegli: inizio sempre sillaba studiata e attiva', relOk);
+  check('Vedi e scegli: parole anche con lettere non ancora studiate', relaxed);
   IAL.Choice.hide();
 
   // --- AREA GENITORI ---

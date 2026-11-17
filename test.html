@@ -97,28 +97,21 @@
   }
   check('Le inventate usano solo sillabe studiate', sylOk);
 
-  // 5. Leggi e guarda: parole reali con immagine E sillabe studiate con associazione,
-  //    mai parole inventate, mai parole senza immagine
-  let matchOk = true, matchSyl = false;
+  // 5. Leggi e guarda: SOLO parole reali complete con immagine, sempre
+  //    svincolata dalla lunghezza selezionata, mai ripetute di seguito
+  let matchOk = true, matchLong = false, matchRepeat = false, prevM = '';
   for (let i = 0; i < 200; i++) {
-    const ex = E.nextMatch(p, { wordType: 'invented', lengths: [2,3,4,5,6] });
+    const ex = E.nextMatch(p, { wordType: 'invented', lengths: [2] }); // opzioni ignorate
     if (!ex) continue;
-    if (ex.invented) { matchOk = false; break; }
     const word = IAL.WORDS_BY_KEY[ex.text];
-    if (word) {
-      // esercizio parola: immagine presente e parola ammessa
-      if (!word.img || ex.text !== ex.assocWord || !E.canShowWord(p, word)) { matchOk = false; break; }
-    } else {
-      // esercizio sillaba: associazione valida (PA → PAPERA) con parola ammessa
-      const aw = IAL.SYLLABLE_ASSOC[ex.text];
-      if (!aw || ex.assocWord !== aw || ex.text !== ex.text.toUpperCase()) { matchOk = false; break; }
-      const entry = IAL.WORDS_BY_KEY[aw];
-      if (!entry || !entry.img || !E.canShowWord(p, entry)) { matchOk = false; break; }
-      matchSyl = true;
-    }
+    if (ex.invented || !word || !word.img || ex.text !== ex.assocWord || !E.canShowWord(p, word)) { matchOk = false; break; }
+    if (ex.text.length > 2) matchLong = true;
+    if (ex.text === prevM) matchRepeat = true;
+    prevM = ex.text;
   }
-  check('LEGGI E GUARDA: solo esercizi validi (parole con immagine o sillabe con associazione), mai inventate', matchOk);
-  check('LEGGI E GUARDA: le sillabe studiate compaiono con la loro associazione', matchSyl);
+  check('LEGGI E GUARDA: solo parole reali complete con immagine (anche se impostate le inventate)', matchOk);
+  check('LEGGI E GUARDA: svincolata dalla lunghezza selezionata (parole oltre 2 lettere)', matchLong);
+  check('LEGGI E GUARDA: mai la stessa parola due volte di seguito', !matchRepeat);
 
   // 6. Coppie di vocali: mai lettere singole
   let pairOk = true;
@@ -170,6 +163,20 @@
     if (IAL.WORDS_BY_KEY[ex.word].s[0] !== ex.syllable) { chOk = false; chDetail = 'sillaba errata per ' + ex.word; break; }
   }
   check('Vedi e scegli: opzioni valide (2-4), corretta inclusa, solo sillabe attive' + (chDetail ? ' → ' + chDetail : ''), chOk);
+
+  // 6d. Vedi e scegli: basta l'inizio conosciuto, il resto può avere lettere nuove
+  let relOk = true, relaxed = false;
+  const okL = ['A','E','I','O','U','P','M','N'];
+  for (let i = 0; i < 150; i++) {
+    const ex = E.nextChoice(p2, { lengths: [2,3,4,5,6] });
+    if (!ex) { relOk = false; break; }
+    if (!ex.img || !ex.word) { relOk = false; break; }
+    if (!E.canShowSyllable(p2, ex.syllable, E.enabledLetters(p2))) { relOk = false; break; }
+    if (ex.options.indexOf(ex.syllable) === -1) { relOk = false; break; }
+    if (IAL.lettersOf(ex.word).some(function (L) { return okL.indexOf(L) === -1; })) relaxed = true;
+  }
+  check('Vedi e scegli: l’inizio è sempre una sillaba studiata e attiva', relOk);
+  check('Vedi e scegli: ammesse parole con lettere ancora da studiare (archivio ampliato)', relaxed);
 
   // 7. Disattivando tutto: zero esercizi
   p.letters = { vowels: [], consonants: [] };
@@ -253,24 +260,50 @@
   }
   check('Livello 6: compaiono anche parole di 5-6 lettere', cap6);
 
-  // 13. Solo sillabe attivate: TUTTE le sezioni mostrano solo sillabe, mai parole
+  // 13. Solo sillabe attivate nelle categorie: SOLO LETTURA mostra solo sillabe,
+  //     mentre LEGGI E GUARDA e DICO LA PAROLA restano a parole complete
+  //     (sezioni svincolate dalle impostazioni, validi solo i vocaboli conosciuti)
   p.settings.level = 6;
   p.settings.categories = { letters: false, syllables: true, words: false };
   IAL.Store.save();
-  let sylOnly = true, sylMatch = false;
+  let sylOnly = true, mWords = false, spWords = false;
   for (let i = 0; i < 100; i++) {
     const r = E.nextReading(p, { categories: p.settings.categories, wordType: 'mixed', lengths: [2,3,4,5,6] });
     if (r && r.kind !== 'syllable') { sylOnly = false; break; }
-    const m = E.nextMatch(p, { wordType: 'mixed', lengths: [2,3,4,5,6] });
+    const m = E.nextMatch(p);
     if (m) {
-      if (IAL.WORDS_BY_KEY[m.text]) { sylOnly = false; break; }  // mai una parola
-      sylMatch = true;
+      const w = IAL.WORDS_BY_KEY[m.text];
+      if (!w || !w.img || !E.canShowWord(p, w)) { sylOnly = false; break; }
+      mWords = true;
+    }
+    const sp = E.nextSpeech(p);
+    if (sp) {
+      const w = IAL.WORDS_BY_KEY[sp.text];
+      if (!w || !E.canShowWord(p, w)) { sylOnly = false; break; }
+      spWords = true;
     }
     const c = E.nextChoice(p, { lengths: [2,3,4,5,6] });
     if (c && !E.canShowSyllable(p, c.syllable, E.enabledLetters(p))) { sylOnly = false; break; }
   }
-  check('Solo sillabe: SOLO LETTURA, LEGGI E GUARDA e VEDI E SCEGLI senza parole', sylOnly);
-  check('Solo sillabe: LEGGI E GUARDA propone comunque le associazioni (PU → PUMA)', sylMatch);
+  check('Solo sillabe: SOLO LETTURA mostra solo sillabe, VEDI E SCEGLI resta valido', sylOnly);
+  check('Solo sillabe: LEGGI E GUARDA mostra comunque parole complete con immagine', mWords);
+  check('Solo sillabe: DICO LA PAROLA mostra comunque parole complete', spWords);
+
+  // 14. DICO LA PAROLA: solo parole reali complete, svincolata dalla lunghezza,
+  //     mai la stessa parola due volte di seguito
+  let spOk = true, spLong = false, spRepeat = false, prevSp = '';
+  for (let i = 0; i < 200; i++) {
+    const ex = E.nextSpeech(p);
+    if (!ex) continue;
+    const w = IAL.WORDS_BY_KEY[ex.text];
+    if (ex.invented || !w || !E.canShowWord(p, w)) { spOk = false; break; }
+    if (ex.text.length > 2) spLong = true;
+    if (ex.text === prevSp) spRepeat = true;
+    prevSp = ex.text;
+  }
+  check('DICO LA PAROLA: solo parole reali complete leggibili', spOk);
+  check('DICO LA PAROLA: svincolata dalla lunghezza selezionata', spLong);
+  check('DICO LA PAROLA: mai la stessa parola due volte di seguito', !spRepeat);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));

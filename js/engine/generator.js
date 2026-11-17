@@ -89,10 +89,12 @@ IAL.Engine = (function () {
     return true;
   }
 
-  // Parole reali disponibili, filtrate per lunghezza E livello di progressione
-  function realWords(p, lengths) {
+  // Parole reali disponibili, filtrate per lunghezza e livello.
+  // Con noCap=true ignora il livello (sezioni "parole complete" come
+  // LEGGI E GUARDA e DICO LA PAROLA: conta solo ciò che la bambina conosce).
+  function realWords(p, lengths, noCap) {
     const letters = enabledLetters(p);
-    const cap = levelCap(p);
+    const cap = noCap ? null : levelCap(p);
     return IAL.WORDS.filter(function (entry) {
       if (lengths && lengths.length && lengths.indexOf(entry.w.length) === -1) return false;
       if (cap) {
@@ -144,8 +146,18 @@ IAL.Engine = (function () {
   // ---------- Selezione casuale con anti-ripetizione ----------
   function pick(list, recent) {
     if (!list.length) return null;
-    const fresh = list.filter(function (x) { return recent.indexOf(xKey(x)) === -1; });
-    return weightedPick(fresh.length ? fresh : list);
+    if (list.length === 1) return list[0];
+    let fresh = list.filter(function (x) { return recent.indexOf(xKey(x)) === -1; });
+    if (!fresh.length) {
+      // Tutto già proposto di recente: esclude comunque gli ULTIMI mostrati,
+      // così la stessa voce non esce mai due volte di seguito.
+      const n = Math.min(Math.max(1, Math.ceil(list.length / 2)), recent.length);
+      const lastKeys = recent.slice(-n);
+      fresh = list.filter(function (x) { return lastKeys.indexOf(xKey(x)) === -1; });
+      if (!fresh.length) fresh = list.filter(function (x) { return xKey(x) !== recent[recent.length - 1]; });
+      if (!fresh.length) fresh = list;
+    }
+    return weightedPick(fresh);
   }
 
   function xKey(x) { return (typeof x === 'string') ? x : (x.text || x.w || x); }
@@ -239,62 +251,33 @@ IAL.Engine = (function () {
   }
 
   // ---------- Esercizi LEGGI E GUARDA ----------
-  // Parole reali complete con immagine e, se attivate, sillabe studiate con
-  // la loro associazione (PA → 🦆 PAPERA). Solo categorie effettive del profilo.
-  function matchSyllablePool(p, letters) {
-    const pool = [];
-    studiedSyllables(p).forEach(function (s) {
-      if (!canShowSyllable(p, s, letters)) return;
-      const aw = IAL.SYLLABLE_ASSOC ? IAL.SYLLABLE_ASSOC[s] : null;
-      if (!aw) return;
-      const entry = IAL.WORDS_BY_KEY[aw];
-      if (!entry || !entry.img || !canShowWord(p, entry, letters)) return;
-      pool.push({
-        kind: 'match', text: s, invented: false, img: entry.img,
-        assocWord: entry.w, typeLabel: 'Sillaba'
-      });
-    });
-    return pool;
+  // SEMPRE parole reali complete con immagine associata. Sezione svincolata
+  // dalle impostazioni di lunghezza e dalle categorie dell'Area Genitori:
+  // conta solo ciò che la bambina sa leggere (lettere e sillabe conosciute).
+  function nextMatch(p) {
+    const pool = realWords(p, null, true).filter(function (entry) { return !!entry.img; });
+    if (!pool.length) return null;
+    const chosen = pick(pool, recent);
+    const ex = {
+      kind: 'match', text: chosen.w, invented: false, img: chosen.img,
+      assocWord: chosen.w, typeLabel: 'Parola'
+    };
+    remember(ex);
+    return ex;
   }
 
-  function nextMatch(p, opts) {
-    const letters = enabledLetters(p);
-    const cats = effectiveCategories(p);
-    const pool = [];
-    if (cats.words) {
-      realWords(p, opts.lengths).forEach(function (entry) {
-        if (!entry.img) return;
-        pool.push({
-          kind: 'match', text: entry.w, invented: false, img: entry.img,
-          assocWord: entry.w, typeLabel: 'Parola'
-        });
-      });
-    }
-    if (cats.syllables) pool.push.apply(pool, matchSyllablePool(p, letters));
-    if (pool.length) {
-      const chosen = pick(pool, recent);
-      remember(chosen);
-      return chosen;
-    }
-    // Solo coppie di vocali attive: senza immagine, ma sempre leggibili
-    if (cats.letters) {
-      const vow = p.letters.vowels;
-      if (vow.length >= 2) {
-        for (let i = 0; i < 12; i++) {
-          const i1 = Math.floor(Math.random() * vow.length);
-          const i2 = (i1 + 1 + Math.floor(Math.random() * (vow.length - 1))) % vow.length;
-          const pair = vow[i1] + vow[i2];
-          if (recent.indexOf(pair) !== -1) continue;
-          const ex = {
-            kind: 'match', text: pair, invented: false, img: null,
-            assocWord: pair, typeLabel: 'Coppia di vocali'
-          };
-          remember(ex);
-          return ex;
-        }
-      }
-    }
-    return null;
+  // ---------- Esercizi DICO LA PAROLA ----------
+  // SEMPRE parole reali complete, leggibili con le lettere/sillabe conosciute.
+  // Sezione svincolata da lunghezze e categorie dell'Area Genitori (come
+  // LEGGI E GUARDA): nessuna sillaba, nessuna parola inventata.
+  function nextSpeech(p) {
+    const pool = realWords(p, null, true);
+    if (!pool.length) return null;
+    const entry = pick(pool, recent);
+    if (!entry) return null;
+    const ex = realExercise(entry);
+    remember(ex);
+    return ex;
   }
 
   // ---------- Esercizi VEDI E SCEGLI (inizio della parola) ----------
@@ -308,9 +291,9 @@ IAL.Engine = (function () {
   }
 
   // Immagine della parola + scelta multipla dell'inizio (prime due lettere).
-  // I distrattori vengono SOLO dalle sillabe studiate e attive del profilo.
-  // Se le parole sono disattivate ma le sillabe no, si usa l'associazione
-  // sillaba→immagine (PA → 🦆 PAPERA): sempre dentro il percorso attivo.
+  // Basta che la parola INIZI con una sillaba studiata e attiva: il resto della
+  // parola può contenere lettere ancora da studiare → archivio molto più ricco.
+  // Sezione svincolata da lunghezze e categorie (come LEGGI E GUARDA).
   function choiceDistractors(p, correctSyl, letters) {
     return shuffleArr(studiedSyllables(p).filter(function (s) {
       return s.length === 2 && s !== correctSyl && canShowSyllable(p, s, letters);
@@ -319,40 +302,19 @@ IAL.Engine = (function () {
 
   function nextChoice(p, opts) {
     const letters = enabledLetters(p);
-    const cats = effectiveCategories(p);
-
-    if (cats.words) {
-      const candidates = realWords(p, opts && opts.lengths).filter(function (e) {
-        return !!e.img && e.s.length && e.s[0].length === 2 && canShowSyllable(p, e.s[0], letters);
-      });
-      if (candidates.length) {
-        const entry = pick(candidates, recent);
-        if (entry) {
-          remember({ text: entry.w });
-          return {
-            kind: 'choice', text: entry.w, invented: false,
-            word: entry.w, img: entry.img, syllable: entry.s[0],
-            options: shuffleArr([entry.s[0]].concat(choiceDistractors(p, entry.s[0], letters))),
-            typeLabel: 'Inizio della parola'
-          };
-        }
-      }
-    }
-
-    if (cats.syllables) {
-      const syls = matchSyllablePool(p, letters);
-      if (syls.length) {
-        const chosen = pick(syls, recent);
-        remember({ text: chosen.text });
-        return {
-          kind: 'choice', text: chosen.assocWord, invented: false,
-          word: chosen.assocWord, img: chosen.img, syllable: chosen.text,
-          options: shuffleArr([chosen.text].concat(choiceDistractors(p, chosen.text, letters))),
-          typeLabel: 'La sillaba giusta'
-        };
-      }
-    }
-    return null;
+    const candidates = IAL.WORDS.filter(function (e) {
+      return !!e.img && e.s.length && e.s[0].length === 2 && canShowSyllable(p, e.s[0], letters);
+    });
+    if (!candidates.length) return null;
+    const entry = pick(candidates, recent);
+    if (!entry) return null;
+    remember({ text: entry.w });
+    return {
+      kind: 'choice', text: entry.w, invented: false,
+      word: entry.w, img: entry.img, syllable: entry.s[0],
+      options: shuffleArr([entry.s[0]].concat(choiceDistractors(p, entry.s[0], letters))),
+      typeLabel: 'Inizio della parola'
+    };
   }
 
   // Descrizione leggibile di ciò che il profilo rende disponibile
@@ -379,6 +341,7 @@ IAL.Engine = (function () {
     effectiveCategories: effectiveCategories,
     nextReading: nextReading,
     nextMatch: nextMatch,
+    nextSpeech: nextSpeech,
     nextChoice: nextChoice,
     makeInvented: makeInvented,
     availability: availability

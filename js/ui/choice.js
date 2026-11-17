@@ -72,8 +72,8 @@ IAL.Choice = (function () {
       if (revealEl) revealEl.innerHTML = '';
       const noteEl = document.getElementById('vc-note');
       if (noteEl) {
-        noteEl.textContent = 'Con le impostazioni attuali non ci sono esercizi con immagini. ' +
-          'Attiva parole o sillabe con associazione (PA → 🦆 PAPERA) nell’Area Genitori 🔒';
+        noteEl.textContent = 'Con le sillabe attuali non ci sono esercizi con immagini. ' +
+          'Attiva più lettere e sillabe nell’Area Genitori 🔒';
       }
       return;
     }
