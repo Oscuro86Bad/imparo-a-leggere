@@ -18,9 +18,10 @@ IAL.Engine = (function () {
 
   // ---------- Helper ----------
   function enabledLetters(p) {
+    const set = p.letters.vowels.concat(p.letters.consonants);
     return {
-      set: p.letters.vowels.concat(p.letters.consonants),
-      has: function (ch) { return this.set.indexOf(ch) !== -1; }
+      set: set,
+      has: function (ch) { return set.indexOf(ch) !== -1; }
     };
   }
 
@@ -49,7 +50,8 @@ IAL.Engine = (function () {
         IAL.lettersOf(syl).every(function (l) { return letters.has(l); });
     }
     if (kind === 'doppia') return hasFlag(p, 'doppie') && letters.has(syl[0]);
-    if (kind === 'gruppo') return hasFlag(p, 'gruppi') && IAL.lettersOf(syl).every(letters.has);
+    if (kind === 'gruppo') return hasFlag(p, 'gruppi') && IAL.lettersOf(syl).every(function (l) { return letters.has(l); });
+    if (kind === 'vc') return hasFlag(p, 'vc') && IAL.lettersOf(syl).every(function (l) { return letters.has(l); });
     if (kind === 'sc') return hasFlag(p, 'sc');
     if (kind === 'gn') return hasFlag(p, 'gn');
     if (kind === 'gli') return hasFlag(p, 'gli');

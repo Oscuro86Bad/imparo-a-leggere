@@ -167,7 +167,7 @@
   // 8. Lunghezza selezionata
   p.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M','L','T','S','N','B','D','F','R','V','Z','C','G'] };
   p.syllables = {}; IAL.CONFIG.CONSONANTS.forEach(c => { if (c !== 'H') p.syllables[c] = IAL.cvSyllables(c); });
-  p.flags = { doppie:true, gruppi:true, sc:true, gn:true, gli:true };
+  p.flags = { doppie:true, gruppi:true, vc:true, sc:true, gn:true, gli:true };
   let lenOk = true;
   for (let i = 0; i < 300; i++) {
     const ex = E.nextReading(p, { categories:{letters:false,syllables:false,words:true}, wordType:'real', lengths:[4] });
@@ -175,6 +175,31 @@
     if (ex.text.length !== 4) { lenOk = false; break; }
   }
   check('Filtro lunghezza rispettato (4 lettere)', lenOk);
+
+  // 9. Parole con gruppi consonantici e doppie: valutazione senza errori
+  let grpOk = true;
+  ['TRENO', 'LIBRO', 'BUSTA', 'CAPRA', 'DRAGO', 'GRILLO', 'MOLLA', 'BURRO', 'ERBA', 'ORTO'].forEach(function (w) {
+    if (!E.canShowWord(p, IAL.WORDS_BY_KEY[w])) grpOk = false;
+  });
+  check('Parole con gruppi consonantici valutabili e disponibili con flag attive', grpOk);
+
+  // 10. Parole nuove dell'archivio: gating corretto
+  p.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M'] };
+  p.syllables = { P: ['PA','PE','PI','PO','PU'], M: ['MA','ME','MI','MO','MU'] };
+  p.flags = { doppie: true, gruppi: true, sc: true, gn: true, gli: true };
+  const pilOk = !E.canShowWord(p, IAL.WORDS_BY_KEY.PILA);   // richiede L
+  const mamOk = E.canShowWord(p, IAL.WORDS_BY_KEY.MAMMA);   // doppie MA-MM-A... MA+MMA
+  const apeOk = E.canShowWord(p, IAL.WORDS_BY_KEY.APE);     // vocali attive + PE studiata → disponibile
+  check('PILA bloccata senza L', pilOk);
+  check('MAMMA disponibile con doppie e MA/MMA', mamOk);
+  check('APE disponibile con vocali e PE (parola con vocale iniziale)', apeOk);
+  const newWordsOk = IAL.WORDS.length >= 140 && IAL.WORDS.filter(w => w.img).length >= 60;
+  check('Archivio espanso: oltre 140 parole, oltre 60 con immagine (attuali: ' + IAL.WORDS.length + ' / ' + IAL.WORDS.filter(w => w.img).length + ')', newWordsOk);
+  let dupOk = true;
+  IAL.WORDS.forEach(function (e, i) {
+    for (let j = i + 1; j < IAL.WORDS.length; j++) if (IAL.WORDS[j].w === e.w) dupOk = false;
+  });
+  check('Nessuna parola duplicata nell’archivio', dupOk);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));

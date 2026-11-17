@@ -18,6 +18,7 @@ IAL.CONFIG = {
   FLAGS: {
     doppie:   { label: 'Doppie (MAMMA, PALLA, LATTE…)', emoji: '👯' },
     gruppi:   { label: 'Gruppi consonantici (TRENO, LIBRO, BARCA…)', emoji: '🚂' },
+    vc:       { label: 'Vocale+consonante (ERBA, ORTO, ALBERO…)', emoji: '🌀' },
     sc:       { label: 'S + C/E,I (PESCE, PESCA…)', emoji: '🐟' },
     gn:       { label: 'GN (GNOMO, BAGNO…)', emoji: '🧙' },
     gli:      { label: 'GLI (CONIGLIO, FIGLIO…)', emoji: '🐰' }
@@ -73,6 +74,7 @@ IAL.syllableKind = function (syl) {
   // gruppo consonantico: 2 consonanti diverse all'inizio (BRO, TRE, BAR->no: BAR è B,A,R... )
   if (S.length >= 3 && !IAL.isVowel(S[0]) && !IAL.isVowel(S[1])) return 'gruppo';
   if (S.length === 2 && !IAL.isVowel(S[0]) && IAL.isVowel(S[1])) return 'cv';
+  if (S.length === 2 && IAL.isVowel(S[0]) && !IAL.isVowel(S[1])) return 'vc'; // ER, OR, AL…
   if (S.length === 3 && !IAL.isVowel(S[0]) && IAL.isVowel(S[1]) && !IAL.isVowel(S[2])) return 'gruppo'; // BAR, NID? no: NID = N,I,D → gruppo
   return 'cv';
 };
