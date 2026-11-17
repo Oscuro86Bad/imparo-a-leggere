@@ -192,6 +192,8 @@ body {
 .speech-status .dot { width: 14px; height: 14px; border-radius: 999px; background: #B4BDC9; }
 .speech-status.on .dot { background: var(--green-dark); animation: mic-pulse 1.2s ease infinite; }
 .speech-status.on { color: #1B5E20; }
+.speech-status.ready .dot { background: var(--accent); }
+.speech-status.ready { color: #A15C00; }
 @keyframes mic-pulse {
   0% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.4); opacity: 0.55; }
@@ -313,6 +315,14 @@ body {
 @media (min-width: 560px) {
   .actions { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .actions .span2 { grid-column: auto; }
+}
+
+/* Pulsante principale prominente (es. 🎤 VERIFICA in DICO LA PAROLA) */
+.actions .btn.big { grid-column: span 2; min-height: 84px; font-size: clamp(22px, 5.6vw, 30px); }
+.actions .btn.big + .btn-soft { grid-column: span 2; }
+@media (min-width: 560px) {
+  .actions .btn.big { grid-column: span 3; }
+  .actions .btn.big + .btn-soft { grid-column: auto; }
 }
 
 /* PC: pulsanti dell'esercizio proporzionati, sempre DENTRO la scheda */

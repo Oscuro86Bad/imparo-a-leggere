@@ -92,6 +92,7 @@
   check('Schermata "Dico la parola" con esercizio', !!document.getElementById('sp-word') && document.getElementById('sp-word').textContent.length >= 1);
   check('Stato microfono/istruzioni visibile', document.getElementById('sp-status-txt').textContent.length > 0);
   check('Pulsante SALTA presente, ASCOLTA rimosso', !!btnWith('SALTA') && !btnWith('ASCOLTA'));
+  check('Pulsante VERIFICA (microfono) o conferma manuale CORRETTO presente', !!btnWith('VERIFICA') || !!btnWith('CORRETTO'));
   const spWord0 = document.getElementById('sp-word').textContent;
   btnWith('SALTA').click(); await wait(50);
   check('SALTA → nuova parola', !!document.getElementById('sp-word') && document.getElementById('sp-word').textContent !== spWord0);

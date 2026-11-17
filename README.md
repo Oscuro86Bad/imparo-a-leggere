@@ -63,17 +63,17 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    stessa parola due volte di seguito.
 
 ### DICO LA PAROLA
-1. Compare **una parola completa reale** (mai sillabe) → il bambino la pronuncia
-   a voce alta.
-2. L'app **ascolta con il microfono** (riconoscimento vocale in italiano) e dà
-   un **feedback immediato**: la parola si **illumina di VERDE** se pronunciata
-   bene, di **ROSSO** se sbagliata.
-3. In entrambi i casi l'app **ripete la pronuncia corretta** della parola
-   (sintesi vocale in italiano).
-4. Parola corretta → **passa automaticamente** alla parola successiva.
-   Parola sbagliata → **ripropone automaticamente** la stessa parola da ripetere.
-5. Se il microfono non è disponibile (es. iPhone/Safari), il genitore conferma
-   con i pulsanti ✅ / ❌.
+1. Compare **una parola completa reale** (mai sillabe) → il bambino la legge
+   a voce alta quando è pronto.
+2. Il microfono **non** è attivo in automatico: il bambino preme il pulsante
+   **🎤 VERIFICA** e l'app ascolta per un giro (riconoscimento vocale in italiano).
+3. Feedback immediato: la parola si **illumina di VERDE** se pronunciata bene
+   (passaggio automatico alla successiva), di **ROSSO** se sbagliata.
+4. In caso di errore l'app **ripete la pronuncia corretta** della parola
+   (sintesi vocale) e torna il pulsante **🎤 VERIFICA** per riprovare
+   sulla stessa parola.
+5. Se il microfono non è disponibile (es. iPhone/iPad con Safari), il genitore
+   conferma con i pulsanti ✅ / ❌.
 6. Sezione **svincolata dalla lunghezza** selezionata nell'Area Genitori: valgono
    solo le lettere e le sillabe conosciute.
 7. Il riconoscimento vocale richiede internet; il resto dell'app resta offline.

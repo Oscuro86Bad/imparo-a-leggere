@@ -1,14 +1,16 @@
 /* ============================================================
    IMPARO A LEGGERE — MODO C: DICO LA PAROLA
-   1. Compare una parola → il bambino la pronuncia a voce alta.
-   2. L'app ascolta con il microfono (riconoscimento vocale).
-   3. Feedback immediato: sfondo VERDE se pronunciata bene,
-      sfondo ROSSO se sbagliata; in entrambi i casi l'app
-      ripete la pronuncia corretta della parola.
-   4. Parola corretta → passa automaticamente alla successiva;
-      parola sbagliata → ripete automaticamente la stessa parola.
-   Se il microfono non è disponibile (es. iPhone con Safari),
-   il genitore conferma con i pulsanti ✅ / ❌.
+   1. Compare una parola completa reale → il bambino la legge
+      a voce alta quando è pronto.
+   2. SOLO quando preme il pulsante 🎤 VERIFICA l'app ascolta
+      (riconoscimento vocale in italiano): nessun microfono
+      attivo in automatico.
+   3. Feedback immediato: parola VERDE se pronunciata bene
+      (passa automaticamente alla successiva), ROSSA se
+      sbagliata (l'app ripete la parola corretta e torna il
+      pulsante 🎤 per riprovare sulla stessa parola).
+   4. Se il microfono non è disponibile (es. iPhone/iPad con
+      Safari) il genitore conferma con i pulsanti ✅ / ❌.
    ============================================================ */
 window.IAL = window.IAL || {};
 
@@ -17,10 +19,10 @@ IAL.Speech = (function () {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   let current = null;      // esercizio corrente
-  let answered = false;    // già dato un giudizio su questa parola
+  let judged = false;      // già dato un giudizio su questa parola
+  let listening = false;   // registrazione in corso
   let sessionOn = false;   // la modalità è attiva (per fermare i loop)
   let rec = null;          // istanza SpeechRecognition
-  let listenTries = 0;     // riavvii automatici per la parola corrente
   let manualMode = !SR;    // conferma manuale (microfono non disponibile)
 
   function show() {
@@ -83,7 +85,7 @@ IAL.Speech = (function () {
       if (typeEl) typeEl.textContent = 'Nessun esercizio disponibile';
       wordEl.textContent = '🤔';
       wordEl.className = 'big-word';
-      setMsg('', '');
+      if (msgEl) { msgEl.textContent = ''; msgEl.className = 'feedback-msg'; }
       setStatus('Nessuna parola disponibile: attiva più lettere e sillabe nell’Area Genitori 🔒', 'off');
       if (actions) actions.innerHTML = '';
       updateNote();
@@ -91,39 +93,17 @@ IAL.Speech = (function () {
     }
 
     current = ex;
-    answered = false;
-    listenTries = 0;
+    judged = false;
     if (typeEl) {
       typeEl.textContent = ex.invented ? 'Parola inventata (senza significato!)' : ex.typeLabel;
       typeEl.className = 'exercise-type' + (ex.invented ? ' invented' : '');
     }
     wordEl.textContent = ex.text;
     wordEl.className = 'big-word';
-    setMsg('Leggi a voce alta! 👄', '');
+    if (msgEl) { msgEl.textContent = 'Leggi la parola a voce alta! 👄'; msgEl.className = 'feedback-msg'; }
+    setStatus('Premi 🎤 quando sei pronto', 'ready');
     setActions();
     updateNote();
-    startListening();
-  }
-
-  // Ripresenta la STESSA parola (dopo un errore)
-  let pendingWord = '', pendingInv = false;
-
-  function keepWordTrigger(text, invented) {
-    pendingWord = text;
-    pendingInv = invented;
-  }
-
-  function again() {
-    if (!pendingWord) return;
-    current = { kind: 'word', text: pendingWord, invented: pendingInv, img: null, typeLabel: 'Parola' };
-    answered = false;
-    listenTries = 0;
-    const wordEl = document.getElementById('sp-word');
-    if (wordEl) { wordEl.textContent = current.text; wordEl.className = 'big-word'; }
-    setMsg('Riprova! 🎤', '');
-    setActions();
-    updateNote();
-    startListening();
   }
 
   function setMsg(text, cls) {
@@ -144,13 +124,13 @@ IAL.Speech = (function () {
     const actions = document.getElementById('sp-actions');
     if (!actions) return;
     actions.innerHTML = '';
-    if (SR) {
-      actions.appendChild(el('button', { class: 'btn btn-primary', onclick: retryListen }, ['🎤', 'RIPROVA']));
+    if (!manualMode && SR) {
+      actions.appendChild(el('button', { class: 'btn btn-orange big', onclick: startListening }, ['🎤', 'VERIFICA']));
     } else {
       actions.appendChild(el('button', { class: 'btn btn-green', onclick: manualCorrect }, ['✅', 'CORRETTO']));
       actions.appendChild(el('button', { class: 'btn btn-danger', onclick: manualWrong }, ['❌', 'SBAGLIATO']));
     }
-    actions.appendChild(el('button', { class: 'btn btn-soft', onclick: function () { answered = true; stopListening(); next(); } }, ['⏭️', 'SALTA']));
+    actions.appendChild(el('button', { class: 'btn btn-soft', onclick: skip }, ['⏭️', 'SALTA']));
   }
 
   function updateNote() {
@@ -160,26 +140,18 @@ IAL.Speech = (function () {
     noteEl.textContent = '⭐ ' + p.stats.stars + ' stelline · ' + p.stats.correct + ' esercizi corretti';
   }
 
-  // ---------- Riconoscimento vocale ----------
+  // ---------- Riconoscimento vocale (solo su richiesta) ----------
   function startListening() {
-    if (!sessionOn || !current || answered) return;
-    if (!SR) {
-      setStatus('Microfono non disponibile: il genitore conferma qui sotto', 'off');
-      return;
-    }
+    if (!sessionOn || !current || judged || listening) return;
+    if (!SR) { manualMode = true; setActions(); return; }
     stopListening();
-    listenTries += 1;
-    if (listenTries > 6) {
-      setStatus('Premi 🎤 RIPROVA per ascoltare di nuovo', 'off');
-      return;
-    }
     try {
       rec = new SR();
       rec.lang = 'it-IT';
       rec.interimResults = false;
       rec.maxAlternatives = 5;
       rec.onresult = function (e) {
-        if (answered || !current) return;
+        if (judged || !current) return;
         let said = '';
         for (let i = 0; i < e.results[e.results.length - 1].length; i++) {
           said += ' ' + e.results[e.results.length - 1][i].transcript;
@@ -187,23 +159,29 @@ IAL.Speech = (function () {
         judge(said);
       };
       rec.onerror = function (e) {
+        listening = false;
         if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          setStatus('Permesso microfono negato: consentilo dal browser 🔒', 'off');
+          // Microfono negato o non disponibile (es. Safari su iPad):
+          // si passa alla conferma manuale del genitore.
           manualMode = true;
+          setStatus('Microfono non disponibile: conferma qui sotto', 'off');
           setActions();
-        } else if (!answered) {
-          setStatus('Non ho sentito nulla… 🎤', 'off');
+        } else if (!judged) {
+          setStatus('Non ho sentito nulla… premi di nuovo 🎤', 'off');
         }
       };
       rec.onend = function () {
-        if (!answered && sessionOn && current && !manualMode) {
-          setTimeout(function () { if (!answered && sessionOn && current) startListening(); }, 700);
+        listening = false;
+        if (!judged && sessionOn && current) {
+          setStatus('Premi di nuovo 🎤 per farci riprovare', 'ready');
         }
       };
       rec.start();
+      listening = true;
       setStatus('🎤 Sto ascoltando…', 'on');
     } catch (err) {
-      setStatus('Premi 🎤 RIPROVA per ascoltare di nuovo', 'off');
+      listening = false;
+      setStatus('Premi di nuovo 🎤 per farci riprovare', 'ready');
     }
   }
 
@@ -212,17 +190,18 @@ IAL.Speech = (function () {
       try { rec.onend = null; rec.stop(); } catch (e) { /* già fermo */ }
       rec = null;
     }
+    listening = false;
   }
 
-  function retryListen() {
-    answered = false;
-    listenTries = 0;
-    startListening();
+  function skip() {
+    judged = true;
+    stopListening();
+    next();
   }
 
   // Valuta la pronuncia: parola riconosciuta?
   function judge(said) {
-    if (!current || answered) return;
+    if (!current || judged) return;
     const target = normalize(current.text);
     const heard = normalize(said);
     const ok = heard.length > 0 && (heard === target || heard.indexOf(target) !== -1);
@@ -238,8 +217,8 @@ IAL.Speech = (function () {
 
   // ---------- Feedback ----------
   function correct() {
-    if (!current || answered) return;
-    answered = true;
+    if (!current || judged) return;
+    judged = true;
     stopListening();
     const p = IAL.Store.active();
     IAL.Store.record(p, current, true);
@@ -256,8 +235,8 @@ IAL.Speech = (function () {
   }
 
   function wrong() {
-    if (!current || answered) return;
-    answered = true;
+    if (!current || judged) return;
+    judged = true;
     stopListening();
     const p = IAL.Store.active();
     IAL.Store.record(p, current, false);
@@ -266,22 +245,25 @@ IAL.Speech = (function () {
     if (wordEl) wordEl.className = 'big-word ko shake';
     setMsg(IAL.UI.retryMsg(), 'try');
 
-    keepWordTrigger(current.text, current.invented);
-    // Ripete la pronuncia corretta, poi ripresenta la STESSA parola
+    // Ripete la pronuncia corretta, poi torna il pulsante 🎤
+    // per riprovare sulla STESSA parola.
     hearAgain(function () {
-      if (sessionOn) again();
+      if (!sessionOn) return;
+      judged = false;
+      setStatus('Premi 🎤 quando sei pronto', 'ready');
+      setActions();
     });
     updateNote();
   }
 
   // Conferma manuale (microfono non disponibile)
-  function manualCorrect() { if (!answered) correct(); }
-  function manualWrong() { if (!answered) wrong(); }
+  function manualCorrect() { if (!judged) correct(); }
+  function manualWrong() { if (!judged) wrong(); }
 
   // ---------- Sintesi vocale ----------
   function hearAgain(done) {
-    if (!current && !pendingWord) { if (done) done(); return; }
-    const text = (current && current.text) ? current.text : pendingWord;
+    if (!current) { if (done) done(); return; }
+    const text = current.text;
     if (!('speechSynthesis' in window)) { if (done) done(); return; }
     try {
       window.speechSynthesis.cancel();
