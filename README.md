@@ -198,10 +198,39 @@ Checklist manuale consigliata (2 minuti):
 - **Aggiungere immagini/associazioni**: aggiorna `js/data/associations.js`
   e il campo `img` in `words.js`.
 - **Rigenerare le icone**: `powershell -ExecutionPolicy Bypass -File scripts/make-icon.ps1`
-- **Funzionalità future predisposte**: pronuncia audio (Web Speech API),
-  riconoscimento vocale della lettura, frasi brevi (livello 6), esercizi
-  personalizzati sugli errori. Il riconoscimento vocale **non è implementato**:
-  sarà aggiunto solo quando effettivamente funzionante.
+- **Funzionalità presenti**: pronuncia audio (sintesi vocale) e riconoscimento
+  vocale della lettura in **DICO LA PAROLA** (Web Speech API).
+- **Funzionalità future predisposte**: frasi brevi (livello 6), esercizi
+  personalizzati sugli errori.
+
+---
+
+## 💻 Lavorare al progetto da un altro terminale
+
+Il codice sorgente completo vive su GitHub, quindi si può modificare da qualsiasi PC:
+
+1. Installa [git](https://git-scm.com) (e, facoltativo, [GitHub CLI](https://cli.github.com)).
+2. Scarica il progetto:
+   ```
+   git clone https://github.com/Oscuro86Bad/imparo-a-leggere.git
+   cd imparo-a-leggere
+   ```
+3. Apri `index.html` nel browser per provare, modifica i file, poi:
+   ```
+   git add -A
+   git commit -m "descrizione della modifica"
+   git push
+   ```
+4. Il push su `main` **ripubblica automaticamente** il sito online in ~30 secondi
+   (workflow GitHub Actions incluso in `.github/workflows/deploy.yml`): il link resta
+   sempre https://oscuro86bad.github.io/imparo-a-leggere/
+
+Per autenticarsi da un nuovo terminale serve un accesso GitHub: il modo più semplice
+è [GitHub CLI](https://cli.github.com) (`gh auth login`) oppure un *Personal Access Token*
+(Servings → Developer settings) al posto della password quando git lo chiede.
+
+Le pagine `test.html` e `uitest.html` sono i collaudi automatici: aprile nel browser
+dopo ogni modifica per verificare che tutto funzioni (motore: 23 test, interfaccia: 21 test).
 
 ---
 
