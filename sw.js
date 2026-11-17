@@ -17,6 +17,7 @@ const ASSETS = [
   './js/ui/home.js',
   './js/ui/reading.js',
   './js/ui/match.js',
+  './js/ui/speech.js',
   './js/ui/parent.js',
   './js/app.js',
   './icons/icon-192.png',

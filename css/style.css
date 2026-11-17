@@ -173,6 +173,45 @@ body {
 }
 .exercise-type.invented { background: #FDEDF5; color: #C2437F; }
 
+/* ---------- DICO LA PAROLA (microfono) ---------- */
+.speech-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #F4F9FE;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: clamp(14px, 3.4vw, 17px);
+  font-weight: bold;
+  color: var(--primary-dark);
+  margin: 8px 0 4px;
+  min-height: 40px;
+}
+.speech-status .dot { width: 14px; height: 14px; border-radius: 999px; background: #B4BDC9; }
+.speech-status.on .dot { background: var(--green-dark); animation: mic-pulse 1.2s ease infinite; }
+.speech-status.on { color: #1B5E20; }
+@keyframes mic-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.55; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Feedback immediato sulla parola: verde = corretta, rosso = sbagliata */
+.big-word.ok {
+  background: linear-gradient(180deg, #66BB6A, #43A047);
+  color: #fff;
+  border-radius: 26px;
+  padding: 4px 24px;
+  display: inline-block;
+}
+.big-word.ko {
+  background: linear-gradient(180deg, #EF9A9A, #E57373);
+  color: #fff;
+  border-radius: 26px;
+  padding: 4px 24px;
+  display: inline-block;
+}
+
 .big-word {
   font-size: clamp(64px, 20vw, 130px);
   letter-spacing: clamp(4px, 2vw, 14px);

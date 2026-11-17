@@ -29,6 +29,10 @@ IAL.Home = (function () {
         el('span', { class: 'emoji' }, ['🖼️']),
         el('span', { class: 'txt' }, ['LEGGI E GUARDA', el('span', { class: 'small' }, ['Leggi la parola e guarda l’immagine'])])
       ]),
+      el('button', { class: 'btn btn-orange btn-block', onclick: function () { IAL.Speech.show(); } }, [
+        el('span', { class: 'emoji' }, ['🎤']),
+        el('span', { class: 'txt' }, ['DICO LA PAROLA', el('span', { class: 'small' }, ['Pronuncia la parola: l’app ti ascolta'])])
+      ]),
       el('button', { class: 'btn btn-purple btn-block', onclick: function () { IAL.Parent.show(); } }, [
         el('span', { class: 'emoji' }, ['🔒']),
         el('span', { class: 'txt' }, ['AREA GENITORI', el('span', { class: 'small' }, ['Lettere, combinazioni, progressi'])])

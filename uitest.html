@@ -15,6 +15,7 @@
 <script src="js/ui/home.js"></script>
 <script src="js/ui/reading.js"></script>
 <script src="js/ui/match.js"></script>
+<script src="js/ui/speech.js"></script>
 <script src="js/ui/parent.js"></script>
 <script src="js/app.js"></script>
 <script>
@@ -34,7 +35,7 @@
   nameInput.value = 'Sofia';
   startBtn.click();
   await wait(50);
-  check('Profilo creato → home con le due modalità', body().indexOf('SOLO LETTURA') !== -1 && body().indexOf('LEGGI E GUARDA') !== -1);
+  check('Profilo creato → home con le tre modalità', body().indexOf('SOLO LETTURA') !== -1 && body().indexOf('LEGGI E GUARDA') !== -1 && body().indexOf('DICO LA PAROLA') !== -1);
 
   // Configura lettere: vocali + P + M + N, sillabe studiate
   IAL.Store.updateActive(pr => {
@@ -81,6 +82,17 @@
   }
   check('Associa: solo parole reali complete (mai sillabe o inventate)', allReal);
   check('Associa: dopo CORRETTO compare sempre immagine/parola', assocOK);
+
+  // --- DICO LA PAROLA ---
+  IAL.Speech.show();
+  await wait(100);
+  check('Schermata "Dico la parola" con esercizio', !!document.getElementById('sp-word') && document.getElementById('sp-word').textContent.length >= 1);
+  check('Stato microfono/istruzioni visibile', document.getElementById('sp-status-txt').textContent.length > 0);
+  check('Pulsanti ASCOLTA e SALTA presenti', !!btnWith('ASCOLTA') && !!btnWith('SALTA'));
+  const spWord0 = document.getElementById('sp-word').textContent;
+  btnWith('SALTA').click(); await wait(50);
+  check('SALTA → nuova parola', !!document.getElementById('sp-word') && document.getElementById('sp-word').textContent !== spWord0);
+  IAL.Speech.hide();
 
   // --- AREA GENITORI ---
   IAL.Parent.show();
