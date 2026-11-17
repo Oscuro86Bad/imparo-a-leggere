@@ -2,15 +2,21 @@
    IMPARO A LEGGERE — MODO C: DICO LA PAROLA
    1. Compare una parola completa reale → il bambino la legge
       a voce alta quando è pronto.
-   2. SOLO quando preme il pulsante 🎤 VERIFICA l'app ascolta
-      (riconoscimento vocale in italiano): nessun microfono
-      attivo in automatico.
-   3. Feedback immediato: parola VERDE se pronunciata bene
-      (passa automaticamente alla successiva), ROSSA se
-      sbagliata (l'app ripete la parola corretta e torna il
-      pulsante 🎤 per riprovare sulla stessa parola).
-   4. Se il microfono non è disponibile (es. iPhone/iPad con
-      Safari) il genitore conferma con i pulsanti ✅ / ❌.
+   2. SOLO quando preme 🎤 VERIFICA l'app ascolta (nessun
+      microfono attivo in automatico). Dentro la stessa
+      pressione l'app RIASCOLTA finché non capisce (o per un
+      massimo di tentativi), senza che il bambino debba
+      ripremere insieme.
+   3. Valutazione tollerante: usa TUTTE le alternative del
+      riconoscitore e un confronto "fuzzy" (distanza di
+      Levenshtein), perché la voce di un bambino viene spesso
+      trascritta con piccoli errori (P/B, T/D…). Un fotogramma
+      di rumore (interiezioni, "eh") viene ignorato.
+   4. Feedback: parola VERDE → passa alla successiva; ROSSA →
+      l'app ripete la parola corretta ("Ho sentito: …") e torna
+      il pulsante 🎤 per riprovare sulla stessa parola.
+   5. Se il microfono non è disponibile (iPhone/iPad Safari)
+      il genitore conferma con ✅ / ❌.
    ============================================================ */
 window.IAL = window.IAL || {};
 
@@ -21,9 +27,12 @@ IAL.Speech = (function () {
   let current = null;      // esercizio corrente
   let judged = false;      // già dato un giudizio su questa parola
   let listening = false;   // registrazione in corso
-  let sessionOn = false;   // la modalità è attiva (per fermare i loop)
+  let sessionOn = false;   // la modalità è attiva
   let rec = null;          // istanza SpeechRecognition
+  let pressSeq = 0;        // identificativo della pressione di VERIFICA
+  let listenFails = 0;     // ri-ascolti già fatti in questa pressione
   let manualMode = !SR;    // conferma manuale (microfono non disponibile)
+  const MAX_RELISTEN = 3;  // quanti ri-ascolti dentro la stessa pressione
 
   function show() {
     sessionOn = true;
@@ -69,8 +78,8 @@ IAL.Speech = (function () {
 
   function next() {
     const p = IAL.Store.active();
-    // DICO LA PAROLA: SEMPRE parole reali complete (mai sillabe o coppie di
-    // vocali). Sezione svincolata da lunghezze e categorie: conta solo ciò
+    // DICO LA PAROLA: SEMPRE parole reali complete (mai sillabe).
+    // Sezione svincolata da lunghezze e categorie: conta solo ciò
     // che la bambina sa leggere (lettere e sillabe conosciute).
     const ex = IAL.Engine.nextSpeech(p);
 
@@ -94,10 +103,7 @@ IAL.Speech = (function () {
 
     current = ex;
     judged = false;
-    if (typeEl) {
-      typeEl.textContent = ex.invented ? 'Parola inventata (senza significato!)' : ex.typeLabel;
-      typeEl.className = 'exercise-type' + (ex.invented ? ' invented' : '');
-    }
+    if (typeEl) typeEl.textContent = ex.typeLabel;
     wordEl.textContent = ex.text;
     wordEl.className = 'big-word';
     if (msgEl) { msgEl.textContent = 'Leggi la parola a voce alta! 👄'; msgEl.className = 'feedback-msg'; }
@@ -140,47 +146,66 @@ IAL.Speech = (function () {
     noteEl.textContent = '⭐ ' + p.stats.stars + ' stelline · ' + p.stats.correct + ' esercizi corretti';
   }
 
-  // ---------- Riconoscimento vocale (solo su richiesta) ----------
+  // ---------- Riconoscimento vocale (solo su 🎤) ----------
   function startListening() {
-    if (!sessionOn || !current || judged || listening) return;
+    if (!sessionOn || !current || judged) return;
     if (!SR) { manualMode = true; setActions(); return; }
+    stopListening();
+    pressSeq += 1;          // ogni pressione ha il suo "canale"
+    listenFails = 0;
+    tryListen(pressSeq);
+  }
+
+  function tryListen(seq) {
+    if (!sessionOn || !current || judged || seq !== pressSeq) return;
     stopListening();
     try {
       rec = new SR();
       rec.lang = 'it-IT';
       rec.interimResults = false;
-      rec.maxAlternatives = 5;
+      rec.continuous = false;
+      rec.maxAlternatives = 6;
+
       rec.onresult = function (e) {
-        if (judged || !current) return;
-        let said = '';
-        for (let i = 0; i < e.results[e.results.length - 1].length; i++) {
-          said += ' ' + e.results[e.results.length - 1][i].transcript;
-        }
-        judge(said);
+        if (judged || !current || seq !== pressSeq) return;
+        const last = e.results[e.results.length - 1];
+        const alts = [];
+        for (let i = 0; i < last.length; i++) alts.push(last[i].transcript);
+        judge(alts);
       };
+
       rec.onerror = function (e) {
-        listening = false;
         if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
           // Microfono negato o non disponibile (es. Safari su iPad):
           // si passa alla conferma manuale del genitore.
           manualMode = true;
           setStatus('Microfono non disponibile: conferma qui sotto', 'off');
           setActions();
-        } else if (!judged) {
-          setStatus('Non ho sentito nulla… premi di nuovo 🎤', 'off');
+        } else if (e.error === 'no-speech' || e.error === 'aborted' || e.error === 'network') {
+          // gestito da onend / ri-ascolto; network lo riproviamo una volta
         }
+        // gli altri errori finiscono nel normale flusso di ri-ascolto
       };
+
       rec.onend = function () {
         listening = false;
-        if (!judged && sessionOn && current) {
-          setStatus('Premi di nuovo 🎤 per farci riprovare', 'ready');
+        rec = null;
+        if (judged || !sessionOn || !current || seq !== pressSeq) return;
+        listenFails += 1;
+        if (listenFails < MAX_RELISTEN) {
+          setStatus('Non ho sentito bene… riprovo 🎤', 'on');
+          setTimeout(function () { tryListen(seq); }, 600);
+        } else {
+          setStatus('Non ho sentito nulla: premi di nuovo 🎤', 'ready');
         }
       };
+
       rec.start();
       listening = true;
-      setStatus('🎤 Sto ascoltando…', 'on');
+      setStatus('🎤 Sto ascoltando… parla ad alta voce!', 'on');
     } catch (err) {
       listening = false;
+      rec = null;
       setStatus('Premi di nuovo 🎤 per farci riprovare', 'ready');
     }
   }
@@ -199,20 +224,91 @@ IAL.Speech = (function () {
     next();
   }
 
-  // Valuta la pronuncia: parola riconosciuta?
-  function judge(said) {
-    if (!current || judged) return;
-    const target = normalize(current.text);
-    const heard = normalize(said);
-    const ok = heard.length > 0 && (heard === target || heard.indexOf(target) !== -1);
-    if (ok) correct(); else wrong();
+  // ---------- Valutazione tollerante ----------
+  // Numero minimo di modifiche per trasformare a in b (Levenshtein)
+  function lev(a, b) {
+    const m = a.length, n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    let prev = new Array(n + 1), cur = new Array(n + 1);
+    for (let j = 0; j <= n; j++) prev[j] = j;
+    for (let i = 1; i <= m; i++) {
+      cur[0] = i;
+      for (let j = 1; j <= n; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+      }
+      const t = prev; prev = cur; cur = t;
+    }
+    return prev[n];
   }
 
+  // Parole chiave: MAIUSCOLE, accenti ridotti, solo lettere
   function normalize(s) {
     return String(s).toUpperCase()
       .replace(/[ÀÁÂÃÄÅ]/g, 'A').replace(/[ÈÉÊË]/g, 'E')
       .replace(/[ÌÍÎÏ]/g, 'I').replace(/[ÒÓÔÖØ]/g, 'O').replace(/[ÙÚÛÜ]/g, 'U')
       .replace(/[^A-Z]/g, '');
+  }
+
+  // Token del discorso: "Il pane!" → ['IL','PANE']
+  function tokens(s) {
+    return String(s).toUpperCase()
+      .replace(/[ÀÁÂÃÄÅ]/g, 'A').replace(/[ÈÉÊË]/g, 'E')
+      .replace(/[ÌÍÎÏ]/g, 'I').replace(/[ÒÓÔÖØ]/g, 'O').replace(/[ÙÚÛÜ]/g, 'U')
+      .split(/[^A-Z]+/).filter(Boolean);
+  }
+
+  // Migliore corrispondenza tra target e alternative del riconoscitore.
+  // Restituisce { dist, transcript }: dist = 0 trovata esatta (anche come
+  // parte di una frase, "il PANE"), Infinity = nessuna parola plausibile.
+  function bestMatch(target, alts) {
+    let best = Infinity, heard = '';
+    for (let k = 0; k < alts.length; k++) {
+      const tk = tokens(alts[k]);
+      const joined = tk.join('');
+      if (target && joined.indexOf(target) !== -1) return { dist: 0, transcript: alts[k] };
+      for (let i = 0; i < tk.length; i++) {
+        const t = tk[i];
+        if (t.length < 2 && target.length > 1) continue; // rumore tipo "E"
+        if (Math.abs(t.length - target.length) > 3) continue; // troppo lontana
+        const d = lev(t, target);
+        if (d < best) { best = d; heard = alts[k]; }
+      }
+    }
+    return { dist: best, transcript: heard };
+  }
+
+  // Quanto il discorso è vicino al target?
+  // 'good' = riconosciuta, 'close' = quasi, 'miss' = non riconosciuta
+  function matchQuality(target, alts) {
+    const maxDist = target.length <= 3 ? 0 : target.length <= 5 ? 1 : 2;
+    // tolleranza: le voci dei bambini vengono spesso trascritte con
+    // piccoli errori (P/B, T/D, vocali incerte…)
+    const d = bestMatch(target, alts).dist;
+    if (d <= maxDist) return 'good';
+    if (d <= maxDist + 2) return 'close';
+    return 'miss';
+  }
+
+  // Valuta le alternative del riconoscitore
+  function judge(alts) {
+    if (!current || judged) return;
+    const target = normalize(current.text);
+    const clean = (alts || []).filter(function (s) {
+      return s && normalize(s).length >= 2;
+    });
+    if (!clean.length) return; // solo rumore: si ri-ascolta
+
+    const m = bestMatch(target, clean);
+    const q = matchQuality(target, clean);
+    if (q === 'good') {
+      correct();
+    } else {
+      // "Ho sentito" riporta l'alternativa che ha ottenuto il punteggio migliore
+      const heard = m.transcript || clean[0];
+      wrong((q === 'close' ? 'Quasi! ' : '') + 'Ho sentito: «' + heard + '» — ');
+    }
   }
 
   // ---------- Feedback ----------
@@ -227,6 +323,7 @@ IAL.Speech = (function () {
     const wordEl = document.getElementById('sp-word');
     if (wordEl) wordEl.className = 'big-word ok';
     setMsg(IAL.UI.praise(), '');
+    setStatus('Perfetto! 🎉', 'off');
 
     hearAgain(function () {
       if (sessionOn) setTimeout(next, 500); // passa automaticamente alla successiva
@@ -234,7 +331,7 @@ IAL.Speech = (function () {
     updateNote();
   }
 
-  function wrong() {
+  function wrong(heardPrefix) {
     if (!current || judged) return;
     judged = true;
     stopListening();
@@ -243,7 +340,8 @@ IAL.Speech = (function () {
 
     const wordEl = document.getElementById('sp-word');
     if (wordEl) wordEl.className = 'big-word ko shake';
-    setMsg(IAL.UI.retryMsg(), 'try');
+    setMsg((heardPrefix || '') + IAL.UI.retryMsg(), 'try');
+    setStatus('Ci riproviamo! 💪', 'off');
 
     // Ripete la pronuncia corretta, poi torna il pulsante 🎤
     // per riprovare sulla STESSA parola.
@@ -258,7 +356,7 @@ IAL.Speech = (function () {
 
   // Conferma manuale (microfono non disponibile)
   function manualCorrect() { if (!judged) correct(); }
-  function manualWrong() { if (!judged) wrong(); }
+  function manualWrong() { if (!judged) wrong(''); }
 
   // ---------- Sintesi vocale ----------
   function hearAgain(done) {
@@ -285,5 +383,10 @@ IAL.Speech = (function () {
     }
   }
 
-  return { show: show, hide: hide };
+  // Per i collaudi automatici (senza microfono)
+  function matchTest(target, heard) {
+    return matchQuality(normalize(target), [heard]) === 'good';
+  }
+
+  return { show: show, hide: hide, matchTest: matchTest };
 })();

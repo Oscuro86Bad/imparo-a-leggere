@@ -66,17 +66,23 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 1. Compare **una parola completa reale** (mai sillabe) → il bambino la legge
    a voce alta quando è pronto.
 2. Il microfono **non** è attivo in automatico: il bambino preme il pulsante
-   **🎤 VERIFICA** e l'app ascolta per un giro (riconoscimento vocale in italiano).
+   **🎤 VERIFICA** e l'app ascolta (riconoscimento vocale in italiano). Se non
+   sente bene, **ri-ascolta da solo** (fino a 3 volte) senza che il bambino
+   debba ripremere.
 3. Feedback immediato: la parola si **illumina di VERDE** se pronunciata bene
    (passaggio automatico alla successiva), di **ROSSO** se sbagliata.
 4. In caso di errore l'app **ripete la pronuncia corretta** della parola
    (sintesi vocale) e torna il pulsante **🎤 VERIFICA** per riprovare
    sulla stessa parola.
-5. Se il microfono non è disponibile (es. iPhone/iPad con Safari), il genitore
+5. La valutazione è **tollerante con le voci infantili**: usa tutte le
+   alternative del riconoscitore e un confronto "fuzzy" (distanza di
+   Levenshtein), così piccoli errori di trascrizione (P/B, T/D…) non fanno
+   segnare sbagliate parole pronunciate bene; il messaggio dice sempre
+   «Ho sentito: …». Il riconoscimento richiede internet.
+6. Se il microfono non è disponibile (es. iPhone/iPad con Safari), il genitore
    conferma con i pulsanti ✅ / ❌.
-6. Sezione **svincolata dalla lunghezza** selezionata nell'Area Genitori: valgono
+7. Sezione **svincolata dalla lunghezza** selezionata nell'Area Genitori: valgono
    solo le lettere e le sillabe conosciute.
-7. Il riconoscimento vocale richiede internet; il resto dell'app resta offline.
 
 ### VEDI E SCEGLI
 1. Compare **solo l'immagine** della parola (senza scriverla), es. ⚽.

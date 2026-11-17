@@ -16,7 +16,7 @@
 <script src="js/ui/home.js?v=8"></script>
 <script src="js/ui/reading.js?v=8"></script>
 <script src="js/ui/match.js?v=8"></script>
-<script src="js/ui/speech.js?v=8"></script>
+<script src="js/ui/speech.js?v=9"></script>
 <script src="js/ui/choice.js?v=8"></script>
 <script src="js/ui/custom.js?v=8"></script>
 <script src="js/ui/parent.js?v=8"></script>
@@ -157,6 +157,18 @@
   check('Parole mie: parola rimossa dalla lista', IAL.Store.active().customWords.length === 1);
   IAL.Store.updateActive(pr => { pr.customWords = []; });
   check('Parole mie: home con la nuova sezione presente', true);
+
+  // --- DICO LA PAROLA: valutazione tollerante (senza microfono) ---
+  const mt = IAL.Speech.matchTest;
+  check('Riconoscimento: parola esatta ("pane")', mt('PANE', 'pane'));
+  check('Riconoscimento: accenti e maiuscole ("città")', mt('CITTÀ', 'citta'));
+  check('Riconoscimento: parola dentro una frase ("il pane!")', mt('PANE', 'il pane!'));
+  check('Riconoscimento: confusione P/B tollerata ("bale" per PALE)', mt('PALE', 'bale'));
+  check('Riconoscimento: confusione F/G tollerata ("fatto" per GATTO)', mt('GATTO', 'fatto'));
+  check('Riconoscimento: parola sbagliata rifiutata ("gatto" ≠ PANE)', !mt('PANE', 'gatto'));
+  check('Riconoscimento: frammento troppo corto rifiutato ("pa" ≠ PANE)', !mt('PANE', 'pa'));
+  check('Riconoscimento: rumore di una lettera rifiutato ("e" ≠ PANE)', !mt('PANE', 'e'));
+  check('Riconoscimento: parola corta esatta ("re")', mt('RE', 're'));
 
   // --- AREA GENITORI ---
   IAL.Parent.show();
