@@ -108,7 +108,8 @@ IAL.Home = (function () {
         ]),
         el('label', {}, ['Scegli il tuo amichetto!']), avatarGrid,
         el('div', { class: 'note' }, [
-          'Dopo, nell’Area Genitori, attiverai le lettere e le sillabe già studiate a scuola.'
+          'Dopo, nell’Area Genitori, attiverai le lettere già studiate a scuola: ',
+          'le loro sillabe (PA, PE…) si attivano da sole.'
         ]),
         el('div', { class: 'modal-actions' }, [
           el('button', { class: 'btn btn-primary', onclick: function () {

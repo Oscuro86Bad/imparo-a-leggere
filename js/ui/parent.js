@@ -228,8 +228,8 @@ IAL.Parent = (function () {
         el('span', { class: 'lx' }, ['Da studiare'])
       ]),
       el('div', { class: 'note' }, [
-        '⚠️ Attivare una consonante NON attiva automaticamente le sue sillabe: ',
-        'selezionale nella scheda «Combinazioni» solo se davvero studiate a scuola.'
+        '✅ Attivando una consonante si attivano da sole anche le sue sillabe con le vocali (PA, PE…). ',
+        'Nella scheda «Combinazioni» puoi togliere quelle non ancora studiate o aggiungere strutture speciali.'
       ])
     ]);
   }
@@ -251,11 +251,27 @@ IAL.Parent = (function () {
       class: classes.join(' '),
       'aria-label': 'Lettera ' + letter + (enabled ? ' attiva' : ' disattivata'),
       onclick: function () {
+        let justOn = false;
         IAL.Store.updateActive(function (pr) {
           const list = isVowel ? pr.letters.vowels : pr.letters.consonants;
           const i = list.indexOf(letter);
-          if (i === -1) list.push(letter); else list.splice(i, 1);
+          if (i === -1) {
+            list.push(letter);
+            justOn = true;
+            // Attiva automaticamente le sillabe CV della consonante (PA, PE…):
+            // se studi una consonante, le sue sillabe con le vocali ci sono già.
+            // Nella scheda «Combinazioni» si possono togliere quelle non ancora viste.
+            if (!isVowel && letter !== 'H') {
+              pr.syllables[letter] = IAL.cvSyllables(letter).slice();
+            }
+          } else {
+            list.splice(i, 1);
+          }
         });
+        if (justOn && !isVowel && letter !== 'H') {
+          const syl = IAL.cvSyllables(letter);
+          IAL.UI.toast(letter + ' attivata: anche le sue sillabe (' + syl[0] + ', ' + syl[1] + '…) ✅');
+        }
         render();
       }
     }, [letter]);
@@ -321,8 +337,8 @@ IAL.Parent = (function () {
     return el('div', { class: 'panel' }, [
       el('h2', {}, ['Combinazioni e strutture studiate']),
       el('p', { class: 'hint' }, [
-        'Seleziona SOLO le sillabe che la maestra ha già spiegato ',
-        '(es. con P attiva: PA, PE, PI…). Nessuna combinazione non studiata comparirà mai negli esercizi.'
+        'Attivando una consonante le sue sillabe (PA, PE…) si attivano automaticamente. ',
+        'Qui puoi togliere quelle non ancora studiate o riattivarle. Nessuna combinazione non studiata comparirà mai negli esercizi.'
       ]),
       enabledCons.length
         ? el('div', { class: 'syl-groups' }, groups)

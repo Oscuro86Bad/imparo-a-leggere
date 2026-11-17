@@ -193,8 +193,27 @@
   check('PILA bloccata senza L', pilOk);
   check('MAMMA disponibile con doppie e MA/MMA', mamOk);
   check('APE disponibile con vocali e PE (parola con vocale iniziale)', apeOk);
-  const newWordsOk = IAL.WORDS.length >= 140 && IAL.WORDS.filter(w => w.img).length >= 60;
-  check('Archivio espanso: oltre 140 parole, oltre 60 con immagine (attuali: ' + IAL.WORDS.length + ' / ' + IAL.WORDS.filter(w => w.img).length + ')', newWordsOk);
+  const newWordsOk = IAL.WORDS.length >= 170 && IAL.WORDS.filter(w => w.img).length >= 80;
+  check('Archivio espanso: oltre 170 parole, oltre 80 con immagine (attuali: ' + IAL.WORDS.length + ' / ' + IAL.WORDS.filter(w => w.img).length + ')', newWordsOk);
+
+  // 11. Attivare una consonante attiva automaticamente le sue sillabe CV
+  const p3 = IAL.Store.createProfile('Test3', '🐹');
+  p3.letters = { vowels: ['A','E','I','O','U'], consonants: [] };
+  p3.syllables = {};
+  IAL.Store.setActive(p3.id);
+  IAL.Store.save();
+  // simula il clic del genitore sul tile consonante P (stessa logica di parent.js)
+  p3.letters.consonants.push('P');
+  p3.syllables['P'] = IAL.cvSyllables('P').slice();
+  const autoSyl = ['PA','PE','PI','PO','PU'].every(s => p3.syllables.P.indexOf(s) !== -1);
+  check('Consonante attivata → sillabe CV attive in automatico (PA-PU)', autoSyl);
+  // migratore: profilo con consonante attiva ma sillabe mai impostate → riempite al caricamento
+  p3.letters.consonants = ['T'];
+  p3.syllables = {};
+  IAL.Store.save();
+  IAL.Store.init(); // riesegue il migratore di load()
+  const p3b = IAL.Store.active(); // riferimento ricaricato dal localStorage
+  check('Migratore: consonante attiva senza sillabe → sillabe CV attive', Array.isArray(p3b.syllables.T) && p3b.syllables.T.indexOf('TA') !== -1);
   let dupOk = true;
   IAL.WORDS.forEach(function (e, i) {
     for (let j = i + 1; j < IAL.WORDS.length; j++) if (IAL.WORDS[j].w === e.w) dupOk = false;

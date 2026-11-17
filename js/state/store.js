@@ -63,6 +63,11 @@ IAL.Store = (function () {
       p.stats = Object.assign({}, def.stats, p.stats || {});
       p.stats.byLetter = p.stats.byLetter || {};
       p.stats.byDate = p.stats.byDate || {};
+      // Le consonanti attivate hanno le loro sillabe CV attive in automatico
+      // (solo se il genitore non ha già personalizzato la lista di quella consonante)
+      (p.letters.consonants || []).forEach(function (c) {
+        if (c !== 'H' && !p.syllables[c]) p.syllables[c] = IAL.cvSyllables(c).slice();
+      });
       delete p.settings.goal;        // obiettivi giornalieri rimossi
       delete p.stats.stickers;       // adesivi premi rimossi
     });

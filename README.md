@@ -21,8 +21,9 @@ inventate, associazione parola-immagine.
 2. Crea il profilo del bambino (nome + mascotte).
 3. Entra in **AREA GENITORI → Lettere** e attiva le lettere già studiate a scuola
    (es. vocali + P + M).
-4. Entra in **AREA GENITORI → Combinazioni** e attiva solo le sillabe davvero studiate
-   (es. PA, PE, PI, PO, PU…).
+4. Ogni consonante attivata in **Lettere** porta con sé **automaticamente** le sue
+   sillabe (PA, PE, PI…): se serve, in **Combinazioni** togli quelle non ancora
+   studiate o attiva strutture speciali (doppie, gruppi, GN, GLI…).
 5. Il bambino usa **SOLO LETTURA**, **LEGGI E GUARDA**, **DICO LA PAROLA**
    e **VEDI E SCEGLI**.
 
@@ -87,9 +88,10 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 - **Profili**: profili multipli indipendenti, modifica, eliminazione.
 - **Lettere**: alfabeto italiano completo, vocali e consonanti distinte, attivazione
   individuale, pulsante «Tutte le vocali», salvataggio automatico.
-- **Combinazioni**: per ogni consonante attiva si scelgono le sillabe studiate
-  (PA, PE…) + strutture ortografiche speciali: doppie, gruppi consonantici,
-  SC, GN, GLI. *Attivare una lettera non attiva automaticamente le combinazioni.*
+- **Combinazioni**: si attivano **automaticamente** quando si attiva una consonante;
+  qui si possono togliere/riattivare le singole sillabe (PA, PE…) + strutture
+  ortografiche speciali: doppie, gruppi consonantici, sillabe vocalica+consonante
+  (ER, OR, AL), SC, GN, GLI.
 - **Esercizi**: tipo di parole, lunghezze, categorie,
   6 livelli di progressione (sempre sotto controllo del genitore, niente avanzamento automatico).
 - **Progressi**: stelline, corretti, da ripetere, statistiche
