@@ -4,7 +4,7 @@
  *   una sola ricarica della pagina basta per vedere gli aggiornamenti.
  * - OFFLINE: usa la copia salvata in cache.
  */
-const CACHE_NAME = 'imparo-a-leggere-v5';
+const CACHE_NAME = 'imparo-a-leggere-v6';
 const ASSETS = [
   './',
   './index.html',

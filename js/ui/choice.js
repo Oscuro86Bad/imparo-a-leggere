@@ -106,12 +106,11 @@ IAL.Choice = (function () {
       btn.classList.add('good');
       setMsg(IAL.UI.praise(), '');
 
-      // Rivela immagine + parola completa
+      // Rivela solo la parola completa (l'immagine principale resta sopra)
       const revealEl = document.getElementById('vc-reveal');
       if (revealEl) {
         revealEl.innerHTML = '';
         const box = el('div', { class: 'associated' });
-        box.appendChild(el('div', { class: 'img' }, [current.img]));
         box.appendChild(el('div', { class: 'lbl' }, [current.word]));
         revealEl.appendChild(box);
       }
