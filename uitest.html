@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="it">
+<head><meta charset="UTF-8"><title>Collaudo UI</title></head>
+<body>
+<h1>Collaudo interfaccia</h1>
+<pre id="summary">in corso…</pre>
+<div id="app" class="app"></div>
+<div id="overlay" class="overlay hidden"></div>
+<script src="js/config.js"></script>
+<script src="js/data/words.js"></script>
+<script src="js/data/associations.js"></script>
+<script src="js/state/store.js"></script>
+<script src="js/engine/generator.js"></script>
+<script src="js/ui/components.js"></script>
+<script src="js/ui/home.js"></script>
+<script src="js/ui/reading.js"></script>
+<script src="js/ui/match.js"></script>
+<script src="js/ui/parent.js"></script>
+<script src="js/app.js"></script>
+<script>
+(async function () {
+  const out = [];
+  let pass = 0, fail = 0;
+  const check = (name, cond) => { if (cond) { pass++; out.push('✔ ' + name); } else { fail++; out.push('✘ ' + name); } };
+  const wait = (ms) => new Promise(r => setTimeout(r, ms));
+  const buttons = () => Array.from(document.querySelectorAll('#app button'));
+  const btnWith = (t) => buttons().find(b => b.textContent.indexOf(t) !== -1);
+  const body = () => document.getElementById('app').textContent;
+
+  await wait(50);
+  // Onboarding → crea profilo
+  const nameInput = document.querySelector('#overlay input[type="text"]');
+  const startBtn = Array.from(document.querySelectorAll('#overlay button')).find(b => b.textContent.indexOf('Inizia') !== -1);
+  nameInput.value = 'Sofia';
+  startBtn.click();
+  await wait(50);
+  check('Profilo creato → home con le due modalità', body().indexOf('SOLO LETTURA') !== -1 && body().indexOf('LEGGI E ASSOCIA') !== -1);
+
+  // Configura lettere: vocali + P + M + N, sillabe studiate
+  IAL.Store.updateActive(pr => {
+    pr.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M','N'] };
+    pr.syllables = { P: ['PA','PE','PI','PO','PU','RA','RE'], M: ['MA','ME','MI','MO','MU'], N: ['NA','NE','NI','NO','NU'] };
+  });
+
+  // --- SOLO LETTURA ---
+  IAL.Reading.show();
+  await wait(50);
+  check('Schermata lettura con esercizio', document.getElementById('ex-word').textContent.length >= 1);
+  const ok = ['A','E','I','O','U','P','M','N'];
+  let leak = false;
+  for (let i = 0; i < 30; i++) { btnWith('NUOVO').click(); await wait(20); const t = document.getElementById('ex-word').textContent; if (![...t].every(c => ok.indexOf(c) !== -1)) { leak = true; break; } }
+  check('30 esercizi: solo lettere abilitate (P,M,N + vocali)', !leak);
+
+  const stars0 = IAL.Store.active().stats.stars;
+  btnWith('CORRETTO').click(); await wait(50);
+  check('CORRETTO → +1 stella', IAL.Store.active().stats.stars === stars0 + 1);
+  btnWith('RITENTA').click(); await wait(20);
+  check('RITENTA registrato (da ripetere)', IAL.Store.active().stats.retried >= 1);
+  check('RIPETI presente', !!btnWith('RIPETI'));
+
+  // --- LEGGI E ASSOCIA ---
+  IAL.Match.show();
+  await wait(1200); // attende l'eventuale avanzamento automatico in sospeso da SOLO LETTURA
+  IAL.Match.show(); // riapre pulita
+  await wait(50);
+  check('Schermata associa con esercizio', document.getElementById('mx-word').textContent.length >= 1);
+  let assocOK = true, allReal = true;
+  for (let i = 0; i < 30; i++) {
+    try {
+      if (document.getElementById('mx-type').textContent !== 'Parola') { allReal = false; break; }
+      btnWith('CORRETTO').click(); await wait(20);
+      const reveal = document.getElementById('mx-reveal').textContent;
+      if (!reveal) { assocOK = false; out.push('  stato: ' + document.getElementById('app').textContent.slice(0, 120)); break; }
+      btnWith('AVANTI').click(); await wait(20);
+      if (!document.getElementById('mx-word')) { assocOK = false; break; }
+    } catch (e) {
+      assocOK = false;
+      out.push('  errore i=' + i + ': ' + e.message + ' | schermata: ' + document.getElementById('app').textContent.slice(0, 120));
+      break;
+    }
+  }
+  check('Associa: solo parole reali complete (mai sillabe o inventate)', allReal);
+  check('Associa: dopo CORRETTO compare sempre immagine/parola', assocOK);
+
+  // --- AREA GENITORI ---
+  IAL.Parent.show();
+  await wait(50);
+  check('Area genitori: scheda lettere', body().indexOf('Lettere già studiate') !== -1);
+  btnWith('Combinazioni').click(); await wait(30);
+  check('Scheda combinazioni', body().indexOf('Combinazioni e strutture studiate') !== -1);
+  check('Chip PA visibile', body().indexOf('PA') !== -1);
+  btnWith('Esercizi').click(); await wait(30);
+  check('Scheda esercizi + livelli', body().indexOf('Livello di progressione') !== -1);
+  btnWith('Progressi').click(); await wait(30);
+  check('Scheda progressi', body().indexOf('Progressi di Sofia') !== -1);
+  btnWith('Sicurezza').click(); await wait(30);
+  check('Scheda sicurezza + backup', body().indexOf('Backup dei dati') !== -1);
+  btnWith('Profili').click(); await wait(30);
+  check('Scheda profili', body().indexOf('Nuovo profilo') !== -1);
+
+  // PIN: impostalo e verifica il blocco
+  btnWith('Sicurezza').click(); await wait(30);
+  const pinInput = document.querySelector('#app input[type="password"]');
+  pinInput.value = '1234';
+  btnWith('Salva PIN').click(); await wait(30);
+  IAL.Parent.unlockedForTest = null;
+  // simula nuova apertura con PIN attivo
+  const ParentShow = IAL.Parent.show; // mostra keypad
+  // ricarica lo stato "bloccato" tramite location non possibile qui: verifichiamo la logica
+  check('PIN salvato', IAL.Store.parentPin() === '1234');
+  IAL.Store.setParentPin(null);
+
+  out.push('');
+  out.push(fail === 0 ? 'UI TEST SUPERATI (' + pass + ')' : 'UI TEST FALLITI: ' + fail + ' su ' + (pass + fail));
+  document.getElementById('summary').textContent = out.join('\n');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#4A90D9">
+  <meta name="description" content="Imparo a Leggere - App educativa per imparare a leggere in prima elementare">
+  <title>Imparo a Leggere</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-512.png">
+  <link rel="apple-touch-icon" href="icons/icon-512.png">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+  /* Diagnostica di avvio: se qualcosa impedisce all'app di aprirsi,
+     mostra un messaggio chiaro al posto della pagina bianca. */
+  (function () {
+    function showBootError(msg) {
+      var d = document.getElementById('boot-error');
+      if (!d) return;
+      d.style.display = 'block';
+      d.innerHTML = msg;
+    }
+    window.addEventListener('error', function (e) {
+      var t = e.target;
+      if (t && t.tagName === 'SCRIPT' && t.src) {
+        showBootError('<strong>File dell’app non trovato:</strong> ' + t.src +
+          '<br>Assicurati di aver aperto index.html presente nella cartella completa (con le sottocartelle js, css, icons).');
+      } else if (e.message) {
+        showBootError('<strong>Si è verificato un errore:</strong> ' + e.message +
+          '<br>Prova ad aprire l’app con Microsoft Edge o Google Chrome aggiornati.');
+      }
+    }, true);
+    document.addEventListener('DOMContentLoaded', function () {
+      try {
+        new Function('let x = 1; const y = (a) => a + x; return y(1);');
+      } catch (err) {
+        showBootError('<strong>Il tuo browser è troppo vecchio per questa app.</strong><br>' +
+          'Aprila con Microsoft Edge o Google Chrome aggiornati (su PC, smartphone o tablet).');
+        return;
+      }
+      setTimeout(function () {
+        var app = document.getElementById('app');
+        if (app && !app.firstChild) {
+          showBootError('<strong>L’app non si è avviata.</strong><br>' +
+            'Verifica che la cartella contenga le sottocartelle js, css e icons, ' +
+            'poi riapri index.html con Microsoft Edge o Google Chrome.');
+        }
+      }, 1500);
+    });
+  })();
+  </script>
+</head>
+<body>
+  <div id="boot-error" style="display:none; font-family:'Comic Sans MS','Segoe UI',sans-serif; max-width:640px; margin:40px auto; padding:24px; background:#FFF6E3; border:3px solid #FFE2A8; border-radius:20px; color:#5A4A1F; font-size:18px; line-height:1.5; text-align:center;"></div>
+  <div id="app" class="app"></div>
+  <div id="overlay" class="overlay hidden"></div>
+
+  <!-- Moduli dell'applicazione (ordine importante, nessuna build necessaria) -->
+  <script src="js/config.js"></script>
+  <script src="js/data/words.js"></script>
+  <script src="js/data/associations.js"></script>
+  <script src="js/state/store.js"></script>
+  <script src="js/engine/generator.js"></script>
+  <script src="js/ui/components.js"></script>
+  <script src="js/ui/home.js"></script>
+  <script src="js/ui/reading.js"></script>
+  <script src="js/ui/match.js"></script>
+  <script src="js/ui/parent.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

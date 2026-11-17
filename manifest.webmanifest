@@ -1,0 +1,17 @@
+{
+  "name": "Imparo a Leggere",
+  "short_name": "Imparo",
+  "description": "App educativa per imparare a leggere in prima elementare, con esercizi personalizzati sulle lettere studiate a scuola.",
+  "lang": "it",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#EAF6FF",
+  "theme_color": "#4A90D9",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

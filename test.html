@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Collaudo — Imparo a Leggere</title>
+<style>
+  body { font-family: monospace; background:#111; color:#d4ffd4; padding:20px; }
+  .ok { color:#7ED957; } .fail { color:#FF8A80; font-weight:bold; }
+  h1 { color:#4A90D9; }
+  pre { white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h1>🧪 Collaudo automatico del motore</h1>
+<pre id="out">In corso…</pre>
+<script src="js/config.js"></script>
+<script src="js/data/words.js"></script>
+<script src="js/data/associations.js"></script>
+<script src="js/state/store.js"></script>
+<script src="js/engine/generator.js"></script>
+<script>
+(function () {
+  const out = [];
+  let pass = 0, fail = 0;
+  IAL.Store.init(); // come fa app.js all'avvio
+  function check(name, cond) {
+    if (cond) { pass++; out.push('✔ ' + name); }
+    else { fail++; out.push('✘ ' + name); }
+  }
+
+  // Profilo: vocali + P + M, sillabe PA PE PI PO PU MA ME MI MO MU
+  const p = IAL.Store.createProfile('Test', '🐻');
+  p.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M'] };
+  p.syllables = { P: ['PA','PE','PI','PO','PU'], M: ['MA','ME','MI','MO','MU'] };
+  p.flags = { doppie:false, gruppi:false, sc:false, gn:false, gli:false };
+  p.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:3, goal:10 };
+  IAL.Store.setActive(p.id);
+  IAL.Store.save();
+
+  const E = IAL.Engine;
+
+  // 1. Controllo lettere e combinazioni
+  check('MAMMA bloccata senza doppie', !E.canShowWord(p, IAL.WORDS_BY_KEY.MAMMA));
+  check('MAPPA bloccata senza doppie', !E.canShowWord(p, IAL.WORDS_BY_KEY.MAPPA));
+  check('PALLA bloccata senza doppie', !E.canShowWord(p, IAL.WORDS_BY_KEY.PALLA));
+  check('PANE bloccata (NE non studiata)', !E.canShowWord(p, IAL.WORDS_BY_KEY.PANE));
+  check('PAPERA bloccata (RA non studiata)', !E.canShowWord(p, IAL.WORDS_BY_KEY.PAPERA));
+  p.flags.doppie = true;
+  check('MAMMA disponibile con doppie', E.canShowWord(p, IAL.WORDS_BY_KEY.MAMMA));
+  check('MAPPA disponibile con doppie', E.canShowWord(p, IAL.WORDS_BY_KEY.MAPPA));
+  p.flags.doppie = false;
+
+  const entry = { w: 'TOPO', s: ['TO','PO'] };
+  check('TOPO bloccata (T non abilitata)', !E.canShowWord(p, entry));
+  const entry2 = { w: 'PAMI', s: ['PA','MI'] };
+  check('PAMI valida (solo sillabe studiate)', E.canShowWord(p, entry2));
+
+  // 2. Nessuna lettera non abilitata in 300 esercizi generati
+  const enabled = ['A','E','I','O','U','P','M'];
+  let leak = null;
+  for (let i = 0; i < 300; i++) {
+    const ex = E.nextReading(p, { categories:{letters:true,syllables:true,words:true}, wordType:'mixed', lengths:[2,3,4,5,6] });
+    if (!ex) continue;
+    const letters = IAL.lettersOf(ex.text);
+    if (!letters.every(L => enabled.indexOf(L) !== -1)) { leak = ex.text; break; }
+  }
+  check('300 esercizi senza lettere non abilitate', leak === null);
+
+  // 3. Le parole reali generate esistono nell'archivio, le inventate no
+  let realOk = true, invOk = true, invLenOk = true;
+  for (let i = 0; i < 200; i++) {
+    const ex = E.nextReading(p, { categories:{letters:false,syllables:false,words:true}, wordType:'mixed', lengths:[3,4,5] });
+    if (!ex) continue;
+    if (ex.invented) {
+      if (IAL.WORDS_BY_KEY[ex.text]) invOk = false;
+      if ([3,4,5].indexOf(ex.text.length) === -1) invLenOk = false;
+    } else if (!IAL.WORDS_BY_KEY[ex.text]) realOk = false;
+  }
+  check('Le parole reali appartengono all’archivio', realOk);
+  check('Le parole inventate non esistono nell’archivio', invOk);
+  check('Le parole inventate rispettano la lunghezza', invLenOk);
+
+  // 4. Le inventate usano solo sillabe studiate
+  let sylOk = true;
+  for (let i = 0; i < 100; i++) {
+    const ex = E.makeInvented(p, 4, []);
+    if (!ex || !ex.invented) continue;
+    let t = ex.text, idx = 0;
+    while (idx < t.length) {
+      const two = t.slice(idx, idx + 2), three = t.slice(idx, idx + 3);
+      if (IAL.CONFIG.VOWELS.indexOf(t[idx]) !== -1) { idx += 1; continue; }
+      if (IAL.SYLLABLE_ASSOC && ['P','M'].indexOf(t[idx]) !== -1 &&
+          (p.syllables[t[idx]].indexOf(two) !== -1)) { idx += 2; continue; }
+      if (t[idx] === 'Q' && p.syllables.Q && p.syllables.Q.indexOf(three) !== -1) { idx += 3; continue; }
+      sylOk = false; break;
+    }
+  }
+  check('Le inventate usano solo sillabe studiate', sylOk);
+
+  // 5. Leggi e associa: SOLO parole reali complete con immagine
+  let matchOk = true;
+  for (let i = 0; i < 200; i++) {
+    const ex = E.nextMatch(p, { wordType:'invented', lengths:[2,3,4,5,6] });
+    if (!ex) continue;
+    const word = IAL.WORDS_BY_KEY[ex.text];
+    if (ex.invented || !word || !word.img || ex.text !== ex.assocWord || !E.canShowWord(p, word)) { matchOk = false; break; }
+  }
+  check('LEGGI E ASSOCIA: solo parole reali complete con immagine (anche se impostate le inventate)', matchOk);
+
+  // 6. Coppie di vocali: mai lettere singole
+  let pairOk = true;
+  for (let i = 0; i < 100; i++) {
+    const ex = E.nextReading(p, { categories:{letters:true,syllables:false,words:false}, wordType:'real', lengths:[2,3,4,5,6] });
+    if (!ex) continue;
+    if (ex.kind !== 'letter' || ex.text.length !== 2 || IAL.CONFIG.VOWELS.indexOf(ex.text[0]) === -1 || IAL.CONFIG.VOWELS.indexOf(ex.text[1]) === -1) { pairOk = false; break; }
+  }
+  check('Categoria lettere: solo coppie di vocali (minimo 2 lettere)', pairOk);
+
+  // 7. Disattivando tutto: zero esercizi
+  p.letters = { vowels: [], consonants: [] };
+  p.syllables = {};
+  check('Nessuna lettera → nessun esercizio', E.nextReading(p, { categories:{letters:true,syllables:true,words:true}, wordType:'mixed', lengths:[2,3,4,5,6] }) === null);
+  check('Nessuna lettera → nessuna associazione', E.nextMatch(p, { wordType:'mixed', lengths:[2,3,4,5,6] }) === null);
+
+  // 8. Lunghezza selezionata
+  p.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M','L','T','S','N','B','D','F','R','V','Z','C','G'] };
+  p.syllables = {}; IAL.CONFIG.CONSONANTS.forEach(c => { if (c !== 'H') p.syllables[c] = IAL.cvSyllables(c); });
+  p.flags = { doppie:true, gruppi:true, sc:true, gn:true, gli:true };
+  let lenOk = true;
+  for (let i = 0; i < 300; i++) {
+    const ex = E.nextReading(p, { categories:{letters:false,syllables:false,words:true}, wordType:'real', lengths:[4] });
+    if (!ex) continue;
+    if (ex.text.length !== 4) { lenOk = false; break; }
+  }
+  check('Filtro lunghezza rispettato (4 lettere)', lenOk);
+
+  out.push('');
+  out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));
+  document.getElementById('out').textContent = out.join('\n');
+})();
+</script>
+</body>
+</html>
