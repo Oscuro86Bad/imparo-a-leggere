@@ -45,12 +45,7 @@ IAL.CONFIG = {
     'Non mollare, riprova! 🌈',
     'Un piccolo tentativo ancora! 🍀',
     'Dai che ci siamo! Riprova 🐣'
-  ],
-
-  // Obiettivo giornaliero: numero di esercizi corretti consigliato
-  GOAL_OPTIONS: [5, 10, 15, 20],
-
-  STICKERS: ['🌟', '🏅', '🎈', '🍭', '🌈', '🦋', '🐬', '🎠', '🧸', '👑', '🎪', '🎁']
+  ]
 };
 
 // Sillabe consonante+vocale di una consonante (Q usa QU)

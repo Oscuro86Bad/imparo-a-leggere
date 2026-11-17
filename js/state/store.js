@@ -27,15 +27,13 @@ IAL.Store = (function () {
         wordType: 'mixed',           // 'real' | 'invented' | 'mixed'
         lengths: [2, 3, 4, 5, 6],    // lunghezze ammesse (in lettere)
         categories: { letters: true, syllables: true, words: true },
-        level: 3,
-        goal: 10
+        level: 3
       },
       stats: {
         stars: 0,
         correct: 0,
         retried: 0,
         total: 0,
-        stickers: [],
         byLetter: {},                // { P: { shown: n, correct: n } }
         byDate: {}                   // { '2026-11-17': { done: n, correct: n } }
       }
@@ -65,7 +63,8 @@ IAL.Store = (function () {
       p.stats = Object.assign({}, def.stats, p.stats || {});
       p.stats.byLetter = p.stats.byLetter || {};
       p.stats.byDate = p.stats.byDate || {};
-      p.stats.stickers = p.stats.stickers || [];
+      delete p.settings.goal;        // obiettivi giornalieri rimossi
+      delete p.stats.stickers;       // adesivi premi rimossi
     });
     return data;
   }
@@ -161,11 +160,6 @@ IAL.Store = (function () {
     save();
   }
 
-  function goalProgress(profile) {
-    const t = todayStats(profile);
-    return { done: t.correct, goal: profile.settings.goal || 10 };
-  }
-
   // ---------- Backup ----------
   function exportJSON() {
     return JSON.stringify(data, null, 2);
@@ -183,7 +177,7 @@ IAL.Store = (function () {
     all: all, active: active, activeId: activeId, setActive: setActive,
     createProfile: createProfile, deleteProfile: deleteProfile, updateActive: updateActive,
     setParentPin: setParentPin, parentPin: parentPin,
-    record: record, todayStats: todayStats, goalProgress: goalProgress,
+    record: record, todayStats: todayStats,
     exportJSON: exportJSON, importJSON: importJSON
   };
 })();

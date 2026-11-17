@@ -33,7 +33,7 @@
   p.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M'] };
   p.syllables = { P: ['PA','PE','PI','PO','PU'], M: ['MA','ME','MI','MO','MU'] };
   p.flags = { doppie:false, gruppi:false, sc:false, gn:false, gli:false };
-  p.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:3, goal:10 };
+  p.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:3 };
   IAL.Store.setActive(p.id);
   IAL.Store.save();
 
@@ -115,6 +115,31 @@
     if (ex.kind !== 'letter' || ex.text.length !== 2 || IAL.CONFIG.VOWELS.indexOf(ex.text[0]) === -1 || IAL.CONFIG.VOWELS.indexOf(ex.text[1]) === -1) { pairOk = false; break; }
   }
   check('Categoria lettere: solo coppie di vocali (minimo 2 lettere)', pairOk);
+
+  // 6b. Sillaba studiata con consonante poi disattivata: mai proposta (bug RA)
+  const p2 = IAL.Store.createProfile('Test2', '🐱');
+  p2.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M','N'] };
+  p2.syllables = { P: ['PA','PE'], M: ['MA','ME'], N: ['NA'], R: ['RA','RE'] };
+  p2.flags = { doppie:false, gruppi:false, sc:false, gn:false, gli:false };
+  p2.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:3 };
+  IAL.Store.setActive(p2.id);
+  IAL.Store.save();
+
+  check('RA con R disattivata non è proponibile', !E.canShowSyllable(p2, 'RA', E.enabledLetters(p2)));
+  let raLeak = null;
+  for (let i = 0; i < 200; i++) {
+    const ex = E.nextReading(p2, { categories:{letters:false,syllables:true,words:false}, wordType:'mixed', lengths:[2,3,4,5,6] });
+    if (ex && ex.text.indexOf('RA') !== -1) { raLeak = ex.text; break; }
+  }
+  check('Categoria sillabe: mai RA con R disattivata' + (raLeak ? ' → "' + raLeak + '"' : ''), raLeak === null);
+  let invLeak = null;
+  for (let i = 0; i < 200; i++) {
+    const ex = E.makeInvented(p2, 4, []);
+    if (ex && ex.invented && ex.text.indexOf('RA') !== -1) { invLeak = ex.text; break; }
+  }
+  check('Inventate: mai RA con R disattivata' + (invLeak ? ' → "' + invLeak + '"' : ''), invLeak === null);
+  const avail = E.availability(p2);
+  check('availability: conta solo le sillabe con consonante attiva (5, non 7)', avail.syllables === 5);
 
   // 7. Disattivando tutto: zero esercizi
   p.letters = { vowels: [], consonants: [] };

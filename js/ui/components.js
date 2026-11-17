@@ -98,34 +98,10 @@ IAL.UI = (function () {
   const praise = function () { return rand(IAL.CONFIG.PRAISE); };
   const retryMsg = function () { return rand(IAL.CONFIG.RETRY); };
 
-  // Premio a collant ogni 10 stelle
-  function maybeSticker(profile) {
-    if (profile.stats.stars > 0 && profile.stats.stars % 10 === 0) {
-      const pool = IAL.CONFIG.STICKERS.filter(function (s) {
-        return profile.stats.stickers.indexOf(s) === -1;
-      });
-      const sticker = pool.length ? rand(pool) : rand(IAL.CONFIG.STICKERS);
-      profile.stats.stickers.push(sticker);
-      IAL.Store.save();
-      modal([
-        el('div', { class: 'big-emoji' }, [sticker]),
-        el('h3', {}, ['Nuovo premio!']),
-        el('div', { class: 'modal-body' }, [
-          'Hai raccolto ', String(profile.stats.stars), ' stelline e conquistato un nuovo adesivo! '
-        ]),
-        el('div', { class: 'modal-actions' }, [
-          el('button', { class: 'btn btn-green', onclick: closeModal }, ['Yay! 🎉'])
-        ])
-      ]);
-      return true;
-    }
-    return false;
-  }
-
   return {
     el: el, renderScreen: renderScreen,
     modal: modal, alertModal: alertModal, confirmModal: confirmModal, closeModal: closeModal,
-    toast: toast, starBurst: starBurst, praise: praise, retryMsg: retryMsg, maybeSticker: maybeSticker,
+    toast: toast, starBurst: starBurst, praise: praise, retryMsg: retryMsg,
     rand: rand
   };
 })();

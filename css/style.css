@@ -243,36 +243,6 @@ body {
   margin-top: 12px;
 }
 
-/* ---------- Barra obiettivo giornaliero ---------- */
-.goal {
-  background: var(--card);
-  border-radius: 20px;
-  padding: 12px 16px;
-  margin: 10px 0 4px;
-  box-shadow: 0 3px 0 rgba(0,0,0,0.06);
-}
-.goal .label {
-  display: flex;
-  justify-content: space-between;
-  font-size: clamp(14px, 3.4vw, 17px);
-  color: var(--muted);
-  font-weight: bold;
-  margin-bottom: 6px;
-}
-.goal .bar {
-  height: 18px;
-  background: #EAF3FC;
-  border-radius: 999px;
-  overflow: hidden;
-}
-.goal .fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #FFD54F, var(--accent));
-  border-radius: 999px;
-  transition: width 0.4s ease;
-}
-
 /* ---------- Area genitore ---------- */
 .parent-nav {
   display: flex;
@@ -490,8 +460,9 @@ table.stats-table th { color: var(--muted); }
   background: #fff;
   border-radius: 26px;
   padding: 22px 20px;
-  max-width: 460px;
+  max-width: calc(100vw - 40px);
   width: 100%;
+  min-width: 0;
   max-height: 86vh;
   overflow: auto;
   box-shadow: 0 20px 60px rgba(0,0,0,0.25);
@@ -540,11 +511,14 @@ table.stats-table th { color: var(--muted); }
 }
 
 /* Onboarding */
-.wizard .avatar-grid {
+.avatar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(66px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin: 10px 0;
+}
+@media (min-width: 480px) {
+  .avatar-grid { grid-template-columns: repeat(6, 1fr); }
 }
 .avatar-opt {
   font-size: clamp(30px, 8vw, 42px);

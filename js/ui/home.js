@@ -13,22 +13,11 @@ IAL.Home = (function () {
   }
 
   function renderHome(p) {
-    const goal = IAL.Store.goalProgress(p);
-    const pct = Math.min(100, Math.round(goal.done / goal.goal * 100));
-
     const topbar = el('div', { class: 'topbar' }, [
       el('button', { class: 'chip', onclick: switchProfileModal, 'aria-label': 'Cambia profilo' }, [
         el('span', { class: 'avatar' }, [p.avatar]), p.name, ' ▾'
       ]),
       el('span', { class: 'chip' }, ['⭐ ', String(p.stats.stars)])
-    ]);
-
-    const goalBox = el('div', { class: 'goal' }, [
-      el('div', { class: 'label' }, [
-        el('span', {}, ['🎯 Obiettivo di oggi']),
-        el('span', {}, [goal.done + ' / ' + goal.goal + ' esercizi'])
-      ]),
-      el('div', { class: 'bar' }, [el('div', { class: 'fill', style: 'width:' + pct + '%' })])
     ]);
 
     const menu = el('div', { class: 'menu' }, [
@@ -49,9 +38,8 @@ IAL.Home = (function () {
     IAL.UI.renderScreen([
       topbar,
       el('h1', { class: 'app-title' }, ['IMPARO A LEGGERE']),
-      el('p', { class: 'app-subtitle' }, ['Ciao ' + p.name + ', pronta a leggere?']),
+      el('p', { class: 'app-subtitle' }, ['Ciao ' + p.name + ', pronta a ripassare?']),
       el('div', { class: 'hero' }, ['🦉📚']),
-      goalBox,
       menu,
       el('p', { class: 'footer-note' }, ['Nessuna pubblicità · Funziona anche offline · I dati restano nel tuo dispositivo'])
     ]);

@@ -95,7 +95,6 @@ IAL.Match = (function () {
     revealed = true;
     IAL.Store.record(p, current, true);
     IAL.UI.starBurst('⭐');
-    IAL.UI.maybeSticker(p);
 
     const msgEl = document.getElementById('mx-msg');
     if (msgEl) { msgEl.textContent = IAL.UI.praise(); msgEl.className = 'feedback-msg'; }
@@ -132,8 +131,7 @@ IAL.Match = (function () {
     const p = IAL.Store.active();
     const noteEl = document.getElementById('mx-note');
     if (!noteEl) return;
-    const goal = IAL.Store.goalProgress(p);
-    noteEl.textContent = '⭐ ' + p.stats.stars + ' stelline · oggi ' + goal.done + '/' + goal.goal + ' corretti';
+    noteEl.textContent = '⭐ ' + p.stats.stars + ' stelline · ' + p.stats.correct + ' esercizi corretti';
   }
 
   return { show: show };

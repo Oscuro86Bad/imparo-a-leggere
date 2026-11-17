@@ -43,7 +43,11 @@ IAL.Engine = (function () {
   function canShowSyllable(p, syl, letters) {
     const kind = IAL.syllableKind(syl);
     if (kind === 'v') return letters.has(syl);
-    if (kind === 'cv') return studiedSyllables(p).indexOf(syl) !== -1;
+    if (kind === 'cv') {
+      // deve essere stata studiata E tutte le sue lettere devono essere attive
+      return studiedSyllables(p).indexOf(syl) !== -1 &&
+        IAL.lettersOf(syl).every(function (l) { return letters.has(l); });
+    }
     if (kind === 'doppia') return hasFlag(p, 'doppie') && letters.has(syl[0]);
     if (kind === 'gruppo') return hasFlag(p, 'gruppi') && IAL.lettersOf(syl).every(letters.has);
     if (kind === 'sc') return hasFlag(p, 'sc');
@@ -79,7 +83,10 @@ IAL.Engine = (function () {
   // Costruite SOLO con sillabe effettivamente studiate: sono quindi
   // foneticamente corrette e mai fuori dal percorso didattico.
   function makeInvented(p, targetLen, exclude) {
-    const syls = studiedSyllables(p).filter(function (s) { return s.length <= 3; });
+    const letters = enabledLetters(p);
+    const syls = studiedSyllables(p).filter(function (s) {
+      return s.length <= 3 && canShowSyllable(p, s, letters);
+    });
     if (!syls.length) return null;
     for (let attempt = 0; attempt < 40; attempt++) {
       let text = '';
@@ -181,7 +188,7 @@ IAL.Engine = (function () {
           typeLabel: 'Coppia di vocali'
         };
       } else if (cat === 'syllables') {
-        const syls = studiedSyllables(p);
+        const syls = studiedSyllables(p).filter(function (s) { return canShowSyllable(p, s, letters); });
         if (!syls.length) continue;
         const syl = pick(syls, recent);
         ex = { kind: 'syllable', text: syl, invented: false, img: null, typeLabel: 'Sillaba' };
@@ -223,11 +230,15 @@ IAL.Engine = (function () {
 
   // Descrizione leggibile di ciò che il profilo rende disponibile
   function availability(p) {
+    const letters = enabledLetters(p);
+    const usableSyllables = studiedSyllables(p).filter(function (s) {
+      return canShowSyllable(p, s, letters);
+    });
     return {
       letters: p.letters.vowels.length + p.letters.consonants.length,
-      syllables: studiedSyllables(p).length,
+      syllables: usableSyllables.length,
       realWords: realWords(p, null).length,
-      invented: studiedSyllables(p).length >= 2
+      invented: usableSyllables.length >= 2
     };
   }
 

@@ -47,9 +47,9 @@
   await wait(50);
   check('Schermata lettura con esercizio', document.getElementById('ex-word').textContent.length >= 1);
   const ok = ['A','E','I','O','U','P','M','N'];
-  let leak = false;
-  for (let i = 0; i < 30; i++) { btnWith('NUOVO').click(); await wait(20); const t = document.getElementById('ex-word').textContent; if (![...t].every(c => ok.indexOf(c) !== -1)) { leak = true; break; } }
-  check('30 esercizi: solo lettere abilitate (P,M,N + vocali)', !leak);
+  let leak = false, leakTxt = '';
+  for (let i = 0; i < 30; i++) { btnWith('NUOVO').click(); await wait(20); const t = document.getElementById('ex-word').textContent; if (![...t].every(c => ok.indexOf(c) !== -1)) { leak = true; leakTxt = t; break; } }
+  check('30 esercizi: solo lettere abilitate (P,M,N + vocali) -> "' + leakTxt + '"', !leak);
 
   const stars0 = IAL.Store.active().stats.stars;
   btnWith('CORRETTO').click(); await wait(50);

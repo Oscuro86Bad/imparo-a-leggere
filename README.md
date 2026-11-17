@@ -49,7 +49,7 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 - Tipo di parole selezionabile dal genitore: solo reali / solo inventate / miste.
 - Lunghezza selezionabile: 2, 3, 4, 5, 6 lettere.
 - Pulsanti: **NUOVO**, **RIPETI**, **CORRETTO**, **RITENTA**, **TORNA AL MENU**.
-- Stelle, messaggi incoraggianti, adesivi premio ogni 10 stelle, obiettivo giornaliero.
+- Stelle e messaggi incoraggianti, senza obiettivi né premi: l'app serve solo come ripasso.
 - Anti-ripetizione: gli ultimi 15 esercizi non vengono riproposti subito.
 
 ### LEGGI E ASSOCIA
@@ -67,10 +67,10 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 - **Combinazioni**: per ogni consonante attiva si scelgono le sillabe studiate
   (PA, PE…) + strutture ortografiche speciali: doppie, gruppi consonantici,
   SC, GN, GLI. *Attivare una lettera non attiva automaticamente le combinazioni.*
-- **Esercizi**: tipo di parole, lunghezze, categorie, obiettivo giornaliero,
+- **Esercizi**: tipo di parole, lunghezze, categorie,
   6 livelli di progressione (sempre sotto controllo del genitore, niente avanzamento automatico).
-- **Progressi**: stelline, corretti, da ripetere, obiettivo del giorno, statistiche
-  per lettera e per giorno, adesivi conquistati.
+- **Progressi**: stelline, corretti, da ripetere, statistiche
+  per lettera e per giorno.
 - **Sicurezza**: PIN, esportazione/importazione backup JSON, note privacy.
 
 ---
@@ -173,7 +173,7 @@ Checklist manuale consigliata (2 minuti):
 - [ ] Disattiva PA: la sillaba PA sparisce dagli esercizi.
 - [ ] Attiva «Doppie»: compaiono MAMMA, MAPPA, LATTE…
 - [ ] Modalità «solo inventate»: le parole mostrano la dicitura «senza significato».
-- [ ] CORRETTO aumenta le stelline; l'obiettivo del giorno avanza.
+- [ ] CORRETTO aumenta le stelline.
 - [ ] PIN: l'Area Genitori è inaccessibile ai bambini senza codice.
 
 ---

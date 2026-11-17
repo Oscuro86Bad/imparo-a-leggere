@@ -125,7 +125,6 @@ IAL.Reading = (function () {
       msgEl.className = 'feedback-msg';
     }
     updateNote();
-    IAL.UI.maybeSticker(p);
     setTimeout(next, 900);
   }
 
@@ -149,8 +148,7 @@ IAL.Reading = (function () {
     const p = IAL.Store.active();
     const noteEl = document.getElementById('ex-note');
     if (!noteEl) return;
-    const goal = IAL.Store.goalProgress(p);
-    noteEl.textContent = '⭐ ' + p.stats.stars + ' stelline · oggi ' + goal.done + '/' + goal.goal + ' corretti';
+    noteEl.textContent = '⭐ ' + p.stats.stars + ' stelline · ' + p.stats.correct + ' esercizi corretti';
   }
 
   return { show: show };

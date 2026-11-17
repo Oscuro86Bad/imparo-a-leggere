@@ -40,7 +40,10 @@
       }
       setTimeout(function () {
         var app = document.getElementById('app');
-        if (app && !app.firstChild) {
+        var overlay = document.getElementById('overlay');
+        // Non è un errore se l'app è mostrata nel modale di benvenuto (overlay)
+        var shownInModal = overlay && overlay.querySelector('.modal');
+        if (app && !app.firstChild && !shownInModal) {
           showBootError('<strong>L’app non si è avviata.</strong><br>' +
             'Verifica che la cartella contenga le sottocartelle js, css e icons, ' +
             'poi riapri index.html con Microsoft Edge o Google Chrome.');

@@ -397,17 +397,6 @@ IAL.Parent = (function () {
         }, [t.label]);
       })),
 
-      el('h3', {}, ['Obiettivo giornaliero (facoltativo)']),
-      el('div', { class: 'opt-row' }, IAL.CONFIG.GOAL_OPTIONS.map(function (g) {
-        return el('button', {
-          class: 'opt-chip' + (p.settings.goal === g ? ' on' : ''),
-          onclick: function () {
-            IAL.Store.updateActive(function (pr) { pr.settings.goal = g; });
-            render();
-          }
-        }, ['⭐ ' + g]);
-      })),
-
       el('h3', {}, ['Livello di progressione']),
       el('div', {}, IAL.CONFIG.LEVELS.map(function (L) {
         return el('div', {
@@ -449,8 +438,8 @@ IAL.Parent = (function () {
 
   // ---------- Scheda: PROGRESSI ----------
   function panelStats(p) {
-    const goal = IAL.Store.goalProgress(p);
     const s = p.stats;
+    const today = IAL.Store.todayStats(p);
 
     const lettersRows = Object.keys(s.byLetter)
       .sort(function (a, b) { return s.byLetter[b].shown - s.byLetter[a].shown; })
@@ -477,15 +466,8 @@ IAL.Parent = (function () {
         statBox(s.stars, '⭐ Stelline'),
         statBox(s.correct, '✅ Corretti'),
         statBox(s.retried, '💪 Da ripetere'),
-        statBox(goal.done + '/' + goal.goal, '🎯 Oggi')
+        statBox(today.correct, '✔️ Corretti oggi')
       ]),
-
-      s.stickers.length
-        ? el('div', {}, [
-            el('h3', {}, ['Adesivi conquistati']),
-            el('div', { style: 'font-size:32px; letter-spacing:6px' }, [s.stickers.join(' ')])
-          ])
-        : el('div', { class: 'note' }, ['Ogni 10 esercizi corretti la bambina conquista un adesivo 🎁']),
 
       lettersRows.length
         ? el('div', {}, [
@@ -513,13 +495,12 @@ IAL.Parent = (function () {
 
       el('button', { class: 'btn btn-soft btn-block', style: 'margin-top:12px', onclick: function () {
         IAL.UI.confirmModal('Azzerare i progressi?',
-          'Stelline, statistiche e adesivi di ' + p.name + ' verranno cancellati.',
+          'Stelline e statistiche di ' + p.name + ' verranno cancellate.',
           function () {
             IAL.Store.updateActive(function (pr) {
-              const keep = pr.stats.stickers;
               pr.stats = {
                 stars: 0, correct: 0, retried: 0, total: 0,
-                stickers: keep, byLetter: {}, byDate: {}
+                byLetter: {}, byDate: {}
               };
             });
             render();
