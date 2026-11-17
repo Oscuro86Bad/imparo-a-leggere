@@ -27,7 +27,7 @@ IAL.Home = (function () {
       ]),
       el('button', { class: 'btn btn-green btn-block', onclick: function () { IAL.Match.show(); } }, [
         el('span', { class: 'emoji' }, ['🖼️']),
-        el('span', { class: 'txt' }, ['LEGGI E GUARDA', el('span', { class: 'small' }, ['Collega parole e immagini'])])
+        el('span', { class: 'txt' }, ['LEGGI E GUARDA', el('span', { class: 'small' }, ['Leggi la parola e guarda l’immagine'])])
       ]),
       el('button', { class: 'btn btn-purple btn-block', onclick: function () { IAL.Parent.show(); } }, [
         el('span', { class: 'emoji' }, ['🔒']),
