@@ -72,8 +72,8 @@ IAL.Choice = (function () {
       if (revealEl) revealEl.innerHTML = '';
       const noteEl = document.getElementById('vc-note');
       if (noteEl) {
-        noteEl.textContent = 'Con le sillabe attuali non ci sono parole con immagine. ' +
-          'Attiva più sillabe nell’Area Genitori per esercizi come PANE, PALLA, MELA…';
+        noteEl.textContent = 'Con le impostazioni attuali non ci sono esercizi con immagini. ' +
+          'Attiva parole o sillabe con associazione (PA → 🦆 PAPERA) nell’Area Genitori 🔒';
       }
       return;
     }
@@ -153,5 +153,5 @@ IAL.Choice = (function () {
     } catch (e) { /* la voce è un extra: mai bloccare l'esercizio */ }
   }
 
-  return { show: show, hide: hide };
+  return { show: show, hide: hide, currentForTest: function () { return current; } };
 })();

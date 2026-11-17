@@ -43,7 +43,7 @@ IAL.Speech = (function () {
     ]);
 
     const card = el('div', { class: 'exercise-card' }, [
-      el('div', { class: 'exercise-type' }, ['Pronuncia la parola']),
+      el('div', { class: 'exercise-type', id: 'sp-type' }, ['…']),
       el('div', { class: 'big-word', id: 'sp-word' }, ['—']),
       el('div', { class: 'feedback-msg', id: 'sp-msg' }, ['']),
       el('div', { class: 'speech-status', id: 'sp-status' }, [
@@ -67,12 +67,15 @@ IAL.Speech = (function () {
 
   function next() {
     const p = IAL.Store.active();
+    // Le categorie scelte dall'Area Genitori valgono anche qui:
+    // solo sillabe → sillabe, solo coppie di vocali → coppie, ecc.
     const ex = IAL.Engine.nextReading(p, {
-      categories: { letters: false, syllables: false, words: true },
+      categories: p.settings.categories,
       wordType: p.settings.wordType,
       lengths: p.settings.lengths
     });
 
+    const typeEl = document.getElementById('sp-type');
     const wordEl = document.getElementById('sp-word');
     const msgEl = document.getElementById('sp-msg');
     const actions = document.getElementById('sp-actions');
@@ -80,10 +83,11 @@ IAL.Speech = (function () {
 
     if (!ex) {
       current = null;
+      if (typeEl) typeEl.textContent = 'Nessun esercizio disponibile';
       wordEl.textContent = '🤔';
       wordEl.className = 'big-word';
       setMsg('', '');
-      setStatus('Serve almeno una parola: attiva più sillabe nell’Area Genitori 🔒', 'off');
+      setStatus('Nessun esercizio con le impostazioni attuali: attiva lettere, sillabe o parole nell’Area Genitori 🔒', 'off');
       if (actions) actions.innerHTML = '';
       updateNote();
       return;
@@ -92,9 +96,13 @@ IAL.Speech = (function () {
     current = ex;
     answered = false;
     listenTries = 0;
+    if (typeEl) {
+      typeEl.textContent = ex.invented ? 'Parola inventata (senza significato!)' : ex.typeLabel;
+      typeEl.className = 'exercise-type' + (ex.invented ? ' invented' : '');
+    }
     wordEl.textContent = ex.text;
     wordEl.className = 'big-word';
-    setMsg('Leggi la parola a voce alta! 👄', '');
+    setMsg('Leggi a voce alta! 👄', '');
     setActions();
     updateNote();
     startListening();

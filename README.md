@@ -92,11 +92,12 @@ In alternativa basta l'estensione *Live Server* di VS Code.
   qui si possono togliere/riattivare le singole sillabe (PA, PE…) + strutture
   ortografiche speciali: doppie, gruppi consonantici, sillabe vocalica+consonante
   (ER, OR, AL), SC, GN, GLI.
-- **Esercizi**: tipo di parole, lunghezze, categorie,
-  6 livelli di progressione (sempre sotto controllo del genitore, niente avanzamento automatico).
+- **Esercizi**: tipo di parole, lunghezze, categorie e 6 livelli di progressione che limitano
+  automaticamente lunghezza e difficoltà degli esercizi in TUTTE le sezioni dell'app
+  (sempre sotto controllo del genitore, niente avanzamento automatico).
 - **Progressi**: stelline, corretti, da ripetere, statistiche
   per lettera e per giorno.
-- **Sicurezza**: PIN, esportazione/importazione backup JSON, note privacy.
+- **Sicurezza**: PIN opzionale a 4 cifre per proteggere l'Area Genitori.
 
 ---
 
@@ -242,7 +243,7 @@ Per autenticarsi da un nuovo terminale serve un accesso GitHub: il modo più sem
 (Servings → Developer settings) al posto della password quando git lo chiede.
 
 Le pagine `test.html` e `uitest.html` sono i collaudi automatici: aprile nel browser
-dopo ogni modifica per verificare che tutto funzioni (motore: 23 test, interfaccia: 21 test).
+dopo ogni modifica per verificare che tutto funzioni (motore, interfaccia, livelli e categorie).
 
 ---
 

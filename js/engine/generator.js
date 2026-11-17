@@ -40,6 +40,23 @@ IAL.Engine = (function () {
     return !!(p.flags && p.flags[kind]);
   }
 
+  // ---------- Livello di progressione ----------
+  // Il livello scelto dal genitore limita AUTOMATICAMENTE ciò che compare
+  // in TUTTE le sezioni: il livello restringe, non amplia mai (non attiva
+  // nulla che il genitore ha spento; taglia solo ciò che è troppo avanzato).
+  function levelCap(p) {
+    const L = (IAL.CONFIG.LEVELS || []).filter(function (l) { return l.n === p.settings.level; })[0];
+    return (L && L.cap) ? L.cap : null;
+  }
+
+  // Categorie effettive: impostazioni del genitore INTERSECTATE con il livello
+  function effectiveCategories(p) {
+    const c = p.settings.categories || {};
+    const cap = levelCap(p);
+    function ok(k) { return !!c[k] && (!cap || cap.cats.indexOf(k) !== -1); }
+    return { letters: ok('letters'), syllables: ok('syllables'), words: ok('words') };
+  }
+
   // Una sillaba è proponibile?
   function canShowSyllable(p, syl, letters) {
     const kind = IAL.syllableKind(syl);
@@ -72,11 +89,16 @@ IAL.Engine = (function () {
     return true;
   }
 
-  // Parole reali disponibili, filtrate per lunghezza
+  // Parole reali disponibili, filtrate per lunghezza E livello di progressione
   function realWords(p, lengths) {
     const letters = enabledLetters(p);
+    const cap = levelCap(p);
     return IAL.WORDS.filter(function (entry) {
       if (lengths && lengths.length && lengths.indexOf(entry.w.length) === -1) return false;
+      if (cap) {
+        if (entry.w.length > cap.maxLen) return false;
+        if ((entry.diff || 1) > cap.maxDiff) return false;
+      }
       return canShowWord(p, entry, letters);
     });
   }
@@ -164,14 +186,18 @@ IAL.Engine = (function () {
 
   function nextReading(p, opts) {
     // opts: { categories: {letters, syllables, words}, wordType, lengths }
-    const cats = opts.categories;
+    // Le categorie passate vengono intersecate con quelle effettive del
+    // profilo (impostazioni del genitore ∩ livello di progressione).
+    const cats = opts.categories || p.settings.categories;
+    const eff = effectiveCategories(p);
     const choices = [];
-    if (cats.letters) choices.push('letters');
-    if (cats.syllables) choices.push('syllables');
-    if (cats.words) choices.push('words');
+    if (cats.letters && eff.letters) choices.push('letters');
+    if (cats.syllables && eff.syllables) choices.push('syllables');
+    if (cats.words && eff.words) choices.push('words');
     if (!choices.length) return null;
 
     const letters = enabledLetters(p);
+    const cap = levelCap(p);
 
     for (let i = 0; i < 12; i++) {
       const cat = choices[Math.floor(Math.random() * choices.length)];
@@ -201,8 +227,9 @@ IAL.Engine = (function () {
           if (entry) ex = realExercise(entry);
         }
         if (!ex && opts.wordType !== 'real') {
-          const len = opts.lengths && opts.lengths.length
-            ? opts.lengths[Math.floor(Math.random() * opts.lengths.length)] : 3;
+          const lens = (opts.lengths && opts.lengths.length) ? opts.lengths : [3];
+          let len = lens[Math.floor(Math.random() * lens.length)];
+          if (cap) len = Math.min(len, cap.maxLen);   // il livello limita anche le inventate
           ex = makeInvented(p, len, recent);
         }
       }
@@ -212,22 +239,62 @@ IAL.Engine = (function () {
   }
 
   // ---------- Esercizi LEGGI E GUARDA ----------
-  // SOLO parole reali e complete con immagine associata: il bambino legge
-  // la parola, il genitore conferma e compare l'immagine corrispondente.
-  function nextMatch(p, opts) {
-    const letters = enabledLetters(p);
+  // Parole reali complete con immagine e, se attivate, sillabe studiate con
+  // la loro associazione (PA → 🦆 PAPERA). Solo categorie effettive del profilo.
+  function matchSyllablePool(p, letters) {
     const pool = [];
-    realWords(p, opts.lengths).forEach(function (entry) {
-      if (!entry.img) return;
+    studiedSyllables(p).forEach(function (s) {
+      if (!canShowSyllable(p, s, letters)) return;
+      const aw = IAL.SYLLABLE_ASSOC ? IAL.SYLLABLE_ASSOC[s] : null;
+      if (!aw) return;
+      const entry = IAL.WORDS_BY_KEY[aw];
+      if (!entry || !entry.img || !canShowWord(p, entry, letters)) return;
       pool.push({
-        kind: 'match', text: entry.w, invented: false, img: entry.img,
-        assocWord: entry.w, typeLabel: 'Parola'
+        kind: 'match', text: s, invented: false, img: entry.img,
+        assocWord: entry.w, typeLabel: 'Sillaba'
       });
     });
-    if (!pool.length) return null;
-    const chosen = pick(pool, recent);
-    remember(chosen);
-    return chosen;
+    return pool;
+  }
+
+  function nextMatch(p, opts) {
+    const letters = enabledLetters(p);
+    const cats = effectiveCategories(p);
+    const pool = [];
+    if (cats.words) {
+      realWords(p, opts.lengths).forEach(function (entry) {
+        if (!entry.img) return;
+        pool.push({
+          kind: 'match', text: entry.w, invented: false, img: entry.img,
+          assocWord: entry.w, typeLabel: 'Parola'
+        });
+      });
+    }
+    if (cats.syllables) pool.push.apply(pool, matchSyllablePool(p, letters));
+    if (pool.length) {
+      const chosen = pick(pool, recent);
+      remember(chosen);
+      return chosen;
+    }
+    // Solo coppie di vocali attive: senza immagine, ma sempre leggibili
+    if (cats.letters) {
+      const vow = p.letters.vowels;
+      if (vow.length >= 2) {
+        for (let i = 0; i < 12; i++) {
+          const i1 = Math.floor(Math.random() * vow.length);
+          const i2 = (i1 + 1 + Math.floor(Math.random() * (vow.length - 1))) % vow.length;
+          const pair = vow[i1] + vow[i2];
+          if (recent.indexOf(pair) !== -1) continue;
+          const ex = {
+            kind: 'match', text: pair, invented: false, img: null,
+            assocWord: pair, typeLabel: 'Coppia di vocali'
+          };
+          remember(ex);
+          return ex;
+        }
+      }
+    }
+    return null;
   }
 
   // ---------- Esercizi VEDI E SCEGLI (inizio della parola) ----------
@@ -242,24 +309,50 @@ IAL.Engine = (function () {
 
   // Immagine della parola + scelta multipla dell'inizio (prime due lettere).
   // I distrattori vengono SOLO dalle sillabe studiate e attive del profilo.
+  // Se le parole sono disattivate ma le sillabe no, si usa l'associazione
+  // sillaba→immagine (PA → 🦆 PAPERA): sempre dentro il percorso attivo.
+  function choiceDistractors(p, correctSyl, letters) {
+    return shuffleArr(studiedSyllables(p).filter(function (s) {
+      return s.length === 2 && s !== correctSyl && canShowSyllable(p, s, letters);
+    })).slice(0, 3);
+  }
+
   function nextChoice(p, opts) {
     const letters = enabledLetters(p);
-    const candidates = realWords(p, opts && opts.lengths).filter(function (e) {
-      return !!e.img && e.s.length && e.s[0].length === 2 && canShowSyllable(p, e.s[0], letters);
-    });
-    if (!candidates.length) return null;
-    const entry = pick(candidates, recent);
-    if (!entry) return null;
-    remember({ text: entry.w });
-    const distractors = shuffleArr(studiedSyllables(p).filter(function (s) {
-      return s.length === 2 && s !== entry.s[0] && canShowSyllable(p, s, letters);
-    })).slice(0, 3);
-    const options = shuffleArr([entry.s[0]].concat(distractors));
-    return {
-      kind: 'choice', text: entry.w, invented: false,
-      word: entry.w, img: entry.img, syllable: entry.s[0],
-      options: options, typeLabel: 'Inizio della parola'
-    };
+    const cats = effectiveCategories(p);
+
+    if (cats.words) {
+      const candidates = realWords(p, opts && opts.lengths).filter(function (e) {
+        return !!e.img && e.s.length && e.s[0].length === 2 && canShowSyllable(p, e.s[0], letters);
+      });
+      if (candidates.length) {
+        const entry = pick(candidates, recent);
+        if (entry) {
+          remember({ text: entry.w });
+          return {
+            kind: 'choice', text: entry.w, invented: false,
+            word: entry.w, img: entry.img, syllable: entry.s[0],
+            options: shuffleArr([entry.s[0]].concat(choiceDistractors(p, entry.s[0], letters))),
+            typeLabel: 'Inizio della parola'
+          };
+        }
+      }
+    }
+
+    if (cats.syllables) {
+      const syls = matchSyllablePool(p, letters);
+      if (syls.length) {
+        const chosen = pick(syls, recent);
+        remember({ text: chosen.text });
+        return {
+          kind: 'choice', text: chosen.assocWord, invented: false,
+          word: chosen.assocWord, img: chosen.img, syllable: chosen.text,
+          options: shuffleArr([chosen.text].concat(choiceDistractors(p, chosen.text, letters))),
+          typeLabel: 'La sillaba giusta'
+        };
+      }
+    }
+    return null;
   }
 
   // Descrizione leggibile di ciò che il profilo rende disponibile
@@ -282,6 +375,8 @@ IAL.Engine = (function () {
     canShowWord: canShowWord,
     canShowSyllable: canShowSyllable,
     realWords: realWords,
+    levelCap: levelCap,
+    effectiveCategories: effectiveCategories,
     nextReading: nextReading,
     nextMatch: nextMatch,
     nextChoice: nextChoice,

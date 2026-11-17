@@ -361,13 +361,11 @@ IAL.Parent = (function () {
       { id: 'words', label: '📖 Parole' }
     ];
 
-    const avail = IAL.Engine.availability(p);
-
     return el('div', { class: 'panel' }, [
       el('h2', {}, ['Impostazioni esercizi']),
       el('p', { class: 'hint' }, [
-        'Le scelte valgono per SOLO LETTURA e si salvano automaticamente. ',
-        'In LEGGI E GUARDA si usano sempre parole reali complete con immagine.'
+        'Le scelte valgono per TUTTE le sezioni dell’app (SOLO LETTURA, LEGGI E GUARDA, ',
+        'DICO LA PAROLA, VEDI E SCEGLI) e si salvano automaticamente.'
       ]),
 
       el('h3', {}, ['Tipo di parole']),
@@ -428,20 +426,11 @@ IAL.Parent = (function () {
         ]);
       })),
       el('div', { class: 'note' }, [
-        'Il livello è solo una guida per il genitore: è sempre tu a decidere quando ',
-        'attivare lettere e combinazioni più difficili. Nessun avanzamento automatico.'
-      ]),
-
-      el('h3', {}, ['Con le scelte attuali sono disponibili']),
-      el('div', { class: 'stats-grid' }, [
-        statBox(avail.letters, 'Lettere attive'),
-        statBox(avail.syllables, 'Sillabe studiate'),
-        statBox(avail.realWords, 'Parole reali utilizzabili'),
-        statBox(avail.invented ? 'Sì' : 'No', 'Parole inventate')
-      ]),
-      (avail.letters && avail.syllables === 0 && p.settings.categories.syllables)
-        ? el('div', { class: 'note' }, ['💡 Con le sillabe attive gli esercizi diventano molto più ricchi: attivane qualcuna nella scheda «Combinazioni».'])
-        : null
+        'Il livello limita automaticamente lunghezza e difficoltà degli esercizi in TUTTE le sezioni: ',
+        'salendo di livello compaiono parole più lunghe e complesse. Le tue scelte di lettere, sillabe ',
+        'e categorie valgono sempre, ma dentro i limiti del livello scelto. ',
+        'Nessun avanzamento automatico: sei tu a cambiare livello.'
+      ])
     ]);
   }
 
@@ -526,7 +515,7 @@ IAL.Parent = (function () {
     ]);
   }
 
-  // ---------- Scheda: SICUREZZA ----------
+  // ---------- Scheda: SICUREZZA (solo PIN) ----------
   function panelSecurity() {
     const pin = IAL.Store.parentPin();
     const pinInput = el('input', { type: 'password', inputmode: 'numeric', maxlength: '4', placeholder: '4 cifre' });
@@ -554,52 +543,9 @@ IAL.Parent = (function () {
           render();
         } }, ['Rimuovi PIN']) : null
       ]),
-
-      el('h3', {}, ['Backup dei dati']),
-      el('p', { class: 'hint' }, [
-        'I dati (profili, lettere, progressi) sono salvati SOLO su questo dispositivo. ',
-        'Esporta un file di backup per conservarli o spostarli su un altro dispositivo.'
-      ]),
-      el('div', { class: 'opt-row' }, [
-        el('button', { class: 'btn btn-green btn-sm', onclick: function () {
-          const blob = new Blob([IAL.Store.exportJSON()], { type: 'application/json' });
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = 'imparo-a-leggere-backup.json';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          IAL.UI.toast('Backup esportato 💾');
-        } }, ['💾 Esporta backup']),
-        el('label', { class: 'btn btn-purple btn-sm', style: 'cursor:pointer' }, [
-          '📥 Importa backup',
-          el('input', { type: 'file', accept: '.json,application/json', style: 'display:none', onchange: function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function () {
-              try {
-                IAL.Store.importJSON(String(reader.result));
-                IAL.UI.toast('Backup importato ✅');
-                render();
-              } catch (err) {
-                IAL.UI.toast('File non valido ⚠️');
-              }
-            };
-            reader.readAsText(file);
-          } })
-        ])
-      ]),
       el('div', { class: 'note' }, [
         '🔒 Privacy: i dati dei bambini non lasciano il dispositivo. Non vengono raccolti ',
         'dati personali né usati strumenti pubblicitari o di tracciamento.'
-      ]),
-
-      el('h3', {}, ['Sincronizzazione online (opzionale)']),
-      el('div', { class: 'note' }, [
-        'La sincronizzazione tra dispositivi tramite Supabase NON è attiva in questa installazione. ',
-        'Per attivarla segui le istruzioni nel file README.md del progetto (schema SQL pronto in supabase/schema.sql). ',
-        'Finché non è configurata, l’app funziona completamente in locale e offline.'
       ])
     ]);
   }

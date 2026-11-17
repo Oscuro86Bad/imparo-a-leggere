@@ -27,7 +27,7 @@ IAL.WORDS = [
   { w: 'PIZZA',    s: ['PI', 'ZZA'],           img: '🍕',  diff: 1 },
   { w: 'PIRATA',   s: ['PI', 'RA', 'TA'],      img: '🏴‍☠️', diff: 2 },
   { w: 'POMODORO', s: ['PO', 'MO', 'DO', 'RO'],img: '🍅',  diff: 2 },
-  { w: 'PUPPA',    s: ['PU', 'PPA'],           img: '🍼',  diff: 1 },
+  { w: 'PUPPA',    s: ['PU', 'PPA'],           img: null,  diff: 1 },
   { w: 'PUMA',     s: ['PU', 'MA'],            img: '🐆',  diff: 1 },
   { w: 'PILA',     s: ['PI', 'LA'],            img: '🔋',  diff: 1 },
   { w: 'PUPA',     s: ['PU', 'PA'],            img: '👶',  diff: 1 },

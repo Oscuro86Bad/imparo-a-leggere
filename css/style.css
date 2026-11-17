@@ -41,8 +41,8 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: max(10px, env(safe-area-inset-top)) 14px max(24px, env(safe-area-inset-bottom));
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: calc(100vh - 36px);
+  min-height: calc(100dvh - 36px);
   display: flex;
   flex-direction: column;
 }
@@ -107,6 +107,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
   border: none;
   cursor: pointer;
   font-family: var(--font);
@@ -302,14 +304,27 @@ body {
 
 .actions {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 14px;
 }
+.actions .btn { min-width: 0; }
 .actions .span2 { grid-column: span 2; }
 @media (min-width: 560px) {
-  .actions { grid-template-columns: repeat(4, 1fr); }
+  .actions { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .actions .span2 { grid-column: auto; }
+}
+
+/* PC: pulsanti dell'esercizio proporzionati, sempre DENTRO la scheda */
+@media (min-width: 640px) {
+  .exercise-card .btn {
+    font-size: 17px;
+    min-height: 52px;
+    padding: 12px 14px;
+    gap: 8px;
+    border-radius: 18px;
+  }
+  .exercise-card .feedback-msg { font-size: 22px; }
 }
 
 .progress-note {
@@ -653,4 +668,15 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
   color: var(--muted);
   font-size: clamp(12px, 3vw, 14px);
   margin-top: 18px;
+}
+
+/* Firma in fondo all'app (visibile su ogni schermata) */
+.powered {
+  text-align: center;
+  color: #9AA7B8;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin: 4px 0 10px;
+  user-select: none;
 }

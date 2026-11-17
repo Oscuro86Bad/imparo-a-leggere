@@ -24,14 +24,18 @@ IAL.CONFIG = {
     gli:      { label: 'GLI (CONIGLIO, FIGLIO…)', emoji: '🐰' }
   },
 
-  // Livelli di progressione didattica (guida per il genitore)
+  // Livelli di progressione didattica. Ogni livello limita AUTOMATICAMENTE
+  // lunghezza e difficoltà degli esercizi in TUTTE le sezioni dell'app
+  // (SOLO LETTURA, LEGGI E GUARDA, DICO LA PAROLA, VEDI E SCEGLI).
+  // Il livello restringe: non attiva mai nulla che il genitore ha spento.
+  // cap.cats = categorie ammesse; maxLen = lunghezza massima parole; maxDiff = difficoltà massima.
   LEVELS: [
-    { n: 1, title: 'Vocali',            desc: 'Riconoscimento delle vocali A E I O U.' },
-    { n: 2, title: 'Prime consonanti',  desc: 'Le prime consonanti studiate, una alla volta.' },
-    { n: 3, title: 'Sillabe semplici',  desc: 'Sillabe consonante+vocale (PA, ME, LU…).' },
-    { n: 4, title: 'Parole brevi',      desc: 'Prime parole di 3-4 lettere.' },
-    { n: 5, title: 'Parole più lunghe', desc: 'Parole di 5-6 lettere, doppie e gruppi.' },
-    { n: 6, title: 'Piccole frasi',     desc: 'In preparazione: arriving soon!' }
+    { n: 1, title: 'Vocali',            desc: 'Solo coppie di vocali (AE, IO…): l’inizio del percorso.', cap: { cats: ['letters'], maxLen: 2, maxDiff: 1 } },
+    { n: 2, title: 'Prime consonanti',  desc: 'Coppie di vocali e sillabe (PA, ME…), ancora senza parole.', cap: { cats: ['letters', 'syllables'], maxLen: 2, maxDiff: 1 } },
+    { n: 3, title: 'Sillabe semplici',  desc: 'Sillabe e prime parole brevi e semplici (fino a 4 lettere).', cap: { cats: ['letters', 'syllables', 'words'], maxLen: 4, maxDiff: 1 } },
+    { n: 4, title: 'Parole brevi',      desc: 'Parole fino a 4 lettere, anche più complesse.', cap: { cats: ['letters', 'syllables', 'words'], maxLen: 4, maxDiff: 2 } },
+    { n: 5, title: 'Parole più lunghe', desc: 'Parole fino a 5 lettere, doppie e gruppi (se attivati).', cap: { cats: ['letters', 'syllables', 'words'], maxLen: 5, maxDiff: 2 } },
+    { n: 6, title: 'Tutto',             desc: 'Tutti gli esercizi attivati, parole fino a 6 lettere (frasi in arrivo!).', cap: { cats: ['letters', 'syllables', 'words'], maxLen: 6, maxDiff: 2 } }
   ],
 
   PRAISE: [

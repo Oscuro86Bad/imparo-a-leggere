@@ -97,15 +97,28 @@
   }
   check('Le inventate usano solo sillabe studiate', sylOk);
 
-  // 5. Leggi e guarda: SOLO parole reali complete con immagine
-  let matchOk = true;
+  // 5. Leggi e guarda: parole reali con immagine E sillabe studiate con associazione,
+  //    mai parole inventate, mai parole senza immagine
+  let matchOk = true, matchSyl = false;
   for (let i = 0; i < 200; i++) {
-    const ex = E.nextMatch(p, { wordType:'invented', lengths:[2,3,4,5,6] });
+    const ex = E.nextMatch(p, { wordType: 'invented', lengths: [2,3,4,5,6] });
     if (!ex) continue;
+    if (ex.invented) { matchOk = false; break; }
     const word = IAL.WORDS_BY_KEY[ex.text];
-    if (ex.invented || !word || !word.img || ex.text !== ex.assocWord || !E.canShowWord(p, word)) { matchOk = false; break; }
+    if (word) {
+      // esercizio parola: immagine presente e parola ammessa
+      if (!word.img || ex.text !== ex.assocWord || !E.canShowWord(p, word)) { matchOk = false; break; }
+    } else {
+      // esercizio sillaba: associazione valida (PA → PAPERA) con parola ammessa
+      const aw = IAL.SYLLABLE_ASSOC[ex.text];
+      if (!aw || ex.assocWord !== aw || ex.text !== ex.text.toUpperCase()) { matchOk = false; break; }
+      const entry = IAL.WORDS_BY_KEY[aw];
+      if (!entry || !entry.img || !E.canShowWord(p, entry)) { matchOk = false; break; }
+      matchSyl = true;
+    }
   }
-  check('LEGGI E GUARDA: solo parole reali complete con immagine (anche se impostate le inventate)', matchOk);
+  check('LEGGI E GUARDA: solo esercizi validi (parole con immagine o sillabe con associazione), mai inventate', matchOk);
+  check('LEGGI E GUARDA: le sillabe studiate compaiono con la loro associazione', matchSyl);
 
   // 6. Coppie di vocali: mai lettere singole
   let pairOk = true;
@@ -219,6 +232,45 @@
     for (let j = i + 1; j < IAL.WORDS.length; j++) if (IAL.WORDS[j].w === e.w) dupOk = false;
   });
   check('Nessuna parola duplicata nell’archivio', dupOk);
+
+  // 12. Il livello di progressione limita lunghezza e difficoltà in TUTTE le sezioni
+  p.settings.level = 3;
+  IAL.Store.save();
+  let capOk = true;
+  for (let i = 0; i < 200; i++) {
+    const ex = E.nextReading(p, { categories:{letters:false,syllables:false,words:true}, wordType:'real', lengths:[2,3,4,5,6] });
+    if (!ex) continue;
+    const w = IAL.WORDS_BY_KEY[ex.text];
+    if (ex.text.length > 4 || (w && (w.diff || 1) > 1)) { capOk = false; break; }
+  }
+  check('Livello 3: solo parole semplici fino a 4 lettere (cap)', capOk);
+  p.settings.level = 6;
+  IAL.Store.save();
+  let cap6 = false;
+  for (let i = 0; i < 400; i++) {
+    const ex = E.nextReading(p, { categories:{letters:false,syllables:false,words:true}, wordType:'real', lengths:[2,3,4,5,6] });
+    if (ex && ex.text.length >= 5) { cap6 = true; break; }
+  }
+  check('Livello 6: compaiono anche parole di 5-6 lettere', cap6);
+
+  // 13. Solo sillabe attivate: TUTTE le sezioni mostrano solo sillabe, mai parole
+  p.settings.level = 6;
+  p.settings.categories = { letters: false, syllables: true, words: false };
+  IAL.Store.save();
+  let sylOnly = true, sylMatch = false;
+  for (let i = 0; i < 100; i++) {
+    const r = E.nextReading(p, { categories: p.settings.categories, wordType: 'mixed', lengths: [2,3,4,5,6] });
+    if (r && r.kind !== 'syllable') { sylOnly = false; break; }
+    const m = E.nextMatch(p, { wordType: 'mixed', lengths: [2,3,4,5,6] });
+    if (m) {
+      if (IAL.WORDS_BY_KEY[m.text]) { sylOnly = false; break; }  // mai una parola
+      sylMatch = true;
+    }
+    const c = E.nextChoice(p, { lengths: [2,3,4,5,6] });
+    if (c && !E.canShowSyllable(p, c.syllable, E.enabledLetters(p))) { sylOnly = false; break; }
+  }
+  check('Solo sillabe: SOLO LETTURA, LEGGI E GUARDA e VEDI E SCEGLI senza parole', sylOnly);
+  check('Solo sillabe: LEGGI E GUARDA propone comunque le associazioni (PU → PUMA)', sylMatch);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));

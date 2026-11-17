@@ -6,6 +6,7 @@
 <pre id="summary">in corso…</pre>
 <div id="app" class="app"></div>
 <div id="overlay" class="overlay hidden"></div>
+<script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
 <script src="js/config.js"></script>
 <script src="js/data/words.js"></script>
 <script src="js/data/associations.js"></script>
@@ -66,10 +67,11 @@
   IAL.Match.show(); // riapre pulita
   await wait(50);
   check('Schermata associa con esercizio', document.getElementById('mx-word').textContent.length >= 1);
-  let assocOK = true, allReal = true;
+  let assocOK = true, allValid = true;
   for (let i = 0; i < 30; i++) {
     try {
-      if (document.getElementById('mx-type').textContent !== 'Parola') { allReal = false; break; }
+      const t = document.getElementById('mx-type').textContent;
+      if (t !== 'Parola' && t !== 'Sillaba') { allValid = false; break; }
       btnWith('CORRETTO').click(); await wait(20);
       const reveal = document.getElementById('mx-reveal').textContent;
       if (!reveal) { assocOK = false; out.push('  stato: ' + document.getElementById('app').textContent.slice(0, 120)); break; }
@@ -81,7 +83,7 @@
       break;
     }
   }
-  check('Associa: solo parole reali complete (mai sillabe o inventate)', allReal);
+  check('Associa: solo parole reali complete o sillabe con associazione (mai inventate)', allValid);
   check('Associa: dopo CORRETTO compare sempre immagine/parola', assocOK);
 
   // --- DICO LA PAROLA ---
@@ -95,6 +97,16 @@
   check('SALTA → nuova parola', !!document.getElementById('sp-word') && document.getElementById('sp-word').textContent !== spWord0);
   IAL.Speech.hide();
 
+  // Categorie: solo sillabe → DICO LA PAROLA mostra sillabe, non parole
+  const sylsStudied = ['PA','PE','PI','PO','PU','RA','RE','MA','ME','MI','MO','MU','NA','NE','NI','NO','NU'];
+  IAL.Store.updateActive(pr => { pr.settings.categories = { letters: false, syllables: true, words: false }; });
+  IAL.Speech.show();
+  await wait(100);
+  const spSyl = document.getElementById('sp-word').textContent;
+  check('Solo sillabe: DICO LA PAROLA mostra sillabe studiate', sylsStudied.indexOf(spSyl) !== -1);
+  IAL.Speech.hide();
+  IAL.Store.updateActive(pr => { pr.settings.categories = { letters: true, syllables: true, words: true }; });
+
   // --- VEDI E SCEGLI ---
   IAL.Choice.show();
   await wait(100);
@@ -102,10 +114,14 @@
   const vcOpts = Array.from(document.querySelectorAll('#vc-options button'));
   check('Scelta multipla con 2-4 opzioni', vcOpts.length >= 2 && vcOpts.length <= 4);
   check('Opzioni: solo sillabe di 2 lettere con consonante abilitata', vcOpts.every(b => /^[A-Z]{2}$/.test(b.textContent) && ok.indexOf(b.textContent[0]) !== -1));
-  let solved = false, wrongTapOk = false;
-  for (const b of vcOpts) { b.click(); await wait(40); if (document.getElementById('vc-reveal').textContent.trim()) { solved = true; break; } else { wrongTapOk = true; } }
-  check('Opzione sbagliata → rossa e disabilitata, si riprova', wrongTapOk);
-  check('Opzione giusta → parola completa rivelata', solved);
+  // Deterministico: prima un'opzione sbagliata, poi quella giusta
+  const vcCur = IAL.Choice.currentForTest();
+  const wrongBtn = vcOpts.find(b => b.textContent !== vcCur.syllable);
+  const rightBtn = vcOpts.find(b => b.textContent === vcCur.syllable);
+  wrongBtn.click(); await wait(40);
+  check('Opzione sbagliata → rossa e disabilitata, si riprova', wrongBtn.disabled && wrongBtn.classList.contains('ko'));
+  rightBtn.click(); await wait(60);
+  check('Opzione giusta → parola completa rivelata', !!document.getElementById('vc-reveal').textContent.trim());
   IAL.Choice.hide();
 
   // --- AREA GENITORI ---
@@ -117,10 +133,12 @@
   check('Chip PA visibile', body().indexOf('PA') !== -1);
   btnWith('Esercizi').click(); await wait(30);
   check('Scheda esercizi + livelli', body().indexOf('Livello di progressione') !== -1);
+  check('Scheda esercizi: niente contatori «sono disponibili»', body().indexOf('sono disponibili') === -1);
   btnWith('Progressi').click(); await wait(30);
   check('Scheda progressi', body().indexOf('Progressi di Sofia') !== -1);
   btnWith('Sicurezza').click(); await wait(30);
-  check('Scheda sicurezza + backup', body().indexOf('Backup dei dati') !== -1);
+  check('Scheda sicurezza: PIN presente', body().indexOf('PIN dell’Area Genitori') !== -1);
+  check('Scheda sicurezza: backup esporta/importa rimosso', body().indexOf('Backup dei dati') === -1);
   btnWith('Profili').click(); await wait(30);
   check('Scheda profili', body().indexOf('Nuovo profilo') !== -1);
 

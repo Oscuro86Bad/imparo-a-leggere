@@ -60,14 +60,14 @@ IAL.Match = (function () {
 
     if (!ex) {
       current = null;
-      if (typeEl) typeEl.textContent = 'Nessuna parola disponibile';
+      if (typeEl) typeEl.textContent = 'Nessun esercizio disponibile';
       if (wordEl) wordEl.textContent = '🤔';
       if (msgEl) msgEl.textContent = '';
       if (revealEl) revealEl.innerHTML = '';
       if (actions) {
         actions.innerHTML = '';
         actions.appendChild(el('div', { class: 'span2 note' },
-          ['Servono parole reali con immagine: attiva più lettere e sillabe (nell’Area Genitori) per parole come PANE, MELA, PALLA…']));
+          ['Nessun esercizio con le impostazioni attuali. Attiva lettere, sillabe e parole nell’Area Genitori 🔒 (es. PA → 🦆 PAPERA).']));
       }
       return;
     }
@@ -98,10 +98,10 @@ IAL.Match = (function () {
     const msgEl = document.getElementById('mx-msg');
     if (msgEl) { msgEl.textContent = IAL.UI.praise(); msgEl.className = 'feedback-msg'; }
 
-    // Rivela immagine + parola completa
+    // Rivela immagine + parola completa (o solo la coppia, se non c'è immagine)
     const revealEl = document.getElementById('mx-reveal');
     const box = el('div', { class: 'associated' });
-    box.appendChild(el('div', { class: 'img' }, [current.img]));
+    if (current.img) box.appendChild(el('div', { class: 'img' }, [current.img]));
     box.appendChild(el('div', { class: 'lbl' }, [current.assocWord]));
     if (revealEl) revealEl.innerHTML = '';
     if (revealEl) revealEl.appendChild(box);
