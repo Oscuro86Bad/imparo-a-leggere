@@ -39,7 +39,7 @@ IAL.WORDS = [
   { w: 'PANINO',   s: ['PA', 'NI', 'NO'],      img: '🥪',  diff: 1 },
   { w: 'PATATA',   s: ['PA', 'TA', 'TA'],      img: '🥔',  diff: 1 },
   { w: 'PILOTA',   s: ['PI', 'LO', 'TA'],      img: '🧑‍✈️', diff: 1 },
-  { w: 'POMPA',    s: ['POM', 'PA'],           img: '🎈',  diff: 2 },
+  { w: 'POMPA',    s: ['POM', 'PA'],           img: '⛽',  diff: 2 },
   { w: 'PISTA',    s: ['PI', 'STA'],           img: '🏁',  diff: 2 },
 
   // --- M ---
