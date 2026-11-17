@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=9"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -13,7 +13,7 @@
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=8"></script>
 <script src="js/ui/components.js?v=8"></script>
-<script src="js/ui/home.js?v=8"></script>
+<script src="js/ui/home.js?v=9"></script>
 <script src="js/ui/reading.js?v=8"></script>
 <script src="js/ui/match.js?v=8"></script>
 <script src="js/ui/speech.js?v=10"></script>
@@ -39,6 +39,12 @@
   startBtn.click();
   await wait(50);
   check('Profilo creato → home con le quattro modalità', body().indexOf('SOLO LETTURA') !== -1 && body().indexOf('LEGGI E GUARDA') !== -1 && body().indexOf('DICO LA PAROLA') !== -1 && body().indexOf('VEDI E SCEGLI') !== -1);
+
+  // Home: ogni sezione ha un colore diverso
+  const menuBtns = Array.from(document.querySelectorAll('.menu .btn'));
+  const bgSet = new Set(menuBtns.map(b => getComputedStyle(b).backgroundColor));
+  const cNames = menuBtns.map(b => (b.className.match(/btn-(\w+)/) || [])[1]).join(',');
+  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 6 && bgSet.size === 6);
 
   // Configura lettere: vocali + P + M + N, sillabe studiate
   IAL.Store.updateActive(pr => {

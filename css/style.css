@@ -14,6 +14,8 @@
   --green-dark: #58A93B;
   --red-soft: #FF8A80;
   --purple: #B28AE8;
+  --teal: #2AB7A9;
+  --slate: #5C738C;
   --ink: #3E3C46;
   --muted: #7A8494;
   --card: #FFFFFF;
@@ -131,6 +133,8 @@ body {
 .btn-green   { background: var(--green-dark); }
 .btn-orange  { background: var(--accent); }
 .btn-purple  { background: var(--purple); }
+.btn-teal    { background: var(--teal); }
+.btn-slate   { background: var(--slate); }
 .btn-soft {
   background: #fff;
   color: var(--primary-dark);

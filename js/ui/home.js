@@ -33,7 +33,7 @@ IAL.Home = (function () {
         el('span', { class: 'emoji' }, ['🎤']),
         el('span', { class: 'txt' }, ['DICO LA PAROLA', el('span', { class: 'small' }, ['Pronuncia la parola: l’app ti ascolta'])])
       ]),
-      el('button', { class: 'btn btn-orange btn-block', onclick: function () { IAL.Choice.show(); } }, [
+      el('button', { class: 'btn btn-teal btn-block', onclick: function () { IAL.Choice.show(); } }, [
         el('span', { class: 'emoji' }, ['🔍']),
         el('span', { class: 'txt' }, ['VEDI E SCEGLI', el('span', { class: 'small' }, ['Indovina l’inizio della parola'])])
       ]),
@@ -41,7 +41,7 @@ IAL.Home = (function () {
         el('span', { class: 'emoji' }, ['📝']),
         el('span', { class: 'txt' }, ['PAROLE MIE', el('span', { class: 'small' }, ['Le parole scelte da te, in ordine casuale'])])
       ]),
-      el('button', { class: 'btn btn-purple btn-block', onclick: function () { IAL.Parent.show(); } }, [
+      el('button', { class: 'btn btn-slate btn-block', onclick: function () { IAL.Parent.show(); } }, [
         el('span', { class: 'emoji' }, ['🔒']),
         el('span', { class: 'txt' }, ['AREA GENITORI', el('span', { class: 'small' }, ['Lettere, combinazioni, progressi'])])
       ])
