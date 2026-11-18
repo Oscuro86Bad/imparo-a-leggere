@@ -226,6 +226,15 @@ body {
   line-height: 1.15;
   margin: 4px 0 8px;
 }
+/* disegno (non emoji) al posto del simbolo */
+.pic {
+  display: block;
+  height: clamp(110px, 30vw, 170px);
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  object-fit: contain;
+}
 .choice-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -287,6 +296,7 @@ body {
   100% { transform: scale(1); opacity: 1; }
 }
 .associated .img { font-size: clamp(84px, 24vw, 150px); line-height: 1.1; }
+.associated .img .pic { height: clamp(96px, 26vw, 160px); }
 .associated .lbl {
   font-size: clamp(26px, 7vw, 44px);
   color: var(--green-dark);

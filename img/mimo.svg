@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" role="img" aria-label="Mimo">
+  <defs>
+    <clipPath id="torso">
+      <path d="M58 108 Q100 98 142 108 L146 186 Q100 194 54 186 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ombra a terra -->
+  <ellipse cx="100" cy="284" rx="52" ry="8" fill="#000" opacity="0.08"/>
+
+  <!-- gambe -->
+  <path d="M78 180 L74 262" stroke="#1b1b1b" stroke-width="30" stroke-linecap="round" fill="none"/>
+  <path d="M122 180 L126 262" stroke="#1b1b1b" stroke-width="30" stroke-linecap="round" fill="none"/>
+
+  <!-- scarpe -->
+  <ellipse cx="70" cy="270" rx="22" ry="10" fill="#111"/>
+  <ellipse cx="130" cy="270" rx="22" ry="10" fill="#111"/>
+  <ellipse cx="64" cy="268" rx="8" ry="4" fill="#3a3a3a"/>
+  <ellipse cx="124" cy="268" rx="8" ry="4" fill="#3a3a3a"/>
+
+  <!-- braccia: manica corta nera, poi braccio chiaro, poi guanto -->
+  <path d="M66 122 L58 102" stroke="#1b1b1b" stroke-width="22" stroke-linecap="round" fill="none"/>
+  <path d="M134 122 L142 102" stroke="#1b1b1b" stroke-width="22" stroke-linecap="round" fill="none"/>
+  <path d="M58 102 L36 70" stroke="#f6dcc8" stroke-width="15" stroke-linecap="round" fill="none"/>
+  <path d="M142 102 L164 70" stroke="#f6dcc8" stroke-width="15" stroke-linecap="round" fill="none"/>
+
+  <!-- guanti bianchi -->
+  <g fill="#ffffff" stroke="#cfcfcf" stroke-width="2">
+    <ellipse cx="31" cy="56" rx="13" ry="14"/>
+    <ellipse cx="169" cy="56" rx="13" ry="14"/>
+    <rect x="20" y="42" width="7" height="13" rx="3.5"/>
+    <rect x="31" y="38" width="7" height="13" rx="3.5"/>
+    <rect x="42" y="42" width="7" height="13" rx="3.5"/>
+    <rect x="158" y="42" width="7" height="13" rx="3.5"/>
+    <rect x="169" y="38" width="7" height="13" rx="3.5"/>
+    <rect x="180" y="42" width="7" height="13" rx="3.5"/>
+  </g>
+
+  <!-- maglietta a righe -->
+  <path d="M58 108 Q100 98 142 108 L146 186 Q100 194 54 186 Z" fill="#ffffff"/>
+  <g clip-path="url(#torso)" fill="#1b1b1b">
+    <rect x="50" y="112" width="100" height="9"/>
+    <rect x="50" y="130" width="100" height="9"/>
+    <rect x="50" y="148" width="100" height="9"/>
+    <rect x="50" y="166" width="100" height="9"/>
+  </g>
+  <path d="M58 108 Q100 98 142 108 L146 186 Q100 194 54 186 Z" fill="none" stroke="#2b2b2b" stroke-width="3"/>
+
+  <!-- bretelle -->
+  <g fill="#111">
+    <path d="M74 104 L84 104 L82 188 L72 188 Z"/>
+    <path d="M126 104 L116 104 L118 188 L128 188 Z"/>
+  </g>
+  <rect x="68" y="146" width="20" height="7" rx="3" fill="#c9c9c9" opacity="0.85"/>
+  <rect x="112" y="146" width="20" height="7" rx="3" fill="#c9c9c9" opacity="0.85"/>
+
+  <!-- collo -->
+  <rect x="90" y="92" width="20" height="16" rx="6" fill="#f6dcc8"/>
+
+  <!-- testa -->
+  <ellipse cx="100" cy="66" rx="31" ry="35" fill="#fdf1ea" stroke="#e3cfc4" stroke-width="2"/>
+
+  <!-- trucco: faccia bianca, sopracciglia e occhi -->
+  <path d="M76 52 Q84 45 92 51" stroke="#1b1b1b" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M108 51 Q116 45 124 52" stroke="#1b1b1b" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <circle cx="86" cy="62" r="4" fill="#1b1b1b"/>
+  <circle cx="114" cy="62" r="4" fill="#1b1b1b"/>
+  <circle cx="87.4" cy="60.6" r="1.3" fill="#fff"/>
+  <circle cx="115.4" cy="60.6" r="1.3" fill="#fff"/>
+
+  <!-- bocca aperta (sorpresa) -->
+  <ellipse cx="100" cy="86" rx="10" ry="13" fill="#8e2b34"/>
+  <ellipse cx="100" cy="93" rx="6" ry="5" fill="#e2686e"/>
+
+  <!-- guance -->
+  <ellipse cx="74" cy="76" rx="8" ry="5" fill="#f6b8bd" opacity="0.55"/>
+  <ellipse cx="126" cy="76" rx="8" ry="5" fill="#f6b8bd" opacity="0.55"/>
+
+  <!-- cappello a basco -->
+  <ellipse cx="100" cy="38" rx="36" ry="15" fill="#111"/>
+  <path d="M64 38 Q100 20 136 38 Z" fill="#1b1b1b"/>
+  <circle cx="100" cy="21" r="5" fill="#111"/>
+  <path d="M64 38 Q100 30 136 38" stroke="#2f2f2f" stroke-width="2" fill="none"/>
+</svg>

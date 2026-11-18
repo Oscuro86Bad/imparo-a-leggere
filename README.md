@@ -180,6 +180,7 @@ IMPARO A LEGGERE/
 │   ├── ui/ocr.js           # lettura parole da FOTO (Tesseract.js, tutto in locale)
 │   └── app.js              # avvio
 ├── icons/                  # icone (generate con scripts/make-icon.ps1)
+├── img/                    # disegni delle parole (SVG, es. mimo.svg, magia.svg)
 ├── scripts/make-icon.ps1   # rigenera le icone (Windows, senza dipendenze)
 ├── supabase/schema.sql     # schema database online (opzionale, vedi sotto)
 ├── .github/workflows/deploy.yml  # pubblicazione automatica su GitHub Pages
@@ -254,7 +255,10 @@ Checklist manuale consigliata (2 minuti):
 - **Aggiungere parole**: aggiungi una riga in `js/data/words.js`
   (`{ w, s, img, diff }`, con sillabazione e vincoli impliciti).
 - **Aggiungere immagini/associazioni**: aggiorna `js/data/associations.js`
-  e il campo `img` in `words.js`.
+  e il campo `img` in `words.js`. Nel campo `img` va un'emoji (`'🍞'`) **oppure
+  il percorso di un disegno** (`'img/mimo.svg'`): in quel caso l'app lo mostra
+  come immagine vera (es. MAGIA e MIMO). I disegni nuovi vanno messi in `img/`
+  e aggiunti a `ASSETS` in `sw.js` per averli anche offline.
 - **Rigenerare le icone**: `powershell -ExecutionPolicy Bypass -File scripts/make-icon.ps1`
 - **Funzionalità presenti**: pronuncia audio (sintesi vocale) e riconoscimento
   vocale della lettura in **DICO LA PAROLA** (Web Speech API).

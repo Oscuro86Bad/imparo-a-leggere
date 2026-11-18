@@ -80,7 +80,8 @@ IAL.Choice = (function () {
 
     current = ex;
     answered = false;
-    imgEl.textContent = ex.img;
+    imgEl.innerHTML = '';
+    imgEl.appendChild(IAL.UI.pic(ex.img));
     setMsg('Dove inizia la parola? 🔍', '');
     if (revealEl) revealEl.innerHTML = '';
     if (optsEl) {

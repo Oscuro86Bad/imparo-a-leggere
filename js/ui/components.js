@@ -98,10 +98,21 @@ IAL.UI = (function () {
   const praise = function () { return rand(IAL.CONFIG.PRAISE); };
   const retryMsg = function () { return rand(IAL.CONFIG.RETRY); };
 
+  // ---------- immagine di una parola ----------
+  // L'archivio può usare un'emoji ('🍞') oppure un disegno del file
+  // ('img/mimo.svg'): in quel caso si crea un vero <img>.
+  function pic(value) {
+    const s = String(value || '');
+    if (/\.(svg|png|jpe?g|webp|gif)$/i.test(s)) {
+      return el('img', { class: 'pic', src: s, alt: '', draggable: 'false' });
+    }
+    return document.createTextNode(s);
+  }
+
   return {
     el: el, renderScreen: renderScreen,
     modal: modal, alertModal: alertModal, confirmModal: confirmModal, closeModal: closeModal,
     toast: toast, starBurst: starBurst, praise: praise, retryMsg: retryMsg,
-    rand: rand
+    rand: rand, pic: pic
   };
 })();

@@ -100,7 +100,7 @@ IAL.Match = (function () {
     // Rivela immagine + parola completa (o solo la coppia, se non c'è immagine)
     const revealEl = document.getElementById('mx-reveal');
     const box = el('div', { class: 'associated' });
-    if (current.img) box.appendChild(el('div', { class: 'img' }, [current.img]));
+    if (current.img) box.appendChild(el('div', { class: 'img' }, [IAL.UI.pic(current.img)]));
     box.appendChild(el('div', { class: 'lbl' }, [current.assocWord]));
     if (revealEl) revealEl.innerHTML = '';
     if (revealEl) revealEl.appendChild(box);
