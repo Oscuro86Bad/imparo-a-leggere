@@ -70,7 +70,7 @@ IAL.UI = (function () {
       el('h3', {}, [title]),
       el('div', { class: 'modal-body' }, [message]),
       el('div', { class: 'modal-actions' }, [
-        el('button', { class: 'btn btn-danger', onclick: function () { closeModal(); onYes(); } }, yesLabel || 'Sì'),
+        el('button', { class: 'btn btn-danger', onclick: function () { closeModal(); onYes(); } }, [yesLabel || 'Sì']),
         el('button', { class: 'btn btn-soft', onclick: closeModal }, ['Annulla'])
       ])
     ]);

@@ -633,6 +633,53 @@ table.stats-table th { color: var(--muted); }
   letter-spacing: 2px;
 }
 
+/* PAROLE MIE: foto → parole (OCR) */
+.photo-input { display: none; }
+.custom-word-row .cw-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font);
+  font-size: clamp(20px, 5.4vw, 26px);
+  font-weight: bold;
+  color: var(--primary-dark);
+  letter-spacing: 2px;
+  background: #FFFFFF;
+  border: 3px solid #D9E6F2;
+  border-radius: 12px;
+  padding: 6px 10px;
+}
+.custom-word-row .cw-input:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+.ocr-bar {
+  height: 18px;
+  background: #E3EEF8;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 14px 0 10px;
+}
+.ocr-bar-fill {
+  height: 100%;
+  width: 4%;
+  background: linear-gradient(90deg, var(--teal), var(--green));
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+.ocr-status {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(15px, 4vw, 19px);
+  color: var(--muted);
+}
+
+/* Zona pericolosa: cancella tutto */
+.danger-zone {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 2px dashed #F0C9C4;
+}
+
 /* Onboarding */
 .avatar-grid {
   display: grid;

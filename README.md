@@ -8,7 +8,8 @@ inventate, associazione parola-immagine.
 
 - ✅ Funziona su smartphone Android, iPhone, tablet, iPad e computer.
 - ✅ Installabile sulla schermata Home (PWA).
-- ✅ Funziona **completamente offline**.
+- ✅ Funziona **completamente offline** (unica eccezione: la lettura delle parole da
+  foto scarica una volta il motore OCR, poi resta in cache sul dispositivo).
 - ✅ Nessuna pubblicità, nessun tracciamento.
 - ✅ Multi-profilo: ogni bambino ha lettere, esercizi e progressi indipendenti.
 - ✅ I dati restano sul dispositivo (privacy, GDPR: nessun dato dei minori raccolto online).
@@ -100,10 +101,21 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 ### PAROLE MIE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,
    parole del quaderno…): restano salvate sul dispositivo.
-2. Le parole girano **in ordine casuale**, senza mai ripetersi di seguito.
-3. Pulsanti **CORRETTO** (+stellina), **RITENTA** e **NUOVO**.
-4. Si possono aggiungere o togliere parole a piacere da 📝 GESTISCI LE PAROLE.
-5. Sezione svincolata da lettere attive e livelli: la parola è scelta
+2. **📷 Da foto**: il genitore fotografa una pagina (quaderno, libro, elenco).
+   L'app legge le parole **sul telefono** (OCR con Tesseract.js in WebAssembly:
+   nessuna immagine viene inviata a un server), ne ricava le parole una per una
+   e le mostra in un elenco modificabile: si possono correggere o togliere prima
+   di aggiungerle. Parole spezzate a fine riga (`PAR-` / `LA`) vengono ricomposte,
+   numeri e righe di rumore vengono scartati.
+   *La prima volta il browser scarica il motore OCR (~8 MB da CDN); poi resta in cache
+   e la funzione lavora anche offline. Con testo stampato la lettura è molto affidabile;
+   con la scrittura a mano è meglio controllare l'elenco prima di aggiungere.*
+3. **🗑️ Cancella tutte le parole**: svuota l'elenco (con conferma) per ripartire da zero;
+   stelline e progressi restano.
+4. Le parole girano **in ordine casuale**, senza mai ripetersi di seguito.
+5. Pulsanti **CORRETTO** (+stellina), **RITENTA** e **NUOVO**.
+6. Si possono aggiungere o togliere parole a piacere da 📝 GESTISCI LE PAROLE.
+7. Sezione svincolata da lettere attive e livelli: la parola è scelta
    apposta da un adulto.
 
 ### AREA GENITORI (protetta da PIN opzionale a 4 cifre)
@@ -156,6 +168,7 @@ IMPARO A LEGGERE/
 │   ├── state/store.js      # profili, impostazioni, progressi (localStorage)
 │   ├── engine/generator.js # motore di generazione con controlli didattici
 │   ├── ui/*.js             # schermate: home, lettura, leggi e guarda, area genitori, parole mie
+│   ├── ui/ocr.js           # lettura parole da FOTO (Tesseract.js, tutto in locale)
 │   └── app.js              # avvio
 ├── icons/                  # icone (generate con scripts/make-icon.ps1)
 ├── scripts/make-icon.ps1   # rigenera le icone (Windows, senza dipendenze)

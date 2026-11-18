@@ -118,12 +118,200 @@ IAL.Custom = (function () {
       .replace(/[ÙÚÛÜ]/g, 'U').replace(/[^A-Z]/g, '');
   }
 
+  // ---------- Aggiunta da FOTO (OCR sul dispositivo) ----------
+  function startPhoto(file) {
+    IAL.UI.renderScreen([
+      el('div', { class: 'topbar' }, [
+        el('button', { class: 'chip', onclick: function () { manage(); } }, ['↩️ Indietro'])
+      ]),
+      el('h1', { class: 'app-title' }, ['LEGGI LA FOTO']),
+      el('div', { class: 'panel' }, [
+        el('h2', {}, ['Sto leggendo la foto…']),
+        el('p', { class: 'hint' }, [
+          'La foto resta sul telefono: nessuna immagine viene inviata a internet.'
+        ]),
+        el('div', { class: 'ocr-bar' }, [el('div', { class: 'ocr-bar-fill', id: 'ocr-bar' })]),
+        el('p', { class: 'ocr-status', id: 'ocr-status' }, ['Preparo la foto…'])
+      ])
+    ]);
+
+    IAL.OCR.recognize(file, function (label, pct) {
+      const bar = document.getElementById('ocr-bar');
+      const status = document.getElementById('ocr-status');
+      if (bar) bar.style.width = Math.round(pct * 100) + '%';
+      if (status && label) status.textContent = label;
+    }).then(function (res) {
+      photoReview(res.words);
+    }).catch(function (err) {
+      photoError(err);
+    });
+  }
+
+  function photoError(err) {
+    IAL.UI.renderScreen([
+      el('div', { class: 'topbar' }, [
+        el('button', { class: 'chip', onclick: function () { manage(); } }, ['↩️ Indietro'])
+      ]),
+      el('h1', { class: 'app-title' }, ['LEGGI LA FOTO']),
+      el('div', { class: 'panel' }, [
+        el('div', { class: 'big-emoji' }, ['😕']),
+        el('h3', {}, ['Non riesco a leggere la foto']),
+        el('p', { class: 'hint' }, [String((err && err.message) || 'Riprova con un’altra foto.')]),
+        el('p', { class: 'hint' }, [
+          'Consigli: buona luce, foglio appoggiato su un piano, foto dall’alto e parole ben leggibili.'
+        ]),
+        el('div', { class: 'opt-row' }, [
+          el('button', { class: 'btn btn-green', onclick: function () { manage(); } }, ['🔁 Riprova']),
+          el('button', { class: 'btn btn-soft', onclick: function () { manage(); } }, ['✍️ Scrivi a mano'])
+        ])
+      ])
+    ]);
+  }
+
+  function photoReview(found) {
+    const p = IAL.Store.active();
+    const existing = (p.customWords || []).slice();
+    const candidates = (found || []).filter(function (w) { return existing.indexOf(w) === -1; });
+    const skipped = (found || []).length - candidates.length;
+
+    if (!candidates.length) {
+      IAL.UI.renderScreen([
+        el('div', { class: 'topbar' }, [
+          el('button', { class: 'chip', onclick: function () { manage(); } }, ['↩️ Indietro'])
+        ]),
+        el('h1', { class: 'app-title' }, ['LEGGI LA FOTO']),
+        el('div', { class: 'panel' }, [
+          el('div', { class: 'big-emoji' }, ['🔍']),
+          el('h3', {}, ['Nessuna parola nuova']),
+          el('p', { class: 'hint' }, [
+            found.length
+              ? 'Le parole della foto sono già tutte nel tuo elenco. 😊'
+              : 'Non ho trovato parole leggibili. Prova con una foto più vicina, con buona luce e il foglio ben dritto.'
+          ]),
+          el('div', { class: 'opt-row' }, [
+            el('button', { class: 'btn btn-green', onclick: function () { manage(); } }, ['📷 Prova un’altra foto']),
+            el('button', { class: 'btn btn-soft', onclick: function () { manage(); } }, ['↩️ Indietro'])
+          ])
+        ])
+      ]);
+      return;
+    }
+
+    const list = el('div', { class: 'custom-list', id: 'cm-found' }, candidates.map(function (w) {
+      return el('div', { class: 'custom-word-row' }, [
+        el('input', {
+          type: 'text', class: 'cw-input', maxlength: '12', value: w,
+          autocomplete: 'off', 'aria-label': 'Parola ' + w
+        }),
+        el('button', {
+          class: 'btn btn-danger btn-sm',
+          'aria-label': 'Togli ' + w,
+          onclick: function (e) {
+            const row = e.currentTarget.parentNode;
+            if (row && row.parentNode) row.parentNode.removeChild(row);
+            updateCount();
+          }
+        }, ['🗑️'])
+      ]);
+    }));
+
+    const countEl = el('p', { class: 'progress-note', id: 'cm-found-count' }, ['']);
+
+    function currentRows() {
+      return Array.prototype.slice.call(document.querySelectorAll('#cm-found input.cw-input'));
+    }
+
+    function updateCount() {
+      const n = currentRows().length;
+      if (countEl) countEl.textContent = n ? n + ' parole da aggiungere' : 'Nessuna parola selezionata';
+    }
+
+    function addAll() {
+      const words = [];
+      currentRows().forEach(function (input) {
+        const w = normalizeWord(input.value);
+        if (w.length < 2) return;
+        if (words.indexOf(w) === -1) words.push(w);
+      });
+      if (!words.length) { IAL.UI.toast('Nessuna parola da aggiungere ✏️'); return; }
+
+      let added = 0, dup = 0;
+      IAL.Store.updateActive(function (pr) {
+        pr.customWords = pr.customWords || [];
+        words.forEach(function (w) {
+          if (pr.customWords.indexOf(w) !== -1) { dup++; return; }
+          pr.customWords.push(w);
+          added++;
+        });
+      });
+
+      if (!added) { IAL.UI.toast('Erano già tutte in elenco 😊'); manage(); return; }
+      IAL.UI.toast(added + (added === 1 ? ' parola aggiunta' : ' parole aggiunte') +
+        (dup ? ' · ' + dup + ' già presenti' : '') + ' ✅');
+      manage();
+    }
+
+    IAL.UI.renderScreen([
+      el('div', { class: 'topbar' }, [
+        el('button', { class: 'chip', onclick: function () { manage(); } }, ['↩️ Indietro'])
+      ]),
+      el('h1', { class: 'app-title' }, ['PAROLE TROVATE']),
+      el('div', { class: 'panel' }, [
+        el('h2', {}, ['Controlla le parole']),
+        el('p', { class: 'hint' }, [
+          'Queste sono le parole lette nella foto. Correggile se serve e togli con 🗑️ ',
+          'quelle sbagliate: verranno aggiunte solo quando tocchi «Aggiungi».'
+        ]),
+        skipped
+          ? el('div', { class: 'note' }, [
+              'ℹ️ ' + skipped + (skipped === 1 ? ' parola era già' : ' parole erano già') + ' nel tuo elenco: saltata.'
+            ])
+          : null,
+        list,
+        countEl,
+        el('div', { class: 'opt-row', style: 'margin-top:12px' }, [
+          el('button', { class: 'btn btn-green', onclick: addAll }, ['➕ Aggiungi le parole']),
+          el('button', { class: 'btn btn-soft', onclick: function () { manage(); } }, ['↩️ Indietro'])
+        ])
+      ])
+    ]);
+
+    updateCount();
+  }
+
+  // ---------- Cancella tutto ----------
+  function clearAll() {
+    const p = IAL.Store.active();
+    const n = (p.customWords || []).length;
+    if (!n) { IAL.UI.toast('L’elenco è già vuoto 😊'); return; }
+    IAL.UI.confirmModal(
+      'Cancellare tutte le parole?',
+      'Verranno rimosse tutte le ' + n + ' parole di «Parole mie». Le stelline e i progressi restano.',
+      function () {
+        IAL.Store.updateActive(function (pr) { pr.customWords = []; });
+        IAL.UI.toast('Elenco svuotato 🗑️');
+        manage();
+      },
+      'Sì, cancella tutto'
+    );
+  }
+
   function manage() {
     const p = IAL.Store.active();
     const list = (p.customWords || []).slice();
     const input = el('input', {
       type: 'text', maxlength: '12', placeholder: 'Es. NONNA',
       autocomplete: 'off', id: 'cm-new-word'
+    });
+
+    // Foto → parole (il file resta sul dispositivo)
+    const fileInput = el('input', {
+      type: 'file', accept: 'image/*', id: 'cm-photo',
+      class: 'photo-input', 'aria-label': 'Foto con le parole da aggiungere',
+      onchange: function () {
+        const file = (fileInput.files && fileInput.files[0]) || null;
+        if (file) startPhoto(file);
+      }
     });
 
     function addFromInput() {
@@ -169,7 +357,17 @@ IAL.Custom = (function () {
         ]),
         el('div', { class: 'field' }, [input]),
         el('div', { class: 'opt-row' }, [
-          el('button', { class: 'btn btn-green btn-sm', onclick: addFromInput }, ['➕ Aggiungi parola'])
+          el('button', { class: 'btn btn-green btn-sm', onclick: addFromInput }, ['➕ Aggiungi parola']),
+          el('button', {
+            class: 'btn btn-teal btn-sm',
+            onclick: function () { if (fileInput) fileInput.click(); }
+          }, ['📷 Da foto'])
+        ]),
+        fileInput,
+        el('p', { class: 'hint' }, [
+          'Oppure fotografa una pagina (quaderno, libro, elenco): l’app legge le parole ',
+          'e te le fa controllare una per una. La foto non esce dal telefono. ',
+          'La prima volta scarica il lettore di testo (circa 8 MB), poi funziona anche offline.'
         ]),
         rows.length
           ? el('div', { class: 'custom-list' }, rows)
@@ -179,10 +377,15 @@ IAL.Custom = (function () {
             ? el('button', { class: 'btn btn-primary', onclick: function () { current = null; render(); next(); } }, ['▶️ GIOCA'])
             : null,
           el('button', { class: 'btn btn-soft', onclick: function () { show(); } }, ['↩️ Indietro'])
-        ])
+        ]),
+        list.length
+          ? el('div', { class: 'danger-zone' }, [
+              el('button', { class: 'btn btn-danger btn-block', onclick: clearAll }, ['🗑️ Cancella tutte le parole'])
+            ])
+          : null
       ])
     ]);
   }
 
-  return { show: show, manage: manage };
+  return { show: show, manage: manage, normalizeWord: normalizeWord, photoReview: photoReview };
 })();

@@ -7,18 +7,20 @@
 <div id="app" class="app"></div>
 <div id="overlay" class="overlay hidden"></div>
 <script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
+<script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push((e.message || 'errore') + ' @ riga ' + e.lineno + ' | ' + ((e.error && e.error.stack) || '').replace(/\n/g, ' ¦ ')); });</script>
 <script src="js/config.js?v=8"></script>
 <script src="js/data/words.js?v=8"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=8"></script>
-<script src="js/ui/components.js?v=8"></script>
+<script src="js/ui/components.js?v=12"></script>
 <script src="js/ui/home.js?v=9"></script>
 <script src="js/ui/reading.js?v=8"></script>
 <script src="js/ui/match.js?v=8"></script>
 <script src="js/ui/speech.js?v=10"></script>
 <script src="js/ui/choice.js?v=8"></script>
-<script src="js/ui/custom.js?v=8"></script>
+<script src="js/ui/ocr.js?v=12"></script>
+<script src="js/ui/custom.js?v=12"></script>
 <script src="js/ui/parent.js?v=8"></script>
 <script src="js/app.js?v=8"></script>
 <script>
@@ -178,6 +180,50 @@
   btnWith('GESTISCI LE PAROLE').click(); await wait(50);
   document.querySelector('button[aria-label="Rimuovi NONNA"]').click(); await wait(50);
   check('Parole mie: parola rimossa dalla lista', IAL.Store.active().customWords.length === 1);
+
+  // --- PAROLE MIE: aggiunta da foto (OCR) e cancellazione totale ---
+  check('Parole da foto: pulsante «Da foto» presente', !!btnWith('Da foto'));
+  const ph = document.getElementById('cm-photo');
+  check('Parole da foto: campo foto pronto (solo immagini)', !!ph && ph.getAttribute('accept') === 'image/*');
+  check('Parole da foto: modulo OCR caricato', !!(IAL.OCR && typeof IAL.OCR.recognize === 'function' && typeof IAL.OCR.wordsFromText === 'function'));
+
+  const wft = IAL.OCR.wordsFromText;
+  check('OCR: parole divise da spazi e punteggiatura',
+    wft('PANE, CASA. SOLE!').join(',') === 'PANE,CASA,SOLE');
+  check('OCR: minuscole e accenti normalizzati',
+    wft('perché sarà').join(',') === 'PERCHE,SARA');
+  check('OCR: parole spezzate a fine riga ricomposte (PAR- / LA)',
+    wft('PAR-\nLA').join(',') === 'PARLA');
+  check('OCR: scarta lettere singole, numeri e rumore',
+    wft('A 3 12 ... MMMM K').length === 0);
+  check('OCR: duplicati rimossi', wft('CASA casa CASA').join(',') === 'CASA');
+  check('OCR: parole oltre 12 lettere scartate', wft('PRECIPITEVOLEISSIMAMENTE').length === 0);
+  check('OCR: lettura di più righe con parole ripetute a capo',
+    wft('NONNA\nLUNA\nNONNA\nMARE').join(',') === 'NONNA,LUNA,MARE');
+
+  check('Cancella tutto: pulsante presente in fondo',
+    !!btnWith('Cancella tutte le parole'));
+  btnWith('Cancella tutte le parole').click(); await wait(50);
+  const yesAll = Array.from(document.querySelectorAll('#overlay button'))
+    .find(b => b.textContent.indexOf('cancella tutto') !== -1);
+  check('Cancella tutto: chiede conferma (parole ancora presenti)',
+    !!yesAll && IAL.Store.active().customWords.length === 1);
+  yesAll.click(); await wait(50);
+  check('Cancella tutto: elenco svuotato', IAL.Store.active().customWords.length === 0);
+
+  // --- PAROLE MIE: revisione delle parole lette da foto ---
+  IAL.Custom.photoReview(['NONNA', 'LUNA', 'CASA']); await wait(50);
+  const foundInputs = document.querySelectorAll('#cm-found input.cw-input');
+  check('Parole da foto: elenco controllabile con le parole trovate', foundInputs.length === 3);
+  foundInputs[2].value = 'pane';
+  btnWith('Aggiungi le parole').click(); await wait(50);
+  const cw = IAL.Store.active().customWords;
+  check('Parole da foto: parola corretta e aggiunta insieme alle altre',
+    cw.length === 3 && cw.indexOf('PANE') !== -1 && cw.indexOf('CASA') === -1);
+  IAL.Custom.photoReview(['NONNA', 'LUNA', 'PANE']); await wait(50);
+  check('Parole da foto: se sono già tutte in elenco non propone nulla',
+    body().indexOf('Nessuna parola nuova') !== -1);
+
   IAL.Store.updateActive(pr => { pr.customWords = []; });
   check('Parole mie: home con la nuova sezione presente', true);
 
