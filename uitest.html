@@ -20,7 +20,7 @@
 <script src="js/ui/speech.js?v=10"></script>
 <script src="js/ui/choice.js?v=8"></script>
 <script src="js/ui/ocr.js?v=12"></script>
-<script src="js/ui/custom.js?v=12"></script>
+<script src="js/ui/custom.js?v=13"></script>
 <script src="js/ui/parent.js?v=8"></script>
 <script src="js/app.js?v=8"></script>
 <script>
@@ -182,9 +182,13 @@
   check('Parole mie: parola rimossa dalla lista', IAL.Store.active().customWords.length === 1);
 
   // --- PAROLE MIE: aggiunta da foto (OCR) e cancellazione totale ---
-  check('Parole da foto: pulsante «Da foto» presente', !!btnWith('Da foto'));
+  check('Parole da foto: pulsante «Scatta foto» presente', !!btnWith('Scatta foto'));
+  check('Parole da foto: pulsante «Galleria» presente', !!btnWith('Galleria'));
+  const phCam = document.getElementById('cm-photo-cam');
+  check('Parole da foto: scatto diretto con fotocamera posteriore (capture=environment)',
+    !!phCam && phCam.getAttribute('accept') === 'image/*' && phCam.getAttribute('capture') === 'environment');
   const ph = document.getElementById('cm-photo');
-  check('Parole da foto: campo foto pronto (solo immagini)', !!ph && ph.getAttribute('accept') === 'image/*');
+  check('Parole da foto: campo galleria pronto (solo immagini)', !!ph && ph.getAttribute('accept') === 'image/*');
   check('Parole da foto: modulo OCR caricato', !!(IAL.OCR && typeof IAL.OCR.recognize === 'function' && typeof IAL.OCR.wordsFromText === 'function'));
 
   const wft = IAL.OCR.wordsFromText;

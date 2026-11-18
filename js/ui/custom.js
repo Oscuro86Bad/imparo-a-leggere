@@ -305,13 +305,25 @@ IAL.Custom = (function () {
     });
 
     // Foto → parole (il file resta sul dispositivo)
+    // Due campi distinti: uno apre SUBITO la fotocamera (scatto in tempo reale),
+    // l'altro la galleria delle foto già scattate.
+    function takeFile(input) {
+      const file = (input.files && input.files[0]) || null;
+      if (input.value !== '') input.value = '';   // permette di riscegliere lo stesso file
+      if (file) startPhoto(file);
+    }
+
+    const camInput = el('input', {
+      type: 'file', accept: 'image/*', capture: 'environment',
+      id: 'cm-photo-cam', class: 'photo-input',
+      'aria-label': 'Scatta la foto con la fotocamera',
+      onchange: function () { takeFile(camInput); }
+    });
+
     const fileInput = el('input', {
       type: 'file', accept: 'image/*', id: 'cm-photo',
-      class: 'photo-input', 'aria-label': 'Foto con le parole da aggiungere',
-      onchange: function () {
-        const file = (fileInput.files && fileInput.files[0]) || null;
-        if (file) startPhoto(file);
-      }
+      class: 'photo-input', 'aria-label': 'Scegli una foto già scattata',
+      onchange: function () { takeFile(fileInput); }
     });
 
     function addFromInput() {
@@ -357,16 +369,23 @@ IAL.Custom = (function () {
         ]),
         el('div', { class: 'field' }, [input]),
         el('div', { class: 'opt-row' }, [
-          el('button', { class: 'btn btn-green btn-sm', onclick: addFromInput }, ['➕ Aggiungi parola']),
+          el('button', { class: 'btn btn-green btn-sm', onclick: addFromInput }, ['➕ Aggiungi parola'])
+        ]),
+        el('div', { class: 'opt-row' }, [
           el('button', {
             class: 'btn btn-teal btn-sm',
+            onclick: function () { if (camInput) camInput.click(); }
+          }, ['📸 Scatta foto']),
+          el('button', {
+            class: 'btn btn-soft btn-sm',
             onclick: function () { if (fileInput) fileInput.click(); }
-          }, ['📷 Da foto'])
+          }, ['🖼️ Galleria'])
         ]),
+        camInput,
         fileInput,
         el('p', { class: 'hint' }, [
-          'Oppure fotografa una pagina (quaderno, libro, elenco): l’app legge le parole ',
-          'e te le fa controllare una per una. La foto non esce dal telefono. ',
+          '«Scatta foto» apre subito la fotocamera; «Galleria» usa una foto già scattata. ',
+          'L’app legge le parole e te le fa controllare una per una. La foto non esce dal telefono. ',
           'La prima volta scarica il lettore di testo (circa 8 MB), poi funziona anche offline.'
         ]),
         rows.length

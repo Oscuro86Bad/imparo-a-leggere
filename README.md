@@ -101,7 +101,9 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 ### PAROLE MIE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,
    parole del quaderno…): restano salvate sul dispositivo.
-2. **📷 Da foto**: il genitore fotografa una pagina (quaderno, libro, elenco).
+2. **📸 Scatta foto / 🖼️ Galleria**: il genitore fotografa una pagina (quaderno, libro,
+   elenco) oppure sceglie una foto già scattata. «Scatta foto» apre direttamente la
+   fotocamera posteriore del telefono (scatto in tempo reale).
    L'app legge le parole **sul telefono** (OCR con Tesseract.js in WebAssembly:
    nessuna immagine viene inviata a un server), ne ricava le parole una per una
    e le mostra in un elenco modificabile: si possono correggere o togliere prima
