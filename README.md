@@ -93,7 +93,7 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    (prime due lettere), es. **PA / PE / MA / PU** per ⚽ PALLA.
 3. Le opzioni sono **solo sillabe studiate e attive** nell'Area Genitori.
 4. La parola deve iniziare con una sillaba conosciuta: il resto può contenere
-   lettere ancora da studiare → archivio molto ricco (oltre 200 parole con immagine).
+   lettere ancora da studiare → archivio molto ricco (oltre 250 parole, quasi tutte con immagine).
 4. Risposta giusta → opzione **VERDE**, stellina, **parola completa rivelata**
    e pronunciata, poi **passaggio automatico** alla parola successiva.
 5. Risposta sbagliata → opzione **ROSSA** disabilitata; si riprova sulle altre.
@@ -109,9 +109,16 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    e le mostra in un elenco modificabile: si possono correggere o togliere prima
    di aggiungerle. Parole spezzate a fine riga (`PAR-` / `LA`) vengono ricomposte,
    numeri e righe di rumore vengono scartati.
+   Come funziona la lettura: la foto viene raddrizzata nella luminosità (ombre,
+   luce gialla e foglio storto), poi il testo viene letto **più volte** con
+   impostazioni diverse (pagina intera, parole sparse, bianco e nero) e si tiene
+   per ogni parola il risultato con il punteggio di sicurezza più alto. Gli errori
+   tipici vengono corretti (`0→O`, `1→I`, `5→S`, `8→B`); le parole poco credibili
+   vengono scartate.
    *La prima volta il browser scarica il motore OCR (~8 MB da CDN); poi resta in cache
-   e la funzione lavora anche offline. Con testo stampato la lettura è molto affidabile;
-   con la scrittura a mano è meglio controllare l'elenco prima di aggiungere.*
+   e la funzione lavora anche offline. Con il testo stampato dei libri la lettura è
+   molto affidabile; con la scrittura a mano è meglio controllare l'elenco prima di
+   aggiungere.*
 3. **🗑️ Cancella tutte le parole**: svuota l'elenco (con conferma) per ripartire da zero;
    stelline e progressi restano.
 4. Le parole girano **in ordine casuale**, senza mai ripetersi di seguito.
@@ -150,7 +157,7 @@ Nessuna parola casuale: il motore verifica **prima** di proporre qualunque eserc
    **solo con sillabe studiate** e se per caso coincidono con una parola reale
    dell'archivio vengono classificate come reali (es. PUMA).
 
-Archivio incluso: oltre 200 parole italiane reali, classificate per lunghezza, difficoltà,
+Archivio incluso: oltre 250 parole italiane reali, classificate per lunghezza, difficoltà,
 struttura sillabica e disponibilità di immagine (`js/data/words.js`).
 
 ---

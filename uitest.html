@@ -19,7 +19,7 @@
 <script src="js/ui/match.js?v=8"></script>
 <script src="js/ui/speech.js?v=10"></script>
 <script src="js/ui/choice.js?v=8"></script>
-<script src="js/ui/ocr.js?v=12"></script>
+<script src="js/ui/ocr.js?v=14"></script>
 <script src="js/ui/custom.js?v=13"></script>
 <script src="js/ui/parent.js?v=8"></script>
 <script src="js/app.js?v=8"></script>
@@ -201,6 +201,11 @@
   check('OCR: scarta lettere singole, numeri e rumore',
     wft('A 3 12 ... MMMM K').length === 0);
   check('OCR: duplicati rimossi', wft('CASA casa CASA').join(',') === 'CASA');
+  check('OCR: corregge le confusioni tipiche (5OLE P0RTA 8ANCO → SOLE PORTA BANCO)',
+    wft('5OLE P0RTA 8ANCO').join(',') === 'SOLE,PORTA,BANCO');
+  check('OCR: la cifra 1 dentro una parola diventa I (SO1E → SOIE)',
+    wft('SO1E').join(',') === 'SOIE');
+  check('OCR: i numeri da soli restano fuori', wft('12 007 3').length === 0);
   check('OCR: parole oltre 12 lettere scartate', wft('PRECIPITEVOLEISSIMAMENTE').length === 0);
   check('OCR: lettura di più righe con parole ripetute a capo',
     wft('NONNA\nLUNA\nNONNA\nMARE').join(',') === 'NONNA,LUNA,MARE');

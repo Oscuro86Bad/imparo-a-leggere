@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Collaudo OCR</title>
+<link rel="stylesheet" href="css/style.css?v=9">
+</head>
+<body style="padding:12px">
+<h1>Collaudo lettura da foto (OCR)</h1>
+<pre id="summary">in corso…</pre>
+<canvas id="page" style="max-width:100%;border:1px solid #ccc"></canvas>
+<script src="js/ui/ocr.js?v=14"></script>
+<script>
+(async function () {
+  const out = [];
+  let pass = 0, fail = 0;
+  const check = (name, cond, extra) => {
+    if (cond) { pass++; out.push('✔ ' + name); }
+    else { fail++; out.push('✘ ' + name + (extra ? ' → ' + extra : '')); }
+  };
+  const show = (t) => { document.getElementById('summary').textContent = out.join('\n') + '\n' + t; };
+
+  const LINES = [
+    'MAMMA PAPA PANE LUNA',
+    'SOLE CASA GATTO CANE',
+    'NONNO NONNA BALENA VELA'
+  ];
+  const EXPECTED = LINES.join(' ').split(' ');
+
+  // Disegna una "foto" verosimile: foglio con ombra, leggera
+  // rotazione, testo stampato e un po' di rumore.
+  function makePhoto(scalePx, fontPx, lines, opts) {
+    const c = document.createElement('canvas');
+    c.width = Math.round(1400 * scalePx);
+    c.height = Math.round(1000 * scalePx);
+    const g = c.getContext('2d');
+    g.fillStyle = '#F7F4EC';
+    g.fillRect(0, 0, c.width, c.height);
+
+    // ombra diagonale
+    const grd = g.createLinearGradient(0, 0, c.width, 0);
+    grd.addColorStop(0, 'rgba(40,40,30,0.35)');
+    grd.addColorStop(0.35, 'rgba(0,0,0,0.06)');
+    grd.addColorStop(1, 'rgba(0,0,0,0.00)');
+    g.fillStyle = grd;
+    g.fillRect(0, 0, c.width, c.height);
+
+    // leggera rotazione
+    g.save();
+    g.translate(c.width / 2, c.height / 2);
+    g.rotate((opts.rotate || 0) * Math.PI / 180);
+    g.translate(-c.width / 2, -c.height / 2);
+
+    g.fillStyle = '#232323';
+    g.textBaseline = 'middle';
+    g.font = 'bold ' + Math.round(fontPx * scalePx) + 'px "Segoe UI", Arial, sans-serif';
+    const step = lines.length > 3 ? 0.2 : 0.26;
+    const top = 0.2;
+    lines.forEach(function (line, i) {
+      g.fillText(line, c.width * 0.07, c.height * (top + i * step));
+    });
+    g.restore();
+
+    // rumore fotografico
+    const frame = g.getImageData(0, 0, c.width, c.height);
+    const d = frame.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const n = (Math.random() - 0.5) * 22;
+      d[i] += n; d[i + 1] += n; d[i + 2] += n;
+    }
+    g.putImageData(frame, 0, 0);
+
+    document.getElementById('page').replaceWith(c);
+    c.id = 'page';
+    return c;
+  }
+
+  function toFile(canvas) {
+    return new Promise(function (resolve) {
+      canvas.toBlob(function (b) {
+        resolve(new File([b], 'foto.jpg', { type: 'image/jpeg' }));
+      }, 'image/jpeg', 0.62);
+    });
+  }
+
+  async function runCase(label, canvas, expected) {
+    show('Eseguo: ' + label + '…');
+    const t0 = Date.now();
+    const res = await IAL.OCR.recognize(await toFile(canvas), function (msg, pct) {
+      show('Eseguo: ' + label + '…\n' + msg + ' ' + Math.round(pct * 100) + '%');
+    });
+    const secs = ((Date.now() - t0) / 1000).toFixed(1);
+    const words = res.words || [];
+    const found = expected.filter(w => words.indexOf(w) !== -1);
+    const missing = expected.filter(w => words.indexOf(w) === -1);
+    const extras = words.filter(w => expected.indexOf(w) === -1);
+    out.push('');
+    out.push('— ' + label + ' (' + secs + ' s): ' + found.length + '/' + expected.length +
+      ' parole giuste, ' + extras.length + ' rumore');
+    if (missing.length) out.push('  mancate: ' + missing.join(' '));
+    if (extras.length) out.push('  rumore: ' + extras.join(' '));
+    check(label + ': legge almeno il 70% delle parole', found.length >= Math.ceil(expected.length * 0.7),
+      found.length + '/' + expected.length);
+    check(label + ': poco rumore (max 3 parole sbagliate)', extras.length <= 3, extras.join(' '));
+  }
+
+  try {
+    await runCase('Pagina stampata con ombra', makePhoto(1, 78, LINES, { rotate: 1.4 }), EXPECTED);
+    await runCase('Parole sparse, foto mossa', makePhoto(0.8, 90, [LINES[0], LINES[2]], { rotate: -2 }),
+      (LINES[0] + ' ' + LINES[2]).split(' '));
+    await runCase('Stampa piccola', makePhoto(1.2, 46, LINES.concat(['MOTO TOPO RISO NASO']), { rotate: 0.6 }),
+      EXPECTED.concat(['MOTO', 'TOPO', 'RISO', 'NASO']));
+  } catch (e) {
+    out.push('ERRORE: ' + (e && e.message));
+    fail++;
+  }
+
+  out.push('');
+  out.push(fail === 0 ? 'OCR TEST SUPERATI (' + pass + ')' : 'OCR TEST FALLITI: ' + fail + ' su ' + (pass + fail));
+  document.getElementById('summary').textContent = out.join('\n');
+})();
+</script>
+</body>
+</html>

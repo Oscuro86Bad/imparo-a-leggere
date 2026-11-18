@@ -261,7 +261,46 @@ IAL.WORDS = [
 
   // --- strutture speciali (richiedono flag dedicate nel pannello genitore) ---
   { w: 'BAGNO',    s: ['BA', 'GNO'],           img: '🛁',  diff: 2 },
-  { w: 'CONIGLIO', s: ['CO', 'NI', 'GLIO'],    img: '🐰',  diff: 2 }
+  { w: 'CONIGLIO', s: ['CO', 'NI', 'GLIO'],    img: '🐰',  diff: 2 },
+
+  // --- parole concrete del libro di scuola (Metodo "Orso curioso 1") ---
+  { w: 'ORSO',     s: ['OR', 'SO'],            img: '🐻',  diff: 1 },
+  { w: 'PARCO',    s: ['PAR', 'CO'],           img: '🏞️', diff: 1 },
+  { w: 'TERRA',    s: ['TER', 'RA'],           img: '🌍',  diff: 1 },
+  { w: 'CESTA',    s: ['CE', 'STA'],           img: '🧺',  diff: 1 },
+  { w: 'FUNE',     s: ['FU', 'NE'],            img: '🪢',  diff: 1 },
+  { w: 'POLPO',    s: ['POL', 'PO'],           img: '🐙',  diff: 1 },
+  { w: 'CASTELLO', s: ['CA', 'STEL', 'LO'],    img: '🏰',  diff: 1 },
+  { w: 'AMICA',    s: ['A', 'MI', 'CA'],       img: '👧',  diff: 1 },
+  { w: 'ACQUA',    s: ['AC', 'QUA'],           img: '💧',  diff: 2 },
+  { w: 'FARFALLA', s: ['FAR', 'FAL', 'LA'],    img: '🦋',  diff: 2 },
+  { w: 'FORMICA',  s: ['FOR', 'MI', 'CA'],     img: '🐜',  diff: 2 },
+  { w: 'DELFINO',  s: ['DEL', 'FI', 'NO'],     img: '🐬',  diff: 2 },
+  { w: 'BRUCO',    s: ['BRU', 'CO'],           img: '🐛',  diff: 2 },
+  { w: 'RICCIO',   s: ['RIC', 'CIO'],          img: '🦔',  diff: 2 },
+  { w: 'ISTRICE',  s: ['I', 'STRI', 'CE'],     img: '🦔',  diff: 2 },
+  { w: 'USIGNOLO', s: ['U', 'SI', 'GNO', 'LO'],img: '🐦',  diff: 2 },
+  { w: 'AQUILONE', s: ['A', 'QUI', 'LO', 'NE'],img: '🪁',  diff: 2 },
+  { w: 'GIOSTRA',  s: ['GIO', 'STRA'],         img: '🎠',  diff: 2 },
+  { w: 'SCATOLA',  s: ['SCA', 'TO', 'LA'],     img: '📦',  diff: 2 },
+  { w: 'BARATTOLO',s: ['BA', 'RAT', 'TO', 'LO'],img: '🫙', diff: 2 },
+  { w: 'QUERCIA',  s: ['QUER', 'CIA'],         img: '🌳',  diff: 2 },
+  { w: 'PIUMA',    s: ['PIU', 'MA'],           img: '🪶',  diff: 2 },
+  { w: 'FORBICI',  s: ['FOR', 'BI', 'CI'],     img: '✂️', diff: 2 },
+  { w: 'FAMIGLIA', s: ['FA', 'MI', 'GLIA'],    img: '👨‍👩‍👧‍👦', diff: 2 },
+  { w: 'VIAGGIO',  s: ['VIAG', 'GIO'],         img: '✈️', diff: 2 },
+  { w: 'CANZONE',  s: ['CAN', 'ZO', 'NE'],     img: '🎵',  diff: 2 },
+  { w: 'ZAINETTO', s: ['ZAI', 'NET', 'TO'],    img: '🎒',  diff: 2 },
+  { w: 'COMPAGNO', s: ['COM', 'PA', 'GNO'],    img: '👦',  diff: 2 },
+  { w: 'MEDUSA',   s: ['ME', 'DU', 'SA'],      img: '🪼',  diff: 2 },
+  { w: 'INVERNO',  s: ['IN', 'VER', 'NO'],     img: '❄️', diff: 2 },
+  { w: 'FUOCO',    s: ['FUO', 'CO'],           img: '🔥',  diff: 2 },
+  { w: 'FOGLIO',   s: ['FO', 'GLIO'],          img: '📄',  diff: 2 },
+  { w: 'CIELO',    s: ['CIE', 'LO'],           img: '🌤️', diff: 2 },
+  { w: 'UOVA',     s: ['UO', 'VA'],            img: '🥚',  diff: 2 },
+  { w: 'EDERA',    s: ['E', 'DE', 'RA'],       img: '🌿',  diff: 2 },
+  { w: 'SCIROPPO', s: ['SCI', 'ROP', 'PO'],    img: '🧃',  diff: 2 },
+  { w: 'XILOFONO', s: ['XI', 'LO', 'FO', 'NO'],img: '🎶',  diff: 2 }
 ];
 
 // Indice rapido per parola (maiuscole)
