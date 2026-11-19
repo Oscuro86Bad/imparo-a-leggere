@@ -9,18 +9,18 @@
 <script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
 <script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push((e.message || 'errore') + ' @ riga ' + e.lineno + ' | ' + ((e.error && e.error.stack) || '').replace(/\n/g, ' ¦ ')); });</script>
 <script src="js/config.js?v=8"></script>
-<script src="js/data/words.js?v=17"></script>
+<script src="js/data/words.js?v=18"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=8"></script>
 <script src="js/ui/components.js?v=13"></script>
-<script src="js/ui/home.js?v=9"></script>
-<script src="js/ui/reading.js?v=8"></script>
-<script src="js/ui/match.js?v=9"></script>
-<script src="js/ui/speech.js?v=10"></script>
-<script src="js/ui/choice.js?v=9"></script>
+<script src="js/ui/home.js?v=10"></script>
+<script src="js/ui/reading.js?v=9"></script>
+<script src="js/ui/match.js?v=10"></script>
+<script src="js/ui/speech.js?v=11"></script>
+<script src="js/ui/choice.js?v=10"></script>
 <script src="js/ui/ocr.js?v=14"></script>
-<script src="js/ui/custom.js?v=13"></script>
+<script src="js/ui/custom.js?v=14"></script>
 <script src="js/ui/parent.js?v=8"></script>
 <script src="js/app.js?v=8"></script>
 <script>
@@ -47,6 +47,13 @@
   const bgSet = new Set(menuBtns.map(b => getComputedStyle(b).backgroundColor));
   const cNames = menuBtns.map(b => (b.className.match(/btn-(\w+)/) || [])[1]).join(',');
   check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 6 && bgSet.size === 6);
+
+  // Home: nomi aggiornati e niente punteggio in alto
+  check('Home: la sezione si chiama PAROLE PERSONALIZZATE',
+    body().indexOf('PAROLE PERSONALIZZATE') !== -1 && body().indexOf('PAROLE MIE') === -1);
+  const homeChips = Array.from(document.querySelectorAll('.topbar .chip')).map(c => c.textContent);
+  check('Home: nessun punteggio stelline in alto [' + homeChips.join(' | ') + ']',
+    homeChips.length === 1 && !homeChips.some(t => t.indexOf('⭐') !== -1));
 
   // Configura lettere: vocali + P + M + N, sillabe studiate
   IAL.Store.updateActive(pr => {
@@ -146,6 +153,9 @@
     IAL.WORDS_BY_KEY.LAGO.img === 'img/lago.svg' &&
     IAL.WORDS_BY_KEY.MERENDA.img === 'img/merenda.svg' &&
     IAL.WORDS_BY_KEY.PIRATA.img === 'img/pirata.svg');
+  check('Immagini: TAVOLO (tavolo, non sedia) e TUTA (tuta, non maglietta)',
+    IAL.WORDS_BY_KEY.TAVOLO.img === 'img/tavolo.svg' &&
+    IAL.WORDS_BY_KEY.TUTA.img === 'img/tuta.svg');
   check('Immagini: il disegno diventa un <img> con la classe pic',
     (function () {
       const box = IAL.UI.el('div', {}, [IAL.UI.pic('img/mimo.svg')]);

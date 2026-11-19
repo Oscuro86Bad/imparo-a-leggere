@@ -99,7 +99,7 @@ IAL.WORDS = [
 
   // --- T ---
   { w: 'TOPO',     s: ['TO', 'PO'],            img: '🐭',  diff: 1 },
-  { w: 'TAVOLO',   s: ['TA', 'VO', 'LO'],      img: '🪑',  diff: 2 },
+  { w: 'TAVOLO',   s: ['TA', 'VO', 'LO'],      img: 'img/tavolo.svg', diff: 2 },
   { w: 'TELE',     s: ['TE', 'LE'],            img: '📺',  diff: 1 },
   { w: 'TAZZA',    s: ['TA', 'ZZA'],           img: '☕',  diff: 1 },
   { w: 'TRENO',    s: ['TRE', 'NO'],           img: '🚂',  diff: 2 },
@@ -109,7 +109,7 @@ IAL.WORDS = [
   { w: 'TIGRE',    s: ['TIG', 'RE'],           img: '🐯',  diff: 2 },
   { w: 'TINTA',    s: ['TIN', 'TA'],           img: '🎨',  diff: 2 },
   { w: 'TELA',     s: ['TE', 'LA'],            img: '🧵',  diff: 1 },
-  { w: 'TUTA',     s: ['TU', 'TA'],            img: '👕',  diff: 1 },
+  { w: 'TUTA',     s: ['TU', 'TA'],            img: 'img/tuta.svg', diff: 1 },
   { w: 'TEATRO',   s: ['TE', 'A', 'TRO'],      img: '🎭',  diff: 2 },
   { w: 'TELEFONO', s: ['TE', 'LE', 'FO', 'NO'],img: '📞',  diff: 1 },
   { w: 'TANGO',    s: ['TAN', 'GO'],           img: '💃',  diff: 2 },

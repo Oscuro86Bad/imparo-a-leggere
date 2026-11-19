@@ -1,5 +1,5 @@
 /* ============================================================
-   IMPARO A LEGGERE — MODO E: PAROLE MIE
+   IMPARO A LEGGERE - MODO E: PAROLE PERSONALIZZATE
    Parole scelte dal genitore (nomi della famiglia, oggetti della
    casa, parole del quaderno…) che girano in ordine casuale.
    - Aggiunta e rimozione libera, salvataggio automatico sul
@@ -28,8 +28,7 @@ IAL.Custom = (function () {
   function render() {
     const p = IAL.Store.active();
     const topbar = el('div', { class: 'topbar' }, [
-      el('button', { class: 'chip', onclick: function () { IAL.Home.show(); }, 'aria-label': 'Torna al menu' }, ['🏠 Menu']),
-      el('span', { class: 'chip' }, ['⭐ ', String(p.stats.stars)])
+      el('button', { class: 'chip', onclick: function () { IAL.Home.show(); }, 'aria-label': 'Torna al menu' }, ['🏠 Menu'])
     ]);
 
     const card = el('div', { class: 'exercise-card' }, [
@@ -45,7 +44,7 @@ IAL.Custom = (function () {
 
     IAL.UI.renderScreen([
       topbar,
-      el('h1', { class: 'app-title' }, ['PAROLE MIE']),
+      el('h1', { class: 'app-title' }, ['PAROLE PERSONALIZZATE']),
       card,
       el('p', { class: 'progress-note', id: 'cm-note' }, ['']),
       el('button', { class: 'btn btn-soft btn-block', style: 'margin-top:10px', onclick: manage }, ['📝 GESTISCI LE PAROLE']),
@@ -286,7 +285,7 @@ IAL.Custom = (function () {
     if (!n) { IAL.UI.toast('L’elenco è già vuoto 😊'); return; }
     IAL.UI.confirmModal(
       'Cancellare tutte le parole?',
-      'Verranno rimosse tutte le ' + n + ' parole di «Parole mie». Le stelline e i progressi restano.',
+      'Verranno rimosse tutte le ' + n + ' parole di «Parole personalizzate». Le stelline e i progressi restano.',
       function () {
         IAL.Store.updateActive(function (pr) { pr.customWords = []; });
         IAL.UI.toast('Elenco svuotato 🗑️');
@@ -359,7 +358,7 @@ IAL.Custom = (function () {
       el('div', { class: 'topbar' }, [
         el('button', { class: 'chip', onclick: function () { IAL.Home.show(); } }, ['🏠 Menu'])
       ]),
-      el('h1', { class: 'app-title' }, ['LE MIE PAROLE']),
+      el('h1', { class: 'app-title' }, ['PAROLE PERSONALIZZATE']),
       el('div', { class: 'panel' }, [
         el('h2', {}, ['Parole da leggere']),
         el('p', { class: 'hint' }, [

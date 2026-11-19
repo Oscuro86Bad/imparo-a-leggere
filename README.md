@@ -98,7 +98,7 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    e pronunciata, poi **passaggio automatico** alla parola successiva.
 5. Risposta sbagliata → opzione **ROSSA** disabilitata; si riprova sulle altre.
 
-### PAROLE MIE
+### PAROLE PERSONALIZZATE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,
    parole del quaderno…): restano salvate sul dispositivo.
 2. **📸 Scatta foto / 🖼️ Galleria**: il genitore fotografa una pagina (quaderno, libro,
@@ -176,7 +176,7 @@ IMPARO A LEGGERE/
 │   ├── data/associations.js# associazioni sillaba→parola→immagine
 │   ├── state/store.js      # profili, impostazioni, progressi (localStorage)
 │   ├── engine/generator.js # motore di generazione con controlli didattici
-│   ├── ui/*.js             # schermate: home, lettura, leggi e guarda, area genitori, parole mie
+│   ├── ui/*.js             # schermate: home, lettura, leggi e guarda, area genitori, parole personalizzate
 │   ├── ui/ocr.js           # lettura parole da FOTO (Tesseract.js, tutto in locale)
 │   └── app.js              # avvio
 ├── icons/                  # icone (generate con scripts/make-icon.ps1)

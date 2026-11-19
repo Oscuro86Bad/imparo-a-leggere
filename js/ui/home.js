@@ -16,8 +16,7 @@ IAL.Home = (function () {
     const topbar = el('div', { class: 'topbar' }, [
       el('button', { class: 'chip', onclick: switchProfileModal, 'aria-label': 'Cambia profilo' }, [
         el('span', { class: 'avatar' }, [p.avatar]), p.name, ' ▾'
-      ]),
-      el('span', { class: 'chip' }, ['⭐ ', String(p.stats.stars)])
+      ])
     ]);
 
     const menu = el('div', { class: 'menu' }, [
@@ -39,7 +38,7 @@ IAL.Home = (function () {
       ]),
       el('button', { class: 'btn btn-purple btn-block', onclick: function () { IAL.Custom.show(); } }, [
         el('span', { class: 'emoji' }, ['📝']),
-        el('span', { class: 'txt' }, ['PAROLE MIE', el('span', { class: 'small' }, ['Le parole scelte da te, in ordine casuale'])])
+        el('span', { class: 'txt' }, ['PAROLE PERSONALIZZATE', el('span', { class: 'small' }, ['Le parole scelte da te, in ordine casuale'])])
       ]),
       el('button', { class: 'btn btn-slate btn-block', onclick: function () { IAL.Parent.show(); } }, [
         el('span', { class: 'emoji' }, ['🔒']),

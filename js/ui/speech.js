@@ -51,8 +51,7 @@ IAL.Speech = (function () {
   function render() {
     const p = IAL.Store.active();
     const topbar = el('div', { class: 'topbar' }, [
-      el('button', { class: 'chip', onclick: function () { hide(); IAL.Home.show(); }, 'aria-label': 'Torna al menu' }, ['🏠 Menu']),
-      el('span', { class: 'chip' }, ['⭐ ', String(p.stats.stars)])
+      el('button', { class: 'chip', onclick: function () { hide(); IAL.Home.show(); }, 'aria-label': 'Torna al menu' }, ['🏠 Menu'])
     ]);
 
     const card = el('div', { class: 'exercise-card' }, [
