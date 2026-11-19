@@ -81,7 +81,7 @@ IAL.Choice = (function () {
     answered = false;
     imgEl.innerHTML = '';
     imgEl.appendChild(IAL.UI.pic(ex.img));
-    setMsg('Dove inizia la parola? 🔍', '');
+    setMsg('Con cosa inizia? 🔍', '');
     if (revealEl) revealEl.innerHTML = '';
     if (optsEl) {
       optsEl.innerHTML = '';

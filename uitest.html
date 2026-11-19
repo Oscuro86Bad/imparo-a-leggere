@@ -18,7 +18,7 @@
 <script src="js/ui/reading.js?v=9"></script>
 <script src="js/ui/match.js?v=10"></script>
 <script src="js/ui/speech.js?v=11"></script>
-<script src="js/ui/choice.js?v=10"></script>
+<script src="js/ui/choice.js?v=11"></script>
 <script src="js/ui/ocr.js?v=14"></script>
 <script src="js/ui/custom.js?v=14"></script>
 <script src="js/ui/parent.js?v=8"></script>
@@ -147,6 +147,8 @@
   const vcImgEl = document.getElementById('vc-img');
   check('Schermata "Vedi e scegli" con immagine',
     !!vcImgEl && (vcImgEl.textContent.length >= 1 || !!vcImgEl.querySelector('img')));
+  check('Vedi e scegli: la domanda è "Con cosa inizia?"',
+    (document.getElementById('vc-msg') || {}).textContent === 'Con cosa inizia? 🔍');
   check('Immagini: MAGIA e MIMO usano i disegni (non emoji confuse)',
     IAL.WORDS_BY_KEY.MAGIA.img === 'img/magia.svg' && IAL.WORDS_BY_KEY.MIMO.img === 'img/mimo.svg');
   check('Immagini: LAGO, MERENDA e PIRATA usano disegni dedicati',
