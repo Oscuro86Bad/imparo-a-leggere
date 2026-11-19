@@ -9,7 +9,7 @@
 <script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
 <script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push((e.message || 'errore') + ' @ riga ' + e.lineno + ' | ' + ((e.error && e.error.stack) || '').replace(/\n/g, ' ¦ ')); });</script>
 <script src="js/config.js?v=8"></script>
-<script src="js/data/words.js?v=9"></script>
+<script src="js/data/words.js?v=17"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=8"></script>
@@ -142,6 +142,10 @@
     !!vcImgEl && (vcImgEl.textContent.length >= 1 || !!vcImgEl.querySelector('img')));
   check('Immagini: MAGIA e MIMO usano i disegni (non emoji confuse)',
     IAL.WORDS_BY_KEY.MAGIA.img === 'img/magia.svg' && IAL.WORDS_BY_KEY.MIMO.img === 'img/mimo.svg');
+  check('Immagini: LAGO, MERENDA e PIRATA usano disegni dedicati',
+    IAL.WORDS_BY_KEY.LAGO.img === 'img/lago.svg' &&
+    IAL.WORDS_BY_KEY.MERENDA.img === 'img/merenda.svg' &&
+    IAL.WORDS_BY_KEY.PIRATA.img === 'img/pirata.svg');
   check('Immagini: il disegno diventa un <img> con la classe pic',
     (function () {
       const box = IAL.UI.el('div', {}, [IAL.UI.pic('img/mimo.svg')]);

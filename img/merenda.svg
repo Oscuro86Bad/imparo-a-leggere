@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Merenda confezionata">
+  <defs>
+    <linearGradient id="sponge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7d59b"/>
+      <stop offset="1" stop-color="#e0ab5f"/>
+    </linearGradient>
+    <linearGradient id="choco" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a4a2a"/>
+      <stop offset="1" stop-color="#4e2a15"/>
+    </linearGradient>
+    <linearGradient id="film" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="0.5" stop-color="#dff2ff" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.75"/>
+    </linearGradient>
+    <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff8fab"/>
+      <stop offset="1" stop-color="#ef5f83"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ombra -->
+  <ellipse cx="100" cy="170" rx="76" ry="9" fill="#000" opacity="0.09"/>
+
+  <!-- involucro: estremità increspate -->
+  <path d="M32 88 L8 76 L20 98 L8 116 L22 128 L12 142 L32 154 Z"
+        fill="#ffe3ec" stroke="#ffb9cd" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M168 88 L192 76 L180 98 L192 116 L178 128 L188 142 L168 154 Z"
+        fill="#ffe3ec" stroke="#ffb9cd" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M20 98 L30 104 M20 116 L30 112 M22 128 L30 124" stroke="#ffc9d9" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M180 98 L170 104 M180 116 L170 112 M178 128 L170 124" stroke="#ffc9d9" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- pellicola trasparente -->
+  <rect x="26" y="74" width="148" height="86" rx="18" fill="url(#film)" stroke="#ffffff" stroke-width="3"/>
+
+  <!-- merendina: spugna con copertura al cioccolato -->
+  <rect x="48" y="86" width="104" height="62" rx="12" fill="url(#sponge)"/>
+  <path d="M48 98 q 0 -12 12 -12 h 80 q 12 0 12 12 v 6 h -104 z" fill="url(#choco)"/>
+  <path d="M56 99 h 88" stroke="#3c1f0f" stroke-width="2" opacity="0.5"/>
+
+  <!-- puntini della spugna -->
+  <g fill="#c98a3f" opacity="0.5">
+    <circle cx="64" cy="118" r="2.2"/>
+    <circle cx="80" cy="132" r="2"/>
+    <circle cx="96" cy="114" r="2.1"/>
+    <circle cx="112" cy="134" r="2"/>
+    <circle cx="128" cy="116" r="2.2"/>
+    <circle cx="140" cy="132" r="1.9"/>
+    <circle cx="74" cy="140" r="1.8"/>
+    <circle cx="122" cy="142" r="1.8"/>
+  </g>
+
+  <!-- banda colorata con stella -->
+  <rect x="62" y="104" width="76" height="26" rx="11" fill="url(#band)"/>
+  <g transform="translate(100 117) scale(0.62)">
+    <polygon points="0,-16 3.82,-5.26 15.22,-4.94 6.18,2.01 9.40,12.94 0,6.5 -9.40,12.94 -6.18,2.01 -15.22,-4.94 -3.82,-5.26"
+             fill="#ffffff"/>
+  </g>
+
+  <!-- riflessi sulla pellicola -->
+  <path d="M40 92 q 6 -10 22 -12" stroke="#ffffff" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.9"/>
+  <path d="M158 146 q -8 6 -20 7" stroke="#ffffff" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.8"/>
+  <path d="M52 150 h 22" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+</svg>

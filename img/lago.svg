@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Lago">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bfe4fb"/>
+      <stop offset="1" stop-color="#eef9ff"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6cc4ee"/>
+      <stop offset="1" stop-color="#1f6fa8"/>
+    </linearGradient>
+    <linearGradient id="mtnA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a8c2d2"/>
+      <stop offset="1" stop-color="#6f8b9c"/>
+    </linearGradient>
+    <linearGradient id="mtnB" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c3d6e0"/>
+      <stop offset="1" stop-color="#8aa6b6"/>
+    </linearGradient>
+    <clipPath id="frame">
+      <rect x="8" y="16" width="184" height="166" rx="18"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <!-- cielo -->
+    <rect x="8" y="16" width="184" height="166" fill="url(#sky)"/>
+    <circle cx="154" cy="58" r="15" fill="#ffd54f"/>
+    <circle cx="154" cy="58" r="21" fill="#ffe08a" opacity="0.35"/>
+
+    <!-- montagne -->
+    <path d="M4 132 L60 58 L114 132 Z" fill="url(#mtnA)"/>
+    <path d="M78 132 L126 70 L176 132 Z" fill="url(#mtnB)"/>
+    <!-- neve in cima -->
+    <path d="M60 58 L72 78 L66 82 L58 74 L50 82 L46 78 Z" fill="#ffffff" opacity="0.95"/>
+    <path d="M126 70 L137 88 L130 90 L124 82 L118 90 L113 86 Z" fill="#ffffff" opacity="0.95"/>
+
+    <!-- acqua -->
+    <rect x="8" y="124" width="184" height="58" fill="url(#water)"/>
+    <path d="M8 126 Q 34 118 60 126 T 112 126 T 164 126 T 192 124 L 192 134 L 8 134 Z"
+          fill="#8dd6f5" opacity="0.6"/>
+
+    <!-- riflesso delle montagne -->
+    <path d="M30 132 L58 178 L92 132 Z" fill="#2f83b8" opacity="0.35"/>
+    <path d="M104 132 L132 172 L160 132 Z" fill="#2f83b8" opacity="0.28"/>
+
+    <!-- onde -->
+    <g stroke="#d8f2ff" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9">
+      <path d="M26 148 q 9 -5 18 0"/>
+      <path d="M52 158 q 9 -5 18 0"/>
+      <path d="M120 150 q 9 -5 18 0"/>
+      <path d="M150 162 q 9 -5 18 0"/>
+      <path d="M30 170 q 9 -5 18 0"/>
+    </g>
+
+    <!-- alberi sulla riva -->
+    <g>
+      <rect x="22" y="112" width="5" height="14" rx="2" fill="#8b5e33"/>
+      <path d="M24 86 L36 114 L12 114 Z" fill="#3f8f5a"/>
+      <path d="M24 96 L34 116 L14 116 Z" fill="#4fa96a"/>
+      <rect x="42" y="116" width="4" height="10" rx="2" fill="#8b5e33"/>
+      <path d="M44 96 L54 120 L34 120 Z" fill="#3f8f5a"/>
+    </g>
+
+    <!-- pontile di legno -->
+    <rect x="104" y="128" width="68" height="8" rx="3" fill="#b07b45"/>
+    <rect x="104" y="126" width="68" height="3" rx="1.5" fill="#c78f55"/>
+    <rect x="112" y="134" width="6" height="14" rx="2" fill="#8b5e33"/>
+    <rect x="128" y="134" width="6" height="14" rx="2" fill="#8b5e33"/>
+    <rect x="144" y="134" width="6" height="14" rx="2" fill="#8b5e33"/>
+    <rect x="160" y="134" width="6" height="14" rx="2" fill="#8b5e33"/>
+
+    <!-- barchetta -->
+    <g>
+      <path d="M40 152 q 16 12 34 0 z" fill="#e2574c"/>
+      <path d="M41 152 q 16 7 32 0" stroke="#b03a31" stroke-width="2" fill="none"/>
+      <rect x="56" y="138" width="3" height="14" fill="#8b5e33"/>
+      <path d="M59 139 L72 150 L59 150 Z" fill="#ffffff"/>
+    </g>
+  </g>
+
+  <rect x="8" y="16" width="184" height="166" rx="18" fill="none" stroke="#cfe6f5" stroke-width="3"/>
+</svg>
