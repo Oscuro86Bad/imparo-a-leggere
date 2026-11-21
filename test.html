@@ -14,10 +14,10 @@
 <h1>🧪 Collaudo automatico del motore</h1>
 <pre id="out">In corso…</pre>
 <script src="js/config.js?v=8"></script>
-<script src="js/data/words.js?v=18"></script>
+<script src="js/data/words.js?v=19"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=8"></script>
+<script src="js/engine/generator.js?v=9"></script>
 <script>
 (function () {
   const out = [];
@@ -326,6 +326,52 @@
   p.customWords = [];
   IAL.Store.save();
   check('PAROLE MIE: lista vuota → nessun esercizio', E.nextCustom(p) === null);
+
+  // 16. Vocali + L/P/M/T: molte più parole reali (incluse TATA, TUTU, TETTO…)
+  const pT = IAL.Store.createProfile('TestT', '🐯');
+  pT.letters = { vowels: ['A','E','I','O','U'], consonants: ['L','P','M','T'] };
+  pT.syllables = {};
+  ['L','P','M','T'].forEach(function (c) { pT.syllables[c] = IAL.cvSyllables(c).slice(); });
+  pT.flags = { doppie: true, gruppi: false, sc: false, gn: false, gli: false };
+  pT.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:6 };
+  pT.customWords = [];
+  IAL.Store.setActive(pT.id);
+  IAL.Store.save();
+  const tPool = E.realWords(pT, null, true).map(function (e) { return e.w; });
+  const wanted = ['TUTA','TATA','TUTU','TETTO','TATTO','TUTTO','TAPPO','LETTO','LOTO','LUME','MUTA','MOLO','MOTO','MULO','POMATA','TELA','TELE'];
+  const missing = wanted.filter(function (w) { return tPool.indexOf(w) === -1; });
+  check('Vocali + L/P/M/T: ' + tPool.length + ' parole reali disponibili (mancanti: ' + (missing.join(',') || 'nessuna') + ')',
+    missing.length === 0 && tPool.length >= 40);
+
+  // Con le sole vocali + T le parole reali non sono più solo TUTA
+  const pTonly = IAL.Store.createProfile('TestT2', '🐯');
+  pTonly.letters = { vowels: ['A','E','I','O','U'], consonants: ['T'] };
+  pTonly.syllables = { T: IAL.cvSyllables('T').slice() };
+  pTonly.flags = { doppie: true, gruppi: false, sc: false, gn: false, gli: false };
+  pTonly.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:6 };
+  const tOnly = E.realWords(pTonly, null, true).map(function (e) { return e.w; });
+  check('Vocali + T: più parole reali oltre TUTA [' + tOnly.join(',') + ']', tOnly.length >= 5);
+
+  // Parole inventate curate: TATU (suggerita) e combinazioni simili
+  check('Inventate curate presenti (TATU, TATO, MIMI, LOLO…)',
+    (IAL.INVENTED_WORDS || []).length >= 20 &&
+    IAL.INVENTED_WORDS.some(function (e) { return e.w === 'TATU'; }) &&
+    !IAL.WORDS_BY_KEY['TATU']);
+  const pInv = IAL.Store.createProfile('TestInv', '🦊');
+  pInv.letters = { vowels: ['A','E','I','O','U'], consonants: ['T','L','P','M'] };
+  pInv.syllables = {};
+  ['T','L','P','M'].forEach(function (c) { pInv.syllables[c] = IAL.cvSyllables(c).slice(); });
+  pInv.flags = { doppie: false, gruppi: false, sc: false, gn: false, gli: false };
+  pInv.settings = { wordType:'invented', lengths:[4], categories:{letters:false,syllables:false,words:true}, level:6 };
+  let seenTatu = false, invBadLetter = false;
+  for (let i = 0; i < 300; i++) {
+    const ex = E.makeInvented(pInv, 4, []);
+    if (!ex || !ex.invented) continue;
+    if (ex.text === 'TATU') seenTatu = true;
+    if (![...ex.text].every(function (c) { return ['A','E','I','O','U','T','L','P','M'].indexOf(c) !== -1; })) invBadLetter = true;
+  }
+  check('Inventate curate generate davvero (TATU esce)', seenTatu);
+  check('Inventate: solo lettere attive (vocali + L/P/M/T)', !invBadLetter);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));

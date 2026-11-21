@@ -31,10 +31,56 @@ IAL.UI = (function () {
 
   // ---------- Schermata ----------
   function renderScreen(nodes, opts) {
+    stopSpeech(); // nessuna voce deve continuare sopra la schermata nuova
     const app = document.getElementById('app');
     app.innerHTML = '';
     window.scrollTo(0, 0);
     (Array.isArray(nodes) ? nodes : [nodes]).forEach(function (n) { app.appendChild(n); });
+  }
+
+  // ---------- Voce (sintesi vocale) ----------
+  function stopSpeech() {
+    if (!('speechSynthesis' in window)) return;
+    try { window.speechSynthesis.cancel(); } catch (e) { /* nessuna voce attiva */ }
+  }
+
+  // Voce italiana preferita (se il dispositivo ne ha una)
+  function italianVoice() {
+    try {
+      const list = window.speechSynthesis.getVoices() || [];
+      for (let i = 0; i < list.length; i++) {
+        if (/^it([-_]|$)/i.test(list[i].lang || '')) return list[i];
+      }
+    } catch (e) { /* elenco voci non disponibile */ }
+    return null;
+  }
+
+  // Pronuncia un testo e chiama done() quando ha finito (o al massimo dopo
+  // 4 secondi, per non bloccare mai l'esercizio se il motore voce non
+  // risponde). Usata dopo ogni risposta corretta.
+  function say(text, done) {
+    let finished = false;
+    const finish = function () {
+      if (finished) return;
+      finished = true;
+      if (done) done();
+    };
+    if (!('speechSynthesis' in window) || !text) { finish(); return; }
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(String(text));
+      u.lang = 'it-IT';
+      u.rate = 0.85;
+      u.pitch = 1.05;
+      const v = italianVoice();
+      if (v) u.voice = v;
+      u.onend = finish;
+      u.onerror = finish;
+      window.speechSynthesis.speak(u);
+      setTimeout(finish, 4000);
+    } catch (e) {
+      finish();
+    }
   }
 
   // ---------- Overlay / modale ----------
@@ -113,6 +159,6 @@ IAL.UI = (function () {
     el: el, renderScreen: renderScreen,
     modal: modal, alertModal: alertModal, confirmModal: confirmModal, closeModal: closeModal,
     toast: toast, starBurst: starBurst, praise: praise, retryMsg: retryMsg,
-    rand: rand, pic: pic
+    rand: rand, pic: pic, say: say, stopSpeech: stopSpeech
   };
 })();

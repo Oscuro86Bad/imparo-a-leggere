@@ -9,18 +9,18 @@
 <script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
 <script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push((e.message || 'errore') + ' @ riga ' + e.lineno + ' | ' + ((e.error && e.error.stack) || '').replace(/\n/g, ' ¦ ')); });</script>
 <script src="js/config.js?v=8"></script>
-<script src="js/data/words.js?v=18"></script>
+<script src="js/data/words.js?v=19"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=8"></script>
-<script src="js/ui/components.js?v=13"></script>
+<script src="js/engine/generator.js?v=9"></script>
+<script src="js/ui/components.js?v=14"></script>
 <script src="js/ui/home.js?v=10"></script>
-<script src="js/ui/reading.js?v=9"></script>
-<script src="js/ui/match.js?v=10"></script>
-<script src="js/ui/speech.js?v=11"></script>
-<script src="js/ui/choice.js?v=11"></script>
+<script src="js/ui/reading.js?v=10"></script>
+<script src="js/ui/match.js?v=11"></script>
+<script src="js/ui/speech.js?v=12"></script>
+<script src="js/ui/choice.js?v=12"></script>
 <script src="js/ui/ocr.js?v=14"></script>
-<script src="js/ui/custom.js?v=14"></script>
+<script src="js/ui/custom.js?v=15"></script>
 <script src="js/ui/parent.js?v=8"></script>
 <script src="js/app.js?v=8"></script>
 <script>
@@ -71,8 +71,15 @@
   check('30 esercizi: solo lettere abilitate (P,M,N + vocali) -> "' + leakTxt + '"', !leak);
 
   const stars0 = IAL.Store.active().stats.stars;
+  const readWord0 = document.getElementById('ex-word').textContent;
+  const origSpeakRead = window.speechSynthesis && window.speechSynthesis.speak;
+  const spokenRead = [];
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { spokenRead.push(u && u.text); };
   btnWith('CORRETTO').click(); await wait(50);
   check('CORRETTO → +1 stella', IAL.Store.active().stats.stars === stars0 + 1);
+  check('CORRETTO → pronuncia la parola corretta (' + readWord0 + ')',
+    !window.speechSynthesis || (spokenRead.length >= 1 && spokenRead[0] === readWord0));
+  if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakRead;
   btnWith('RITENTA').click(); await wait(20);
   check('RITENTA registrato (da ripetere)', IAL.Store.active().stats.retried >= 1);
   check('RIPETI presente', !!btnWith('RIPETI'));
@@ -83,6 +90,15 @@
   IAL.Match.show(); // riapre pulita
   await wait(50);
   check('Schermata associa con esercizio', document.getElementById('mx-word').textContent.length >= 1);
+  const mxWord0 = document.getElementById('mx-word').textContent;
+  const origSpeakMx = window.speechSynthesis && window.speechSynthesis.speak;
+  const spokenMx = [];
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { spokenMx.push(u && u.text); };
+  btnWith('CORRETTO').click(); await wait(50);
+  check('LEGGI E GUARDA → CORRETTO pronuncia la parola (' + mxWord0 + ')',
+    !window.speechSynthesis || (spokenMx.length >= 1 && spokenMx[0] === mxWord0));
+  if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakMx;
+  btnWith('AVANTI').click(); await wait(30);
   let assocOK = true, allValid = true;
   for (let i = 0; i < 30; i++) {
     try {
@@ -158,6 +174,17 @@
   check('Immagini: TAVOLO (tavolo, non sedia) e TUTA (tuta, non maglietta)',
     IAL.WORDS_BY_KEY.TAVOLO.img === 'img/tavolo.svg' &&
     IAL.WORDS_BY_KEY.TUTA.img === 'img/tuta.svg');
+  check('Nuove parole vocali + T / L-P-M-T presenti (TATA, TUTU, TETTO, LETTO…)',
+    ['TATA','TUTU','TETTO','TATTO','TUTTO','TAPPO','LETTO','LOTO','LUME','MUTA','MOLO','MOTORE','POMATA']
+      .every(function (w) { return !!IAL.WORDS_BY_KEY[w]; }));
+  check('Nuove parole reali con immagine per LEGGI E GUARDA e DICO LA PAROLA',
+    ['TATA','TUTU','TETTO','TATTO','TAPPO','LETTO','LOTO','LUME','MUTA','MOLO','MOTORE','POMATA']
+      .every(function (w) { return !!IAL.WORDS_BY_KEY[w].img; }));
+  check('Immagini: TETTO ha il disegno dedicato', IAL.WORDS_BY_KEY.TETTO.img === 'img/tetto.svg');
+  check('Parole inventate curate: TATU (e altre) pronte, mai parole reali',
+    (IAL.INVENTED_WORDS || []).length >= 20 &&
+    IAL.INVENTED_WORDS.some(function (e) { return e.w === 'TATU'; }) &&
+    !IAL.WORDS_BY_KEY['TATU']);
   check('Immagini: il disegno diventa un <img> con la classe pic',
     (function () {
       const box = IAL.UI.el('div', {}, [IAL.UI.pic('img/mimo.svg')]);
@@ -201,8 +228,14 @@
   const cmWord = document.getElementById('cm-word').textContent;
   check('Parole mie: esercizio con le parole inserite', cmWord === 'NONNA' || cmWord === 'LUNA');
   const starsCm = IAL.Store.active().stats.stars;
+  const origSpeakCm = window.speechSynthesis && window.speechSynthesis.speak;
+  const spokenCm = [];
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { spokenCm.push(u && u.text); };
   btnWith('CORRETTO').click(); await wait(50);
   check('Parole mie: CORRETTO → +1 stella', IAL.Store.active().stats.stars === starsCm + 1);
+  check('Parole mie: CORRETTO pronuncia la parola (' + cmWord + ')',
+    !window.speechSynthesis || (spokenCm.length >= 1 && spokenCm[0] === cmWord));
+  if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakCm;
   btnWith('GESTISCI LE PAROLE').click(); await wait(50);
   document.querySelector('button[aria-label="Rimuovi NONNA"]').click(); await wait(50);
   check('Parole mie: parola rimossa dalla lista', IAL.Store.active().customWords.length === 1);

@@ -106,10 +106,40 @@ IAL.Engine = (function () {
   }
 
   // ---------- Parole inventate ----------
+  // Alcune combinazioni sono scritte a mano (IAL.INVENTED_WORDS): sono
+  // più carine e varie dei puri accostamenti casuali (TATU, MIMI, LOLO…).
+  // Restano comunque filtrate: si usano solo se TUTTE le loro sillabe sono
+  // state studiate e tutte le loro lettere sono abilitate.
+  function curatedInvented(p, targetLen, exclude, letters) {
+    const pool = (IAL.INVENTED_WORDS || []).filter(function (entry) {
+      if (entry.w.length !== targetLen) return false;
+      if (IAL.WORDS_BY_KEY[entry.w]) return false;           // è una parola reale
+      if (exclude && exclude.indexOf(entry.w) !== -1) return false;
+      return entry.s.every(function (s) { return canShowSyllable(p, s, letters); });
+    });
+    if (!pool.length) return null;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function inventedExercise(text) {
+    return {
+      kind: 'word', text: text, invented: true,
+      img: null, img2: null, typeLabel: 'Parola inventata'
+    };
+  }
+
   // Costruite SOLO con sillabe effettivamente studiate: sono quindi
   // foneticamente corrette e mai fuori dal percorso didattico.
   function makeInvented(p, targetLen, exclude) {
     const letters = enabledLetters(p);
+
+    // 1. spesso una combinazione curata (più leggibile e divertente)
+    if (Math.random() < 0.7) {
+      const curated = curatedInvented(p, targetLen, exclude, letters);
+      if (curated) return inventedExercise(curated.w);
+    }
+
+    // 2. altrimenti generazione sillabica casuale
     const syls = studiedSyllables(p).filter(function (s) {
       return s.length <= 3 && canShowSyllable(p, s, letters);
     });
@@ -128,10 +158,7 @@ IAL.Engine = (function () {
       // Se la sequenza coincide con una parola reale, si classifica come REALE
       if (IAL.WORDS_BY_KEY[text]) return realExercise(IAL.WORDS_BY_KEY[text]);
       if (exclude && exclude.indexOf(text) !== -1) continue;
-      return {
-        kind: 'word', text: text, invented: true,
-        img: null, img2: null, typeLabel: 'Parola inventata'
-      };
+      return inventedExercise(text);
     }
     return null;
   }

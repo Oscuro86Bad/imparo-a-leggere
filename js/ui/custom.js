@@ -53,6 +53,7 @@ IAL.Custom = (function () {
   }
 
   function next() {
+    IAL.UI.stopSpeech();
     const p = IAL.Store.active();
     const ex = IAL.Engine.nextCustom(p);
 
@@ -87,7 +88,16 @@ IAL.Custom = (function () {
     const msgEl = document.getElementById('cm-msg');
     if (msgEl) { msgEl.textContent = IAL.UI.praise(); msgEl.className = 'feedback-msg'; }
     updateNote();
-    setTimeout(next, 900);
+
+    // Pronuncia la parola corretta, poi passa alla successiva
+    const ex = current;
+    IAL.UI.say(ex.text, function () {
+      setTimeout(function () {
+        if (current !== ex) return;
+        if (!document.getElementById('cm-word')) return;
+        next();
+      }, 350);
+    });
   }
 
   function retry() {

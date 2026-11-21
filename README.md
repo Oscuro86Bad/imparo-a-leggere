@@ -54,6 +54,10 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 - Pulsanti: **NUOVO**, **RIPETI**, **CORRETTO**, **RITENTA**, **TORNA AL MENU**.
 - Stelle e messaggi incoraggianti, senza obiettivi né premi: l'app serve solo come ripasso.
 - Anti-ripetizione: gli ultimi 15 esercizi non vengono riproposti subito.
+- Dopo **CORRETTO** l'app **pronuncia la parola** e poi passa alla successiva:
+  il bambino collega ciò che ha letto al suono giusto.
+- Le **parole inventate** includono anche combinazioni curate a mano
+  (TATU, TATO, MIMI, LOLO…), sempre leggibili con le sillabe già studiate.
 
 ### LEGGI E GUARDA
 1. Compare **una parola completa reale** → il bambino legge ad alta voce.
@@ -62,6 +66,7 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 4. Solo parole che la bambina può leggere con le **lettere e le sillabe conosciute**.
 5. Sezione **svincolata dalla lunghezza** selezionata nell'Area Genitori; mai la
    stessa parola due volte di seguito.
+6. Dopo **CORRETTO** la parola viene **pronunciata** insieme al disegno.
 
 ### DICO LA PAROLA
 1. Compare **una parola completa reale** (mai sillabe) → il bambino la legge
@@ -93,10 +98,10 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    (prime due lettere), es. **PA / PE / MA / PU** per ⚽ PALLA.
 3. Le opzioni sono **solo sillabe studiate e attive** nell'Area Genitori.
 4. La parola deve iniziare con una sillaba conosciuta: il resto può contenere
-   lettere ancora da studiare → archivio molto ricco (oltre 250 parole, quasi tutte con immagine).
-4. Risposta giusta → opzione **VERDE**, stellina, **parola completa rivelata**
+   lettere ancora da studiare → archivio molto ricco (oltre 270 parole, quasi tutte con immagine).
+5. Risposta giusta → opzione **VERDE**, stellina, **parola completa rivelata**
    e pronunciata, poi **passaggio automatico** alla parola successiva.
-5. Risposta sbagliata → opzione **ROSSA** disabilitata; si riprova sulle altre.
+6. Risposta sbagliata → opzione **ROSSA** disabilitata; si riprova sulle altre.
 
 ### PAROLE PERSONALIZZATE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,
@@ -122,7 +127,8 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 3. **🗑️ Cancella tutte le parole**: svuota l'elenco (con conferma) per ripartire da zero;
    stelline e progressi restano.
 4. Le parole girano **in ordine casuale**, senza mai ripetersi di seguito.
-5. Pulsanti **CORRETTO** (+stellina), **RITENTA** e **NUOVO**.
+5. Pulsanti **CORRETTO** (+stellina, con **pronuncia della parola** e passaggio
+   automatico), **RITENTA** e **NUOVO**.
 6. Si possono aggiungere o togliere parole a piacere da 📝 GESTISCI LE PAROLE.
 7. Sezione svincolata da lettere attive e livelli: la parola è scelta
    apposta da un adulto.
@@ -157,7 +163,7 @@ Nessuna parola casuale: il motore verifica **prima** di proporre qualunque eserc
    **solo con sillabe studiate** e se per caso coincidono con una parola reale
    dell'archivio vengono classificate come reali (es. PUMA).
 
-Archivio incluso: oltre 250 parole italiane reali, classificate per lunghezza, difficoltà,
+Archivio incluso: oltre 270 parole italiane reali, classificate per lunghezza, difficoltà,
 struttura sillabica e disponibilità di immagine (`js/data/words.js`).
 
 ---

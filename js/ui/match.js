@@ -44,6 +44,7 @@ IAL.Match = (function () {
   }
 
   function next() {
+    IAL.UI.stopSpeech();
     const p = IAL.Store.active();
     // LEGGI E GUARDA: SEMPRE parole reali complete con immagine, svincolate
     // da lunghezze e categorie dell'Area Genitori.
@@ -103,6 +104,9 @@ IAL.Match = (function () {
     box.appendChild(el('div', { class: 'lbl' }, [current.assocWord]));
     if (revealEl) revealEl.innerHTML = '';
     if (revealEl) revealEl.appendChild(box);
+
+    // Pronuncia la parola mentre il bambino guarda il disegno
+    IAL.UI.say(current.text);
 
     // Sostituisce i pulsanti con AVANTI
     const actions = document.getElementById('mx-actions');

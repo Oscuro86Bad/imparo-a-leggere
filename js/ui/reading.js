@@ -62,6 +62,7 @@ IAL.Reading = (function () {
   }
 
   function next() {
+    IAL.UI.stopSpeech();
     const p = IAL.Store.active();
     const ex = IAL.Engine.nextReading(p, {
       categories: p.settings.categories,
@@ -124,7 +125,17 @@ IAL.Reading = (function () {
       msgEl.className = 'feedback-msg';
     }
     updateNote();
-    setTimeout(next, 900);
+
+    // Pronuncia la parola corretta, poi passa alla successiva: così il
+    // bambino collega ciò che ha letto al suono della parola.
+    const ex = current;
+    IAL.UI.say(ex.text, function () {
+      setTimeout(function () {
+        if (current !== ex) return;                 // nel frattempo è cambiato esercizio
+        if (!document.getElementById('ex-word')) return; // schermata lasciata
+        next();
+      }, 350);
+    });
   }
 
   function retry() {

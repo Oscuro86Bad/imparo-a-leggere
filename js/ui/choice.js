@@ -27,7 +27,7 @@ IAL.Choice = (function () {
 
   function hide() {
     sessionOn = false;
-    if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel(); } catch (e) { /* ignora */ } }
+    IAL.UI.stopSpeech();
   }
 
   function render() {
@@ -54,6 +54,7 @@ IAL.Choice = (function () {
   }
 
   function next() {
+    IAL.UI.stopSpeech();
     const p = IAL.Store.active();
     const ex = IAL.Engine.nextChoice(p, { lengths: p.settings.lengths });
 
@@ -114,8 +115,12 @@ IAL.Choice = (function () {
         box.appendChild(el('div', { class: 'lbl' }, [current.word]));
         revealEl.appendChild(box);
       }
-      speakWord(current.word);
-      if (sessionOn) setTimeout(function () { if (sessionOn) next(); }, 1800);
+      // Pronuncia la parola completa, poi passa alla successiva
+      const word = current.word;
+      IAL.UI.say(word, function () {
+        if (!sessionOn || !answered) return;
+        setTimeout(function () { if (sessionOn && answered) next(); }, 600);
+      });
     } else {
       IAL.Store.record(p, current, false);
       btn.classList.add('ko');
@@ -140,17 +145,7 @@ IAL.Choice = (function () {
   }
 
   // ---------- Pronuncia della parola (sintesi vocale) ----------
-  function speakWord(text) {
-    if (!('speechSynthesis' in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'it-IT';
-      u.rate = 0.8;
-      u.pitch = 1.05;
-      window.speechSynthesis.speak(u);
-    } catch (e) { /* la voce è un extra: mai bloccare l'esercizio */ }
-  }
+  // (gestita da IAL.UI.say, condivisa con le altre sezioni)
 
   return { show: show, hide: hide, currentForTest: function () { return current; } };
 })();

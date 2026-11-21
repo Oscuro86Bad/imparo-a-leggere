@@ -46,6 +46,11 @@ IAL.WORDS = [
   { w: 'PATATINE', s: ['PA', 'TA', 'TI', 'NE'],img: '🍟',  diff: 1 },
   { w: 'PELUCHE',  s: ['PE', 'LU', 'CHE'],     img: '🧸',  diff: 1 },
   { w: 'PISCINA',  s: ['PI', 'SCI', 'NA'],     img: '🏊',  diff: 2 },
+  { w: 'POMATA',   s: ['PO', 'MA', 'TA'],      img: '🧴',  diff: 1 },
+  { w: 'PEPE',     s: ['PE', 'PE'],            img: null,  diff: 1 },
+  { w: 'POLO',     s: ['PO', 'LO'],            img: null,  diff: 1 },
+  { w: 'PALO',     s: ['PA', 'LO'],            img: null,  diff: 1 },
+  { w: 'PELO',     s: ['PE', 'LO'],            img: null,  diff: 1 },
 
   // --- M ---
   { w: 'MANO',     s: ['MA', 'NO'],            img: '✋',  diff: 1 },
@@ -76,6 +81,11 @@ IAL.WORDS = [
   { w: 'MOSCA',    s: ['MO', 'SCA'],           img: '🪰',  diff: 2 },
   { w: 'MURO',     s: ['MU', 'RO'],            img: '🧱',  diff: 1 },
   { w: 'MUSEO',    s: ['MU', 'SE', 'O'],       img: '🏛️', diff: 2 },
+  { w: 'MUTA',     s: ['MU', 'TA'],            img: '🤿',  diff: 2 },
+  { w: 'MOLO',     s: ['MO', 'LO'],            img: '⚓',  diff: 1 },
+  { w: 'MUTO',     s: ['MU', 'TO'],            img: '🤐',  diff: 2 },
+  { w: 'MOTORE',   s: ['MO', 'TO', 'RE'],      img: '⚙️', diff: 2 },
+  { w: 'METTO',    s: ['ME', 'TTO'],           img: null,  diff: 2 },
 
   // --- L ---
   { w: 'LANA',     s: ['LA', 'NA'],            img: '🧶',  diff: 1 },
@@ -96,6 +106,11 @@ IAL.WORDS = [
   { w: 'LEGUME',   s: ['LE', 'GU', 'ME'],      img: '🫘',  diff: 2 },
   { w: 'LOMBRICO', s: ['LO', 'MBRI', 'CO'],    img: '🪱',  diff: 2 },
   { w: 'LUCERTOLA',s: ['LU', 'CE', 'RTO', 'LA'],img: '🦎', diff: 2 },
+  { w: 'LOTO',     s: ['LO', 'TO'],            img: '🪷',  diff: 1 },
+  { w: 'LUME',     s: ['LU', 'ME'],            img: '🪔',  diff: 1 },
+  { w: 'LETTO',    s: ['LE', 'TTO'],           img: '🛏️', diff: 1 },
+  { w: 'LATO',     s: ['LA', 'TO'],            img: null,  diff: 1 },
+  { w: 'LIMA',     s: ['LI', 'MA'],            img: null,  diff: 2 },
 
   // --- T ---
   { w: 'TOPO',     s: ['TO', 'PO'],            img: '🐭',  diff: 1 },
@@ -110,6 +125,16 @@ IAL.WORDS = [
   { w: 'TINTA',    s: ['TIN', 'TA'],           img: '🎨',  diff: 2 },
   { w: 'TELA',     s: ['TE', 'LA'],            img: '🧵',  diff: 1 },
   { w: 'TUTA',     s: ['TU', 'TA'],            img: 'img/tuta.svg', diff: 1 },
+  { w: 'TATA',     s: ['TA', 'TA'],            img: '🧑‍🍼', diff: 1 },
+  { w: 'TUTU',     s: ['TU', 'TU'],            img: '🩰',  diff: 1 },
+  { w: 'TETTO',    s: ['TE', 'TTO'],           img: 'img/tetto.svg', diff: 2 },
+  { w: 'TATTO',    s: ['TA', 'TTO'],           img: '🖐️',  diff: 2 },
+  { w: 'TUTTO',    s: ['TU', 'TTO'],           img: null,  diff: 2 },
+  { w: 'TAPPO',    s: ['TA', 'PPO'],           img: '🍾',  diff: 1 },
+  { w: 'TEMA',     s: ['TE', 'MA'],            img: null,  diff: 2 },
+  { w: 'TOMO',     s: ['TO', 'MO'],            img: null,  diff: 2 },
+  { w: 'TUTELA',   s: ['TU', 'TE', 'LA'],      img: null,  diff: 2 },
+  { w: 'TUTORE',   s: ['TU', 'TO', 'RE'],      img: null,  diff: 2 },
   { w: 'TEATRO',   s: ['TE', 'A', 'TRO'],      img: '🎭',  diff: 2 },
   { w: 'TELEFONO', s: ['TE', 'LE', 'FO', 'NO'],img: '📞',  diff: 1 },
   { w: 'TANGO',    s: ['TAN', 'GO'],           img: '💃',  diff: 2 },
@@ -308,3 +333,38 @@ IAL.WORDS_BY_KEY = {};
 IAL.WORDS.forEach(function (entry) {
   IAL.WORDS_BY_KEY[entry.w.toUpperCase()] = entry;
 });
+
+// Parole inventate "curate": combinazioni buffe ma leggibili con le sillabe
+// CV di L, M, P, T + vocali. Servono a dare varietà in SOLO LETTURA senza
+// uscire dal percorso didattico (nessuna lettera o struttura non studiata:
+// il motore le filtra una per una prima di proporle). Non hanno immagine
+// e non entrano mai in LEGGI E GUARDA, DICO LA PAROLA o VEDI E SCEGLI.
+IAL.INVENTED_WORDS = [
+  { w: 'TATU', s: ['TA', 'TU'] },
+  { w: 'TATO', s: ['TA', 'TO'] },
+  { w: 'TETI', s: ['TE', 'TI'] },
+  { w: 'TETO', s: ['TE', 'TO'] },
+  { w: 'TOTO', s: ['TO', 'TO'] },
+  { w: 'TITI', s: ['TI', 'TI'] },
+  { w: 'TAMA', s: ['TA', 'MA'] },
+  { w: 'TAMI', s: ['TA', 'MI'] },
+  { w: 'TUME', s: ['TU', 'ME'] },
+  { w: 'TAMU', s: ['TA', 'MU'] },
+  { w: 'MIMI', s: ['MI', 'MI'] },
+  { w: 'MOMO', s: ['MO', 'MO'] },
+  { w: 'MAMU', s: ['MA', 'MU'] },
+  { w: 'MATU', s: ['MA', 'TU'] },
+  { w: 'MUTU', s: ['MU', 'TU'] },
+  { w: 'MOLU', s: ['MO', 'LU'] },
+  { w: 'PATA', s: ['PA', 'TA'] },
+  { w: 'PATU', s: ['PA', 'TU'] },
+  { w: 'PULU', s: ['PU', 'LU'] },
+  { w: 'PAMU', s: ['PA', 'MU'] },
+  { w: 'LALA', s: ['LA', 'LA'] },
+  { w: 'LALO', s: ['LA', 'LO'] },
+  { w: 'LELA', s: ['LE', 'LA'] },
+  { w: 'LOLO', s: ['LO', 'LO'] },
+  { w: 'LULU', s: ['LU', 'LU'] },
+  { w: 'LUTU', s: ['LU', 'TU'] },
+  { w: 'TULU', s: ['TU', 'LU'] }
+];

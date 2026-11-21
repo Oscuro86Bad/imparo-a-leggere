@@ -78,6 +78,7 @@ IAL.Speech = (function () {
   }
 
   function next() {
+    IAL.UI.stopSpeech();
     const p = IAL.Store.active();
     // DICO LA PAROLA: SEMPRE parole reali complete (mai sillabe).
     // Sezione svincolata da lunghezze e categorie: conta solo ciò
@@ -328,7 +329,7 @@ IAL.Speech = (function () {
     setStatus('Perfetto! 🎉', 'off');
 
     hearAgain(function () {
-      if (sessionOn) setTimeout(next, 500); // passa automaticamente alla successiva
+      if (sessionOn) setTimeout(function () { if (sessionOn) next(); }, 500); // passa alla successiva
     });
     updateNote();
   }
@@ -400,28 +401,10 @@ IAL.Speech = (function () {
   }
 
   // ---------- Sintesi vocale ----------
+  // Pronuncia la parola corretta usando la voce condivisa dell'app.
   function hearAgain(done) {
     if (!current) { if (done) done(); return; }
-    const text = current.text;
-    if (!('speechSynthesis' in window)) { if (done) done(); return; }
-    try {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'it-IT';
-      u.rate = 0.8;
-      u.pitch = 1.05;
-      if (done) {
-        let called = false;
-        const once = function () { if (!called) { called = true; done(); } };
-        u.onend = once;
-        u.onerror = once;
-        // Rete di sicurezza: se onend non scatta mai, procede comunque
-        setTimeout(once, 4000);
-      }
-      window.speechSynthesis.speak(u);
-    } catch (e) {
-      if (done) done();
-    }
+    IAL.UI.say(current.text, done);
   }
 
   // Per i collaudi automatici (senza microfono)
