@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=19"></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=20"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -14,7 +14,7 @@
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=11"></script>
 <script src="js/ui/components.js?v=15"></script>
-<script src="js/ui/home.js?v=13"></script>
+<script src="js/ui/home.js?v=14"></script>
 <script src="js/ui/reading.js?v=12"></script>
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
@@ -57,6 +57,13 @@
   const iComplete = homeOrder.indexOf('COMPLETA LA PAROLA');
   check('Home: ordine [' + homeOrder.join(' → ') + ']',
     iCustom !== -1 && iListen !== -1 && iComplete !== -1 && iCustom < iListen && iListen < iComplete);
+
+  // Home: fumetto "NEW" solo sulle due sezioni appena aggiunte
+  const tagged = Array.from(document.querySelectorAll('.menu .btn')).filter(b => b.querySelector('.new-tag'));
+  const taggedNames = tagged.map(b => (b.querySelector('.txt').firstChild.textContent || '').trim());
+  check('Home: fumetto NEW solo sulle sezioni nuove [' + taggedNames.join(', ') + ']',
+    tagged.length === 2 && taggedNames.indexOf('ASCOLTA E SELEZIONA') !== -1 &&
+    taggedNames.indexOf('COMPLETA LA PAROLA') !== -1);
 
   // Home: tutte le sezioni della stessa altezza (niente sezioni "giganti")
   const appEl = document.querySelector('.app');

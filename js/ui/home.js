@@ -26,31 +26,33 @@ IAL.Home = (function () {
       ]),
       el('button', { class: 'btn btn-green btn-block', onclick: function () { IAL.Match.show(); } }, [
         el('span', { class: 'emoji' }, ['🖼️']),
-        el('span', { class: 'txt' }, ['LEGGI E GUARDA', el('span', { class: 'small' }, ['Leggi la parola e guarda l’immagine'])])
+        el('span', { class: 'txt' }, ['LEGGI E GUARDA', el('span', { class: 'small' }, ['Leggi la parola e l’immagine'])])
       ]),
       el('button', { class: 'btn btn-orange btn-block', onclick: function () { IAL.Speech.show(); } }, [
         el('span', { class: 'emoji' }, ['🎤']),
-        el('span', { class: 'txt' }, ['DICO LA PAROLA', el('span', { class: 'small' }, ['Pronuncia la parola: l’app ti ascolta'])])
+        el('span', { class: 'txt' }, ['DICO LA PAROLA', el('span', { class: 'small' }, ['Pronuncia: l’app ti ascolta'])])
       ]),
       el('button', { class: 'btn btn-teal btn-block', onclick: function () { IAL.Choice.show(); } }, [
         el('span', { class: 'emoji' }, ['🔍']),
-        el('span', { class: 'txt' }, ['VEDI E SCEGLI', el('span', { class: 'small' }, ['Indovina l’inizio della parola'])])
+        el('span', { class: 'txt' }, ['VEDI E SCEGLI', el('span', { class: 'small' }, ['Indovina l’inizio'])])
       ]),
       el('button', { class: 'btn btn-purple btn-block', onclick: function () { IAL.Custom.show(); } }, [
         el('span', { class: 'emoji' }, ['📝']),
-        el('span', { class: 'txt' }, ['PAROLE PERSONALIZZATE', el('span', { class: 'small' }, ['Le parole scelte da te, in ordine casuale'])])
+        el('span', { class: 'txt' }, ['PAROLE PERSONALIZZATE', el('span', { class: 'small' }, ['Le tue parole, a caso'])])
       ]),
       el('button', { class: 'btn btn-pink btn-block', onclick: function () { IAL.Listen.show(); } }, [
         el('span', { class: 'emoji' }, ['🎧']),
-        el('span', { class: 'txt' }, ['ASCOLTA E SELEZIONA', el('span', { class: 'small' }, ['Ascolta la parola e scegli quella giusta'])])
+        el('span', { class: 'txt' }, ['ASCOLTA E SELEZIONA', el('span', { class: 'small' }, ['Ascolta e scegli la parola'])]),
+        el('span', { class: 'new-tag' }, ['NEW'])
       ]),
       el('button', { class: 'btn btn-brown btn-block', onclick: function () { IAL.Complete.show(); } }, [
         el('span', { class: 'emoji' }, ['✍️']),
-        el('span', { class: 'txt' }, ['COMPLETA LA PAROLA', el('span', { class: 'small' }, ['Scrivi con il dito le lettere che mancano'])])
+        el('span', { class: 'txt' }, ['COMPLETA LA PAROLA', el('span', { class: 'small' }, ['Scrivi le lettere mancanti'])]),
+        el('span', { class: 'new-tag' }, ['NEW'])
       ]),
       el('button', { class: 'btn btn-slate btn-block', onclick: function () { IAL.Parent.show(); } }, [
         el('span', { class: 'emoji' }, ['🔒']),
-        el('span', { class: 'txt' }, ['AREA GENITORI', el('span', { class: 'small' }, ['Lettere, combinazioni, progressi'])])
+        el('span', { class: 'txt' }, ['AREA GENITORI', el('span', { class: 'small' }, ['Lettere, livelli, progressi'])])
       ])
     ]);
 

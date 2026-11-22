@@ -156,19 +156,49 @@ body {
 }
 
 /* ---------- Menu principale ---------- */
-.menu { display: flex; flex-direction: column; gap: 16px; margin-top: 6px; }
-/* tutte le sezioni hanno la stessa altezza: il testo occupa lo spazio libero
-   e va a capo solo all'interno della sua colonna (mai schiacciato) */
+.menu { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; }
+/* Sezioni compatte: stessa altezza per tutte, testo su una riga */
 .menu .btn {
+  position: relative;
   justify-content: flex-start;
   text-align: left;
-  padding-left: 28px;
+  padding: 8px 14px;
+  gap: 10px;
   flex-wrap: nowrap;
-  min-height: 104px;
+  min-height: 70px;
+  font-size: clamp(17px, 4.6vw, 26px);
 }
+.menu .btn .emoji { font-size: 1.25em; }
 .menu .btn .txt { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
-.menu .btn .txt > span:first-child { line-height: 1.12; }
-.menu .btn .small { font-size: 0.62em; font-weight: normal; opacity: 0.92; }
+.menu .btn .txt > span:first-child { line-height: 1.1; }
+.menu .btn .small { font-size: 0.6em; font-weight: normal; opacity: 0.92; }
+
+/* Fumetto "NEW" per le sezioni appena aggiunte (non allunga il pulsante) */
+.new-tag {
+  position: absolute;
+  right: 12px;
+  bottom: 5px;
+  background: #FFF3B0;
+  color: #B36A00;
+  border: 2px solid #FFD24D;
+  border-radius: 999px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.6px;
+  line-height: 1.35;
+  transform: rotate(-6deg);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+}
+.new-tag::after {
+  content: '';
+  position: absolute;
+  left: 9px;
+  bottom: -5px;
+  border: 5px solid transparent;
+  border-top-color: #FFD24D;
+  border-bottom: 0;
+}
 .line-title { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 /* Nuvoletta "NEW-BETA" */
