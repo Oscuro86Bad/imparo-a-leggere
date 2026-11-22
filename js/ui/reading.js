@@ -24,6 +24,9 @@ IAL.Reading = (function () {
     const card = el('div', { class: 'exercise-card' }, [
       el('div', { class: 'exercise-type', id: 'ex-type' }, ['…']),
       el('div', { class: 'big-word', id: 'ex-word' }, ['—']),
+      el('div', { class: 'word-tools' }, [
+        el('button', { class: 'chip', onclick: speakCurrent, 'aria-label': 'Ascolta la parola' }, ['🔊 SENTI'])
+      ]),
       el('div', { class: 'feedback-msg', id: 'ex-msg' }, ['']),
       el('div', { class: 'actions' }, [
         el('button', { class: 'btn btn-primary', onclick: next }, ['🔄', 'NUOVO']),
@@ -112,6 +115,11 @@ IAL.Reading = (function () {
       wordEl.style.animation = 'pop 0.4s ease';
       setTimeout(function () { wordEl.style.animation = ''; }, 450);
     }
+  }
+
+  function speakCurrent() {
+    if (!current) return;
+    IAL.UI.say(current.text);
   }
 
   function markCorrect() {

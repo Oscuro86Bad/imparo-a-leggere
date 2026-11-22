@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=13"></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=14"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -13,15 +13,15 @@
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=9"></script>
-<script src="js/ui/components.js?v=14"></script>
+<script src="js/ui/components.js?v=15"></script>
 <script src="js/ui/home.js?v=10"></script>
-<script src="js/ui/reading.js?v=10"></script>
-<script src="js/ui/match.js?v=11"></script>
+<script src="js/ui/reading.js?v=11"></script>
+<script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
 <script src="js/ui/choice.js?v=12"></script>
 <script src="js/ui/ocr.js?v=14"></script>
-<script src="js/ui/custom.js?v=15"></script>
-<script src="js/ui/parent.js?v=8"></script>
+<script src="js/ui/custom.js?v=16"></script>
+<script src="js/ui/parent.js?v=9"></script>
 <script src="js/app.js?v=8"></script>
 <script>
 (async function () {
@@ -74,8 +74,8 @@
   const readWord0 = document.getElementById('ex-word').textContent;
   const origSpeakRead = window.speechSynthesis && window.speechSynthesis.speak;
   const spokenRead = [];
-  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { spokenRead.push(u && u.text); };
-  btnWith('CORRETTO').click(); await wait(50);
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenRead.push(t); };
+  btnWith('CORRETTO').click(); await wait(400);
   check('CORRETTO → +1 stella', IAL.Store.active().stats.stars === stars0 + 1);
   check('CORRETTO → pronuncia la parola corretta (' + readWord0 + ')',
     !window.speechSynthesis || (spokenRead.length >= 1 && spokenRead[0] === readWord0));
@@ -83,6 +83,7 @@
   btnWith('RITENTA').click(); await wait(20);
   check('RITENTA registrato (da ripetere)', IAL.Store.active().stats.retried >= 1);
   check('RIPETI presente', !!btnWith('RIPETI'));
+  check('Pulsante 🔊 SENTI presente in SOLO LETTURA', !!btnWith('SENTI'));
 
   // --- LEGGI E GUARDA ---
   IAL.Match.show();
@@ -93,10 +94,11 @@
   const mxWord0 = document.getElementById('mx-word').textContent;
   const origSpeakMx = window.speechSynthesis && window.speechSynthesis.speak;
   const spokenMx = [];
-  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { spokenMx.push(u && u.text); };
-  btnWith('CORRETTO').click(); await wait(50);
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenMx.push(t); };
+  btnWith('CORRETTO').click(); await wait(400);
   check('LEGGI E GUARDA → CORRETTO pronuncia la parola (' + mxWord0 + ')',
     !window.speechSynthesis || (spokenMx.length >= 1 && spokenMx[0] === mxWord0));
+  check('Pulsante 🔊 SENTI presente in LEGGI E GUARDA', !!btnWith('SENTI'));
   if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakMx;
   btnWith('AVANTI').click(); await wait(30);
   let assocOK = true, allValid = true;
@@ -230,11 +232,12 @@
   const starsCm = IAL.Store.active().stats.stars;
   const origSpeakCm = window.speechSynthesis && window.speechSynthesis.speak;
   const spokenCm = [];
-  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { spokenCm.push(u && u.text); };
-  btnWith('CORRETTO').click(); await wait(50);
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenCm.push(t); };
+  btnWith('CORRETTO').click(); await wait(400);
   check('Parole mie: CORRETTO → +1 stella', IAL.Store.active().stats.stars === starsCm + 1);
   check('Parole mie: CORRETTO pronuncia la parola (' + cmWord + ')',
     !window.speechSynthesis || (spokenCm.length >= 1 && spokenCm[0] === cmWord));
+  check('Pulsante 🔊 SENTI presente in PAROLE PERSONALIZZATE', !!btnWith('SENTI'));
   if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakCm;
   btnWith('GESTISCI LE PAROLE').click(); await wait(50);
   document.querySelector('button[aria-label="Rimuovi NONNA"]').click(); await wait(50);
@@ -317,6 +320,7 @@
   btnWith('Esercizi').click(); await wait(30);
   check('Scheda esercizi + livelli', body().indexOf('Livello di progressione') !== -1);
   check('Scheda esercizi: niente contatori «sono disponibili»', body().indexOf('sono disponibili') === -1);
+  check('Area genitori: pulsante «Prova la voce» con istruzioni', !!btnWith('Prova la voce') && body().indexOf('interruttore laterale') !== -1);
   btnWith('Progressi').click(); await wait(30);
   check('Scheda progressi', body().indexOf('Progressi di Sofia') !== -1);
   btnWith('Sicurezza').click(); await wait(30);

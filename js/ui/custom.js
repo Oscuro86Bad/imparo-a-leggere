@@ -34,6 +34,9 @@ IAL.Custom = (function () {
     const card = el('div', { class: 'exercise-card' }, [
       el('div', { class: 'exercise-type', id: 'cm-type' }, ['…']),
       el('div', { class: 'big-word', id: 'cm-word' }, ['—']),
+      el('div', { class: 'word-tools' }, [
+        el('button', { class: 'chip', onclick: speakCurrent, 'aria-label': 'Ascolta la parola' }, ['🔊 SENTI'])
+      ]),
       el('div', { class: 'feedback-msg', id: 'cm-msg' }, ['']),
       el('div', { class: 'actions', id: 'cm-actions' }, [
         el('button', { class: 'btn btn-green', onclick: markCorrect }, ['✅', 'CORRETTO']),
@@ -78,6 +81,11 @@ IAL.Custom = (function () {
     wordEl.className = 'big-word';
     if (msgEl) { msgEl.textContent = ''; msgEl.className = 'feedback-msg'; }
     updateNote();
+  }
+
+  function speakCurrent() {
+    if (!current) return;
+    IAL.UI.say(current.text);
   }
 
   function markCorrect() {

@@ -133,6 +133,20 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 7. Sezione svincolata da lettere attive e livelli: la parola è scelta
    apposta da un adulto.
 
+### 🔊 VOCE E PRONUNCIA
+- Dopo ogni risposta corretta l'app **pronuncia la parola** e poi passa alla
+  successiva (in LEGGI E GUARDA la pronuncia accompagna il disegno).
+- Ogni sezione con le parole ha anche il pulsante **🔊 SENTI** per riascoltare.
+- La voce italiana viene scelta automaticamente; se non è installata l'app
+  ripiega sulla voce predefinita del dispositivo.
+- Se non si sente nulla: alzare il volume dei **contenuti multimediali**,
+  togliere il **silenzioso** (su iPhone è l'interruttore laterale) e verificare
+  una voce italiana in *Accessibilità → Sintesi vocale*.
+- Nell'**Area Genitori → Esercizi** c'è **🔊 Prova la voce**: dice una frase di
+  prova e mostra quale voce è in uso. Nelle app aggiunte alla schermata Home
+  di iPhone/iPad la sintesi vocale può essere limitata dal sistema: in quel
+  caso usare Safari (o il pulsante 🔊 SENTI, che parte da un tocco diretto).
+
 ### AREA GENITORI (protetta da PIN opzionale a 4 cifre)
 - **Profili**: profili multipli indipendenti, modifica, eliminazione.
 - **Lettere**: alfabeto italiano completo, vocali e consonanti distinte, attivazione

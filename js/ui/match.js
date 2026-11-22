@@ -26,6 +26,9 @@ IAL.Match = (function () {
     const card = el('div', { class: 'exercise-card' }, [
       el('div', { class: 'exercise-type', id: 'mx-type' }, ['…']),
       el('div', { class: 'big-word', id: 'mx-word' }, ['—']),
+      el('div', { class: 'word-tools' }, [
+        el('button', { class: 'chip', onclick: speakCurrent, 'aria-label': 'Ascolta la parola' }, ['🔊 SENTI'])
+      ]),
       el('div', { class: 'feedback-msg', id: 'mx-msg' }, ['']),
       el('div', { id: 'mx-reveal' }),
       el('div', { class: 'actions', id: 'mx-actions' }, [
@@ -85,6 +88,11 @@ IAL.Match = (function () {
       actions.appendChild(el('button', { class: 'btn btn-danger', onclick: retry }, ['💪', 'RITENTA']));
     }
     updateNote();
+  }
+
+  function speakCurrent() {
+    if (!current) return;
+    IAL.UI.say(current.text);
   }
 
   function correct() {
