@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=18"></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=19"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -14,7 +14,7 @@
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=11"></script>
 <script src="js/ui/components.js?v=15"></script>
-<script src="js/ui/home.js?v=12"></script>
+<script src="js/ui/home.js?v=13"></script>
 <script src="js/ui/reading.js?v=12"></script>
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
@@ -50,14 +50,31 @@
   const cNames = menuBtns.map(b => (b.className.match(/btn-(\w+)/) || [])[1]).join(',');
   check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 8 && bgSet.size === 8);
 
+  // Home: PAROLE PERSONALIZZATE viene prima delle due sezioni nuove
+  const homeOrder = Array.from(document.querySelectorAll('.menu .btn .txt')).map(t => (t.firstChild.textContent || '').trim());
+  const iCustom = homeOrder.indexOf('PAROLE PERSONALIZZATE');
+  const iListen = homeOrder.indexOf('ASCOLTA E SELEZIONA');
+  const iComplete = homeOrder.indexOf('COMPLETA LA PAROLA');
+  check('Home: ordine [' + homeOrder.join(' → ') + ']',
+    iCustom !== -1 && iListen !== -1 && iComplete !== -1 && iCustom < iListen && iListen < iComplete);
+
+  // Home: tutte le sezioni della stessa altezza (niente sezioni "giganti")
+  const appEl = document.querySelector('.app');
+  const prevMax = appEl.style.maxWidth;
+  appEl.style.maxWidth = '720px';
+  await wait(40);
+  const homeHeights = Array.from(document.querySelectorAll('.menu .btn')).map(b => b.getBoundingClientRect().height);
+  appEl.style.maxWidth = prevMax;
+  check('Home: sezioni tutte della stessa altezza [' + homeHeights.map(h => Math.round(h)).join(',') + ']',
+    Math.max.apply(null, homeHeights) - Math.min.apply(null, homeHeights) <= 2);
+
   // Home: nomi aggiornati e niente punteggio in alto
   check('Home: la sezione si chiama PAROLE PERSONALIZZATE',
     body().indexOf('PAROLE PERSONALIZZATE') !== -1 && body().indexOf('PAROLE MIE') === -1);
-  check('Home: nuova sezione ASCOLTA E SELEZIONA con nuvoletta (NEW-BETA)',
-    body().indexOf('ASCOLTA E SELEZIONA') !== -1 && body().indexOf('(NEW-BETA)') !== -1);
-  check('Home: nuova sezione COMPLETA LA PAROLA con nuvoletta (NEW-BETA)',
-    body().indexOf('COMPLETA LA PAROLA') !== -1 &&
-    btnWith('COMPLETA LA PAROLA').textContent.indexOf('(NEW-BETA)') !== -1);
+  check('Home: nuova sezione ASCOLTA E SELEZIONA',
+    body().indexOf('ASCOLTA E SELEZIONA') !== -1);
+  check('Home: nuova sezione COMPLETA LA PAROLA',
+    body().indexOf('COMPLETA LA PAROLA') !== -1);
   const homeChips = Array.from(document.querySelectorAll('.topbar .chip')).map(c => c.textContent);
   check('Home: nessun punteggio stelline in alto [' + homeChips.join(' | ') + ']',
     homeChips.length === 1 && !homeChips.some(t => t.indexOf('⭐') !== -1));
