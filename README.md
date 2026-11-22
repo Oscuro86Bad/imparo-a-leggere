@@ -25,8 +25,8 @@ inventate, associazione parola-immagine.
 4. Ogni consonante attivata in **Lettere** porta con sé **automaticamente** le sue
    sillabe (PA, PE, PI…): se serve, in **Combinazioni** togli quelle non ancora
    studiate o attiva strutture speciali (doppie, gruppi, GN, GLI…).
-5. Il bambino usa **SOLO LETTURA**, **LEGGI E GUARDA**, **DICO LA PAROLA**
-   e **VEDI E SCEGLI**.
+5. Il bambino usa **SOLO LETTURA**, **LEGGI E GUARDA**, **DICO LA PAROLA**,
+   **VEDI E SCEGLI** e **ASCOLTA E SELEZIONA** (novità, etichetta NEW-BETA).
 
 > Nota: per l'installazione come PWA e l'offline completo serve servire l'app via `http(s)`
 > (GitHub Pages, o un mini-server locale, vedi sotto). Aprendo il file direttamente
@@ -51,7 +51,7 @@ In alternativa basta l'estensione *Live Server* di VS Code.
   **parole inventate** foneticamente corrette (contrassegnate come «senza significato»).
 - Tipo di parole selezionabile dal genitore: solo reali / solo inventate / miste.
 - Lunghezza selezionabile: 2, 3, 4, 5, 6 lettere.
-- Pulsanti: **NUOVO**, **RIPETI**, **CORRETTO**, **RITENTA**, **TORNA AL MENU**.
+- Pulsanti: **NUOVO**, **CORRETTO**, **🔊 SENTI**, **TORNA AL MENU**.
 - Stelle e messaggi incoraggianti, senza obiettivi né premi: l'app serve solo come ripasso.
 - Anti-ripetizione: gli ultimi 15 esercizi non vengono riproposti subito.
 - Dopo **CORRETTO** l'app **pronuncia la parola** e poi passa alla successiva:
@@ -102,6 +102,22 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 5. Risposta giusta → opzione **VERDE**, stellina, **parola completa rivelata**
    e pronunciata, poi **passaggio automatico** alla parola successiva.
 6. Risposta sbagliata → opzione **ROSSA** disabilitata; si riprova sulle altre.
+7. Pulsante **🔊 SENTI** per riascoltare la parola in qualsiasi momento.
+
+### ASCOLTA E SELEZIONA (novità — NEW-BETA)
+1. L'app **pronuncia una parola** senza scriverla (la nuvoletta «NEW-BETA»
+   segnala la sezione appena introdotta).
+2. Sotto compaiono **4 parole scritte**: si sceglie quella sentita.
+   I distrattori sono parole simili (stessa lunghezza o stesso inizio),
+   così serve ascoltare e leggere con attenzione.
+3. **🔊 RIPETI** riascolta la parola, **✅ CORRETTO** controlla la scelta,
+   **⏭️ SALTA** passa a una nuova parola.
+4. Risposta giusta → parola **VERDE**, stellina, parola pronunciata e
+   **passaggio automatico** alla successiva.
+   Risposta sbagliata → parola **ROSSA** disabilitata: si sceglie un'altra
+   parola e si riprova.
+5. Solo parole reali e leggibili con le **lettere e sillabe studiate**:
+   la sezione è svincolata da lunghezze e categorie (come LEGGI E GUARDA).
 
 ### PAROLE PERSONALIZZATE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,

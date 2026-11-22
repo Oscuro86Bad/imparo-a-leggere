@@ -39,6 +39,9 @@ IAL.Choice = (function () {
     const card = el('div', { class: 'exercise-card' }, [
       el('div', { class: 'exercise-type' }, ['Che cosa vedi?']),
       el('div', { class: 'choice-img', id: 'vc-img' }, ['…']),
+      el('div', { class: 'word-tools' }, [
+        el('button', { class: 'chip', onclick: speakCurrent, 'aria-label': 'Ascolta la parola' }, ['🔊 SENTI'])
+      ]),
       el('div', { class: 'feedback-msg', id: 'vc-msg' }, ['']),
       el('div', { class: 'choice-grid', id: 'vc-options' }, []),
       el('div', { id: 'vc-reveal' })
@@ -94,6 +97,11 @@ IAL.Choice = (function () {
       });
     }
     updateNote();
+  }
+
+  function speakCurrent() {
+    if (!current) return;
+    IAL.UI.say(current.word);
   }
 
   function choose(btn, syl) {

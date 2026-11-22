@@ -17,7 +17,7 @@
 <script src="js/data/words.js?v=19"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=9"></script>
+<script src="js/engine/generator.js?v=10"></script>
 <script>
 (function () {
   const out = [];
@@ -182,6 +182,7 @@
   p.letters = { vowels: [], consonants: [] };
   p.syllables = {};
   check('Nessuna lettera → nessun esercizio', E.nextReading(p, { categories:{letters:true,syllables:true,words:true}, wordType:'mixed', lengths:[2,3,4,5,6] }) === null);
+  check('Nessuna lettera → nessun esercizio di ascolto', E.nextListen(p) === null);
   check('Nessuna lettera → nessuna associazione', E.nextMatch(p, { wordType:'mixed', lengths:[2,3,4,5,6] }) === null);
 
   // 8. Lunghezza selezionata
@@ -372,6 +373,30 @@
   }
   check('Inventate curate generate davvero (TATU esce)', seenTatu);
   check('Inventate: solo lettere attive (vocali + L/P/M/T)', !invBadLetter);
+
+  // 17. ASCOLTA E SELEZIONA: la parola sentita è tra le scelte, tutte leggibili
+  IAL.Store.setActive(pT.id);
+  let asOk = true, asDetail = '', asFour = 0, asRepeat = false, prevAs = '';
+  for (let i = 0; i < 200; i++) {
+    const ex = E.nextListen(pT);
+    if (!ex) { asOk = false; asDetail = 'nessun esercizio'; break; }
+    if (!ex.word || !Array.isArray(ex.options)) { asOk = false; asDetail = 'struttura'; break; }
+    if (ex.options.length === 4) asFour++;
+    if (ex.options.length < 2) { asOk = false; asDetail = 'troppe poche scelte'; break; }
+    if (ex.options.indexOf(ex.word) === -1) { asOk = false; asDetail = 'corretta mancante'; break; }
+    if (new Set(ex.options).size !== ex.options.length) { asOk = false; asDetail = 'duplicati'; break; }
+    const word = IAL.WORDS_BY_KEY[ex.word];
+    if (!word || !E.canShowWord(pT, word)) { asOk = false; asDetail = 'parola non leggibile ' + ex.word; break; }
+    if (ex.options.some(function (o) {
+      const w = IAL.WORDS_BY_KEY[o];
+      return !w || !E.canShowWord(pT, w);
+    })) { asOk = false; asDetail = 'distrattore non leggibile'; break; }
+    if (ex.word === prevAs) asRepeat = true;
+    prevAs = ex.word;
+  }
+  check('Ascolta e seleziona: scelte reali e leggibili, corretta inclusa' + (asDetail ? ' → ' + asDetail : ''), asOk);
+  check('Ascolta e seleziona: 4 scelte quando l’archivio lo permette (' + asFour + '/200)', asFour >= 190);
+  check('Ascolta e seleziona: mai la stessa parola due volte di seguito', !asRepeat);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));

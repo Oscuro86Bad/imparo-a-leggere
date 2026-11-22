@@ -364,6 +364,35 @@ IAL.Engine = (function () {
     };
   }
 
+  // ---------- Esercizi ASCOLTA E SELEZIONA ----------
+  // L'app pronuncia una parola reale: il bambino sceglie tra 4 parole
+  // scritte quella che ha sentito. Come LEGGI E GUARDA e DICO LA PAROLA è
+  // svincolata da lunghezze e categorie: valgono solo lettere e sillabe
+  // studiate, così tutte le scelte si sanno leggere.
+  // I distrattori sono parole simili (stessa lunghezza, se possibile anche
+  // stesso inizio), per allenare l'orecchio e la lettura attenta.
+  function nextListen(p) {
+    const pool = realWords(p, null, true);
+    if (pool.length < 2) return null;
+    const entry = pick(pool, recent);
+    if (!entry) return null;
+
+    const others = pool.filter(function (e) { return e.w !== entry.w; });
+    const sameLen = others.filter(function (e) { return e.w.length === entry.w.length; });
+    const sameStart = sameLen.filter(function (e) { return e.s[0] === entry.s[0]; });
+    let candidates = others;
+    if (sameLen.length >= 3) candidates = sameLen;
+    if (sameStart.length >= 3) candidates = sameStart;
+    const distractors = shuffleArr(candidates).slice(0, 3);
+
+    const options = shuffleArr([entry.w].concat(distractors.map(function (e) { return e.w; })));
+    remember({ text: entry.w });
+    return {
+      kind: 'listen', text: entry.w, word: entry.w, invented: false,
+      options: options, typeLabel: 'Ascolta e scegli'
+    };
+  }
+
   // Descrizione leggibile di ciò che il profilo rende disponibile
   function availability(p) {
     const letters = enabledLetters(p);
@@ -391,6 +420,7 @@ IAL.Engine = (function () {
     nextSpeech: nextSpeech,
     nextCustom: nextCustom,
     nextChoice: nextChoice,
+    nextListen: nextListen,
     makeInvented: makeInvented,
     availability: availability
   };

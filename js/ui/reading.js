@@ -1,7 +1,7 @@
 /* ============================================================
    IMPARO A LEGGERE — MODO A: SOLO LETTURA
    Un solo elemento per schermata, caratteri giganti.
-   Pulsanti: NUOVO, RIPETI, CORRETTO, RITENTA, MENU.
+   Pulsanti: NUOVO, CORRETTO, SENTI, MENU.
    ============================================================ */
 window.IAL = window.IAL || {};
 
@@ -30,9 +30,7 @@ IAL.Reading = (function () {
       el('div', { class: 'feedback-msg', id: 'ex-msg' }, ['']),
       el('div', { class: 'actions' }, [
         el('button', { class: 'btn btn-primary', onclick: next }, ['🔄', 'NUOVO']),
-        el('button', { class: 'btn btn-purple', onclick: repeat }, ['👀', 'RIPETI']),
-        el('button', { class: 'btn btn-green', onclick: markCorrect }, ['✅', 'CORRETTO']),
-        el('button', { class: 'btn btn-danger', onclick: retry }, ['💪', 'RITENTA'])
+        el('button', { class: 'btn btn-green', onclick: markCorrect }, ['✅', 'CORRETTO'])
       ])
     ]);
 
@@ -106,17 +104,6 @@ IAL.Reading = (function () {
     updateNote();
   }
 
-  function repeat() {
-    if (!current) { next(); return; }
-    const wordEl = document.getElementById('ex-word');
-    if (wordEl) {
-      wordEl.className = 'big-word';
-      void wordEl.offsetWidth; // riavvia l'animazione
-      wordEl.style.animation = 'pop 0.4s ease';
-      setTimeout(function () { wordEl.style.animation = ''; }, 450);
-    }
-  }
-
   function speakCurrent() {
     if (!current) return;
     IAL.UI.say(current.text);
@@ -144,22 +131,6 @@ IAL.Reading = (function () {
         next();
       }, 350);
     });
-  }
-
-  function retry() {
-    if (!current) return;
-    const p = IAL.Store.active();
-    IAL.Store.record(p, current, false);
-    const wordEl = document.getElementById('ex-word');
-    const msgEl = document.getElementById('ex-msg');
-    if (wordEl) {
-      wordEl.className = 'big-word shake';
-    }
-    if (msgEl) {
-      msgEl.textContent = IAL.UI.retryMsg();
-      msgEl.className = 'feedback-msg try';
-    }
-    updateNote();
   }
 
   function updateNote() {

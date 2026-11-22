@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=14"></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=15"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -12,13 +12,14 @@
 <script src="js/data/words.js?v=19"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=9"></script>
+<script src="js/engine/generator.js?v=10"></script>
 <script src="js/ui/components.js?v=15"></script>
-<script src="js/ui/home.js?v=10"></script>
-<script src="js/ui/reading.js?v=11"></script>
+<script src="js/ui/home.js?v=11"></script>
+<script src="js/ui/reading.js?v=12"></script>
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
-<script src="js/ui/choice.js?v=12"></script>
+<script src="js/ui/choice.js?v=13"></script>
+<script src="js/ui/listen.js?v=1"></script>
 <script src="js/ui/ocr.js?v=14"></script>
 <script src="js/ui/custom.js?v=16"></script>
 <script src="js/ui/parent.js?v=9"></script>
@@ -46,11 +47,13 @@
   const menuBtns = Array.from(document.querySelectorAll('.menu .btn'));
   const bgSet = new Set(menuBtns.map(b => getComputedStyle(b).backgroundColor));
   const cNames = menuBtns.map(b => (b.className.match(/btn-(\w+)/) || [])[1]).join(',');
-  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 6 && bgSet.size === 6);
+  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 7 && bgSet.size === 7);
 
   // Home: nomi aggiornati e niente punteggio in alto
   check('Home: la sezione si chiama PAROLE PERSONALIZZATE',
     body().indexOf('PAROLE PERSONALIZZATE') !== -1 && body().indexOf('PAROLE MIE') === -1);
+  check('Home: nuova sezione ASCOLTA E SELEZIONA con nuvoletta (NEW-BETA)',
+    body().indexOf('ASCOLTA E SELEZIONA') !== -1 && body().indexOf('(NEW-BETA)') !== -1);
   const homeChips = Array.from(document.querySelectorAll('.topbar .chip')).map(c => c.textContent);
   check('Home: nessun punteggio stelline in alto [' + homeChips.join(' | ') + ']',
     homeChips.length === 1 && !homeChips.some(t => t.indexOf('⭐') !== -1));
@@ -80,9 +83,8 @@
   check('CORRETTO → pronuncia la parola corretta (' + readWord0 + ')',
     !window.speechSynthesis || (spokenRead.length >= 1 && spokenRead[0] === readWord0));
   if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakRead;
-  btnWith('RITENTA').click(); await wait(20);
-  check('RITENTA registrato (da ripetere)', IAL.Store.active().stats.retried >= 1);
-  check('RIPETI presente', !!btnWith('RIPETI'));
+  check('SOLO LETTURA: niente RIPETI e RITENTA (non servono)',
+    !btnWith('RIPETI') && !btnWith('RITENTA'));
   check('Pulsante 🔊 SENTI presente in SOLO LETTURA', !!btnWith('SENTI'));
 
   // --- LEGGI E GUARDA ---
@@ -167,6 +169,15 @@
     !!vcImgEl && (vcImgEl.textContent.length >= 1 || !!vcImgEl.querySelector('img')));
   check('Vedi e scegli: la domanda è "Con cosa inizia?"',
     (document.getElementById('vc-msg') || {}).textContent === 'Con cosa inizia? 🔍');
+  const origSpeakVc = window.speechSynthesis && window.speechSynthesis.speak;
+  const spokenVc = [];
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenVc.push(t); };
+  const vcWordForSay = IAL.Choice.currentForTest().word;
+  check('Pulsante 🔊 SENTI presente in VEDI E SCEGLI', !!btnWith('SENTI'));
+  btnWith('SENTI').click(); await wait(150);
+  check('Vedi e scegli: SENTI pronuncia la parola (' + vcWordForSay + ')',
+    spokenVc.indexOf(vcWordForSay) !== -1);
+  if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakVc;
   check('Immagini: MAGIA e MIMO usano i disegni (non emoji confuse)',
     IAL.WORDS_BY_KEY.MAGIA.img === 'img/magia.svg' && IAL.WORDS_BY_KEY.MIMO.img === 'img/mimo.svg');
   check('Immagini: LAGO, MERENDA e PIRATA usano disegni dedicati',
@@ -215,6 +226,44 @@
   check('Vedi e scegli: inizio sempre sillaba studiata e attiva', relOk);
   check('Vedi e scegli: parole anche con lettere non ancora studiate', relaxed);
   IAL.Choice.hide();
+
+  // --- ASCOLTA E SELEZIONA ---
+  const origSpeakAs = window.speechSynthesis && window.speechSynthesis.speak;
+  const spokenAs = [];
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenAs.push(t); };
+  IAL.Listen.show();
+  await wait(250);
+  const asCur = IAL.Listen.currentForTest();
+  check('Ascolta e seleziona: parola pronunciata all’avvio', !!asCur && spokenAs[0] === asCur.word);
+  const asOpts = Array.from(document.querySelectorAll('#as-options button'));
+  check('Ascolta e seleziona: 2-4 parole tra cui scegliere', asOpts.length >= 2 && asOpts.length <= 4);
+  check('Ascolta e seleziona: la parola sentita è tra le scelte', asOpts.some(b => b.textContent === asCur.word));
+  check('Ascolta e seleziona: nuvoletta (NEW-BETA) nella schermata', body().indexOf('(NEW-BETA)') !== -1);
+  btnWith('RIPETI').click(); await wait(150);
+  check('Ascolta e seleziona: RIPETI riascolta la parola',
+    spokenAs.filter(t => t === asCur.word).length >= 2);
+  const asWrong = asOpts.find(b => b.textContent !== asCur.word);
+  if (asWrong) {
+    const starsAs = IAL.Store.active().stats.stars;
+    asWrong.click(); await wait(30);
+    check('Ascolta e seleziona: la scelta si evidenzia', asWrong.classList.contains('sel'));
+    btnWith('CORRETTO').click(); await wait(60);
+    check('Ascolta e seleziona: scelta sbagliata → rossa, nessuna stella',
+      asWrong.classList.contains('ko') && asWrong.disabled && IAL.Store.active().stats.stars === starsAs);
+  }
+  const asRight = asOpts.find(b => b.textContent === asCur.word);
+  const starsAs2 = IAL.Store.active().stats.stars;
+  asRight.click(); await wait(30);
+  btnWith('CORRETTO').click(); await wait(80);
+  check('Ascolta e seleziona: scelta giusta → verde e +1 stella',
+    asRight.classList.contains('good') && IAL.Store.active().stats.stars === starsAs2 + 1);
+  const asBefore = document.getElementById('as-options').textContent;
+  btnWith('SALTA').click(); await wait(120);
+  const asNew = IAL.Listen.currentForTest();
+  check('Ascolta e seleziona: SALTA propone una nuova parola',
+    !!asNew && (asNew.word !== asCur.word || document.getElementById('as-options').textContent !== asBefore));
+  if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakAs;
+  IAL.Listen.hide();
 
   // --- PAROLE MIE ---
   IAL.Custom.show();
