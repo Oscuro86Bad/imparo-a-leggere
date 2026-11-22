@@ -46,6 +46,16 @@ IAL.Home = (function () {
           el('span', { class: 'small' }, ['Ascolta la parola e scegli quella giusta'])
         ])
       ]),
+      el('button', { class: 'btn btn-brown btn-block', onclick: function () { IAL.Complete.show(); } }, [
+        el('span', { class: 'emoji' }, ['✍️']),
+        el('span', { class: 'txt' }, [
+          el('span', { class: 'line-title' }, [
+            el('span', {}, ['COMPLETA LA PAROLA']),
+            el('span', { class: 'cloud-badge' }, ['(NEW-BETA)'])
+          ]),
+          el('span', { class: 'small' }, ['Scrivi con il dito le lettere che mancano'])
+        ])
+      ]),
       el('button', { class: 'btn btn-purple btn-block', onclick: function () { IAL.Custom.show(); } }, [
         el('span', { class: 'emoji' }, ['📝']),
         el('span', { class: 'txt' }, ['PAROLE PERSONALIZZATE', el('span', { class: 'small' }, ['Le parole scelte da te, in ordine casuale'])])

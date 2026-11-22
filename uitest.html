@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=16"></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=18"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -12,14 +12,15 @@
 <script src="js/data/words.js?v=19"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=10"></script>
+<script src="js/engine/generator.js?v=11"></script>
 <script src="js/ui/components.js?v=15"></script>
-<script src="js/ui/home.js?v=11"></script>
+<script src="js/ui/home.js?v=12"></script>
 <script src="js/ui/reading.js?v=12"></script>
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
 <script src="js/ui/choice.js?v=13"></script>
 <script src="js/ui/listen.js?v=2"></script>
+<script src="js/ui/complete.js?v=4"></script>
 <script src="js/ui/ocr.js?v=14"></script>
 <script src="js/ui/custom.js?v=16"></script>
 <script src="js/ui/parent.js?v=9"></script>
@@ -47,13 +48,16 @@
   const menuBtns = Array.from(document.querySelectorAll('.menu .btn'));
   const bgSet = new Set(menuBtns.map(b => getComputedStyle(b).backgroundColor));
   const cNames = menuBtns.map(b => (b.className.match(/btn-(\w+)/) || [])[1]).join(',');
-  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 7 && bgSet.size === 7);
+  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 8 && bgSet.size === 8);
 
   // Home: nomi aggiornati e niente punteggio in alto
   check('Home: la sezione si chiama PAROLE PERSONALIZZATE',
     body().indexOf('PAROLE PERSONALIZZATE') !== -1 && body().indexOf('PAROLE MIE') === -1);
   check('Home: nuova sezione ASCOLTA E SELEZIONA con nuvoletta (NEW-BETA)',
     body().indexOf('ASCOLTA E SELEZIONA') !== -1 && body().indexOf('(NEW-BETA)') !== -1);
+  check('Home: nuova sezione COMPLETA LA PAROLA con nuvoletta (NEW-BETA)',
+    body().indexOf('COMPLETA LA PAROLA') !== -1 &&
+    btnWith('COMPLETA LA PAROLA').textContent.indexOf('(NEW-BETA)') !== -1);
   const homeChips = Array.from(document.querySelectorAll('.topbar .chip')).map(c => c.textContent);
   check('Home: nessun punteggio stelline in alto [' + homeChips.join(' | ') + ']',
     homeChips.length === 1 && !homeChips.some(t => t.indexOf('⭐') !== -1));
@@ -272,6 +276,81 @@
     !!asNew && !!asAfterOk && (asNew.word !== asAfterOk.word || document.getElementById('as-options').textContent !== asBefore));
   if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakAs;
   IAL.Listen.hide();
+
+  // --- COMPLETA LA PAROLA ---
+  const origSpeakCp = window.speechSynthesis && window.speechSynthesis.speak;
+  const spokenCp = [];
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenCp.push(t); };
+  IAL.Complete.show();
+  await wait(200);
+  const cpCur = IAL.Complete.currentForTest();
+  check('Completa la parola: esercizio con immagine',
+    !!cpCur && !!document.getElementById('cp-img') &&
+    (document.getElementById('cp-img').textContent.length >= 1 || !!document.querySelector('#cp-img img')));
+  check('Completa la parola: la parola mostra il resto e 2 spazi vuoti',
+    !!cpCur && document.getElementById('cp-slots').textContent === cpCur.prefix &&
+    document.querySelectorAll('#cp-slots .ws-blank').length === 2);
+  check('Completa la parola: nuvoletta (NEW-BETA) nella schermata', body().indexOf('(NEW-BETA)') !== -1);
+  check('Completa la parola: lavagna presente (' + (cpCur && cpCur.word) + ')', !!document.getElementById('cp-canvas'));
+
+  const pad = document.getElementById('cp-canvas');
+  const padRect = pad.getBoundingClientRect();
+  const pev = (type, x, y) => pad.dispatchEvent(new PointerEvent(type, {
+    bubbles: true, cancelable: true,
+    clientX: padRect.left + x, clientY: padRect.top + y, pointerId: 1, isPrimary: true
+  }));
+
+  // Senza scrivere: HO SCRITTO non svela la soluzione
+  btnWith('HO SCRITTO').click(); await wait(40);
+  check('Completa la parola: senza scrittura non svela la soluzione',
+    document.querySelectorAll('#cp-slots .ws-blank.filled').length === 0 && !!IAL.Complete.currentForTest());
+
+  // Scrittura con il dito (eventi pointer come su un tablet)
+  pev('pointerdown', 30, 60);
+  pev('pointermove', 70, 95);
+  pev('pointermove', 115, 55);
+  pev('pointerup', 115, 55);
+  await wait(40);
+  check('Completa la parola: il dito lascia il segno sulla lavagna', IAL.Complete.drawnForTest());
+
+  btnWith('HO SCRITTO').click(); await wait(60);
+  const cpFilled = Array.from(document.querySelectorAll('#cp-slots .ws-blank.filled')).map(n => n.textContent).join('');
+  check('Completa la parola: HO SCRITTO mostra le lettere giuste (' + cpFilled + ')', cpFilled === cpCur.hidden);
+  check('Completa la parola: compare la conferma È GIUSTO / RIPROVO',
+    !!btnWith('È GIUSTO') && !!btnWith('RIPROVO'));
+
+  const starsCp = IAL.Store.active().stats.stars;
+  btnWith('È GIUSTO').click(); await wait(100);
+  check('Completa la parola: È GIUSTO → +1 stella', IAL.Store.active().stats.stars === starsCp + 1);
+  check('Completa la parola: la parola viene pronunciata', spokenCp.indexOf(cpCur.word) !== -1);
+
+  let cpAfter = null;
+  for (let i = 0; i < 45; i++) {
+    const c = IAL.Complete.currentForTest();
+    if (c && c.word !== cpCur.word) { cpAfter = c; break; }
+    await wait(120);
+  }
+  check('Completa la parola: passa da sola alla parola dopo', !!cpAfter);
+
+  // RIPROVO: la stessa parola ricomincia da capo
+  const cp2 = IAL.Complete.currentForTest();
+  const pad2 = document.getElementById('cp-canvas');
+  const padRect2 = pad2.getBoundingClientRect();
+  const pev2 = (type, x, y) => pad2.dispatchEvent(new PointerEvent(type, {
+    bubbles: true, cancelable: true,
+    clientX: padRect2.left + x, clientY: padRect2.top + y, pointerId: 2, isPrimary: true
+  }));
+  pev2('pointerdown', 40, 70); pev2('pointermove', 90, 85); pev2('pointerup', 90, 85);
+  btnWith('HO SCRITTO').click(); await wait(50);
+  const starsCp2 = IAL.Store.active().stats.stars;
+  btnWith('RIPROVO').click(); await wait(50);
+  check('Completa la parola: RIPROVO cancella la lavagna e rimostra gli spazi',
+    document.querySelectorAll('#cp-slots .ws-blank.filled').length === 0 &&
+    !IAL.Complete.drawnForTest() && IAL.Store.active().stats.stars === starsCp2);
+  check('Completa la parola: RIPROVO tiene la stessa parola',
+    !!cp2 && IAL.Complete.currentForTest().word === cp2.word);
+  if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakCp;
+  IAL.Complete.hide();
 
   // --- PAROLE MIE ---
   IAL.Custom.show();

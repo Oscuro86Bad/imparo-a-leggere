@@ -393,6 +393,42 @@ IAL.Engine = (function () {
     };
   }
 
+  // ---------- Esercizi COMPLETA LA PAROLA ----------
+  // Parole reali con immagine e più lunghe ("complesse"): si nascondono le
+  // ULTIME DUE lettere, che devono formare la sillaba finale della parola
+  // (una sillaba CV studiata e attiva). Tutta la parola è leggibile con le
+  // lettere e le sillabe conosciute, quindi anche le lettere mancanti sono
+  // lettere che il bambino ha già studiato.
+  function completePool(p) {
+    const letters = enabledLetters(p);
+    return IAL.WORDS.filter(function (e) {
+      if (!e.img || e.w.length < 4 || !e.s.length) return false;
+      const tail = e.s[e.s.length - 1];
+      if (tail.length !== 2) return false;            // solo sillabe CV
+      if (e.w.slice(-2) !== tail) return false;       // proprio in fondo
+      if (!canShowSyllable(p, tail, letters)) return false;
+      return canShowWord(p, e, letters);
+    });
+  }
+
+  function nextComplete(p) {
+    const pool = completePool(p);
+    if (!pool.length) return null;
+    // Privilegia le parole più lunghe quando ce ne sono abbastanza
+    const longer = pool.filter(function (e) { return e.w.length >= 5; });
+    const use = longer.length >= 3 ? longer : pool;
+    const entry = pick(use, recent);
+    if (!entry) return null;
+    remember({ text: entry.w });
+    return {
+      kind: 'complete', text: entry.w, word: entry.w, invented: false,
+      img: entry.img,
+      prefix: entry.w.slice(0, -2),
+      hidden: entry.w.slice(-2),
+      typeLabel: 'Completa la parola'
+    };
+  }
+
   // Descrizione leggibile di ciò che il profilo rende disponibile
   function availability(p) {
     const letters = enabledLetters(p);
@@ -421,6 +457,8 @@ IAL.Engine = (function () {
     nextCustom: nextCustom,
     nextChoice: nextChoice,
     nextListen: nextListen,
+    nextComplete: nextComplete,
+    completePool: completePool,
     makeInvented: makeInvented,
     availability: availability
   };

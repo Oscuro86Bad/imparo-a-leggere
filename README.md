@@ -26,7 +26,8 @@ inventate, associazione parola-immagine.
    sillabe (PA, PE, PI…): se serve, in **Combinazioni** togli quelle non ancora
    studiate o attiva strutture speciali (doppie, gruppi, GN, GLI…).
 5. Il bambino usa **SOLO LETTURA**, **LEGGI E GUARDA**, **DICO LA PAROLA**,
-   **VEDI E SCEGLI** e **ASCOLTA E SELEZIONA** (novità, etichetta NEW-BETA).
+   **VEDI E SCEGLI**, **ASCOLTA E SELEZIONA** e **COMPLETA LA PAROLA**
+   (le ultime due con etichetta NEW-BETA).
 
 > Nota: per l'installazione come PWA e l'offline completo serve servire l'app via `http(s)`
 > (GitHub Pages, o un mini-server locale, vedi sotto). Aprendo il file direttamente
@@ -118,6 +119,21 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    parola e si riprova.
 5. Solo parole reali e leggibili con le **lettere e sillabe studiate**:
    la sezione è svincolata da lunghezze e categorie (come LEGGI E GUARDA).
+
+### COMPLETA LA PAROLA (novità — NEW-BETA)
+1. Compare l'**immagine** di una parola reale e più lunga (es. 🍞 PANE),
+   scritta però **senza le ultime due lettere**: si vedono le lettere che
+   restano e **due spazi vuoti**.
+2. Il bambino **scrive le due lettere mancanti con il dito** sulla lavagna
+   (canvas) qui sotto: è il "campo di scrittura" a mano libera.
+3. **✅ HO SCRITTO** mostra le lettere giuste negli spazi: il bambino
+   confronta ciò che ha scritto e conferma con **✅ È GIUSTO** (stellina,
+   parola pronunciata e passaggio automatico) oppure **🔁 RIPROVO**
+   (si cancella la lavagna e si riscrive la stessa parola).
+4. **🧽 CANCELLA** pulisce la lavagna, **⏭️ SALTA** cambia parola.
+5. Le due lettere mancanti sono sempre una **sillaba studiata e attiva**
+   (PA, NE, NO…): compaiono solo parole con immagine leggibili con le
+   lettere e le sillabe conosciute, quindi mai lettere non ancora studiate.
 
 ### PAROLE PERSONALIZZATE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,

@@ -17,7 +17,7 @@
 <script src="js/data/words.js?v=19"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=10"></script>
+<script src="js/engine/generator.js?v=11"></script>
 <script>
 (function () {
   const out = [];
@@ -183,6 +183,7 @@
   p.syllables = {};
   check('Nessuna lettera → nessun esercizio', E.nextReading(p, { categories:{letters:true,syllables:true,words:true}, wordType:'mixed', lengths:[2,3,4,5,6] }) === null);
   check('Nessuna lettera → nessun esercizio di ascolto', E.nextListen(p) === null);
+  check('Nessuna lettera → nessun esercizio COMPLETA LA PAROLA', E.nextComplete(p) === null);
   check('Nessuna lettera → nessuna associazione', E.nextMatch(p, { wordType:'mixed', lengths:[2,3,4,5,6] }) === null);
 
   // 8. Lunghezza selezionata
@@ -397,6 +398,36 @@
   check('Ascolta e seleziona: scelte reali e leggibili, corretta inclusa' + (asDetail ? ' → ' + asDetail : ''), asOk);
   check('Ascolta e seleziona: 4 scelte quando l’archivio lo permette (' + asFour + '/200)', asFour >= 190);
   check('Ascolta e seleziona: mai la stessa parola due volte di seguito', !asRepeat);
+
+  // 18. COMPLETA LA PAROLA: parole reali con immagine, mancano le ultime
+  //     due lettere (una sillaba CV studiata e attiva)
+  const pC = IAL.Store.createProfile('TestC', '🐨');
+  pC.letters = { vowels: ['A','E','I','O','U'], consonants: ['L','P','M','T','N','R','S','C','D'] };
+  pC.syllables = {};
+  ['L','P','M','T','N','R','S','C','D'].forEach(function (c) { pC.syllables[c] = IAL.cvSyllables(c).slice(); });
+  pC.flags = { doppie: true, gruppi: true, sc: true, gn: true, gli: true };
+  pC.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:6 };
+  pC.customWords = [];
+  IAL.Store.setActive(pC.id);
+  let cpOk = true, cpDetail = '', cpLong = 0, cpRepeat = false, prevCp = '';
+  for (let i = 0; i < 200; i++) {
+    const ex = E.nextComplete(pC);
+    if (!ex) { cpOk = false; cpDetail = 'nessun esercizio'; break; }
+    if (ex.kind !== 'complete' || !ex.word || !ex.img) { cpOk = false; cpDetail = 'struttura'; break; }
+    if (ex.prefix + ex.hidden !== ex.word) { cpOk = false; cpDetail = 'composizione'; break; }
+    if (ex.hidden.length !== 2 || ex.word.length < 4) { cpOk = false; cpDetail = 'lunghezza'; break; }
+    if (E.studiedSyllables(pC).indexOf(ex.hidden) === -1) { cpOk = false; cpDetail = 'sillaba non studiata ' + ex.hidden; break; }
+    if (!E.canShowSyllable(pC, ex.hidden, E.enabledLetters(pC))) { cpOk = false; cpDetail = 'sillaba non attiva ' + ex.hidden; break; }
+    const entry = IAL.WORDS_BY_KEY[ex.word];
+    if (!entry || !E.canShowWord(pC, entry)) { cpOk = false; cpDetail = 'parola non leggibile'; break; }
+    if (ex.word === prevCp) cpRepeat = true;
+    prevCp = ex.word;
+    if (ex.word.length >= 5) cpLong++;
+  }
+  check('Completa la parola: parole reali, con immagine, mancano 2 lettere' + (cpDetail ? ' → ' + cpDetail : ''), cpOk);
+  check('Completa la parola: le lettere mancanti sono una sillaba studiata e attiva', cpOk);
+  check('Completa la parola: privilegia parole lunghe (' + cpLong + '/200)', cpLong >= 150);
+  check('Completa la parola: mai la stessa parola due volte di seguito', !cpRepeat);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));

@@ -16,6 +16,7 @@
   --purple: #B28AE8;
   --teal: #2AB7A9;
   --pink: #E86A9A;
+  --brown: #A9744F;
   --slate: #5C738C;
   --ink: #3E3C46;
   --muted: #7A8494;
@@ -136,6 +137,7 @@ body {
 .btn-purple  { background: var(--purple); }
 .btn-teal    { background: var(--teal); }
 .btn-pink    { background: var(--pink); }
+.btn-brown   { background: var(--brown); }
 .btn-slate   { background: var(--slate); }
 .btn-soft {
   background: #fff;
@@ -317,6 +319,62 @@ body {
   35% { transform: scale(1.18); }
   70% { transform: scale(0.96); }
   100% { transform: scale(1); }
+}
+
+/* ---------- COMPLETA LA PAROLA (lavagna a dito) ---------- */
+.cp-card .choice-img { font-size: clamp(60px, 17vw, 110px); margin: 0 0 2px; }
+.cp-card .choice-img .pic { height: clamp(76px, 19vw, 118px); }
+.word-slots {
+  --ws-n: 5;
+  --ws-fs: min(calc(640px / var(--ws-n)), calc(88vw / var(--ws-n)), 72px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: clamp(2px, 0.8vw, 6px);
+  margin: 2px 0 2px;
+}
+.word-slots .ws-letter {
+  font-size: var(--ws-fs);
+  font-weight: bold;
+  line-height: 1.05;
+  color: var(--primary-dark);
+}
+.word-slots .ws-blank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(var(--ws-fs) * 0.74);
+  min-height: calc(var(--ws-fs) * 1.02);
+  border: 4px dashed #A9C2DA;
+  border-radius: 14px;
+  background: #F7FBFF;
+  font-size: var(--ws-fs);
+  font-weight: bold;
+  line-height: 1.05;
+  color: var(--green-dark);
+}
+.word-slots .ws-blank.filled {
+  border: 4px solid var(--green-dark);
+  background: rgba(126, 217, 87, 0.18);
+}
+.draw-pad {
+  display: block;
+  width: 100%;
+  height: clamp(130px, 24vh, 190px);
+  background: #fff;
+  border: 4px dashed #B9CBE0;
+  border-radius: 20px;
+  touch-action: none;
+  cursor: crosshair;
+  margin: 6px 0 2px;
+}
+.check-question {
+  margin: 6px 0 2px;
+  font-size: clamp(17px, 4.4vw, 22px);
+  font-weight: bold;
+  color: var(--primary-dark);
+  text-align: center;
 }
 
 .big-word {
