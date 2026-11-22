@@ -2,7 +2,8 @@
    IMPARO A LEGGERE — MODO F: ASCOLTA E SELEZIONA
    1. L'app pronuncia una parola reale (senza scriverla).
    2. Sotto compaiono 4 parole scritte: si sceglie quella sentita.
-   3. RIPETI riascolta, CORRETTO controlla, SALTA cambia parola.
+   3. La scelta è immediata: nessun pulsante di conferma.
+      RIPETI riascolta, SALTA cambia parola.
    4. Risposta giusta → parola VERDE, stellina, pronuncia della
       parola e passaggio automatico alla successiva.
       Risposta sbagliata → parola ROSSA (disabilitata): si sceglie
@@ -15,7 +16,6 @@ window.IAL = window.IAL || {};
 IAL.Listen = (function () {
   const el = IAL.UI.el;
   let current = null;
-  let selected = null;   // { btn, word }
   let answered = false;
   let sessionOn = false;
 
@@ -42,7 +42,6 @@ IAL.Listen = (function () {
       el('div', { class: 'choice-grid', id: 'as-options' }, []),
       el('div', { class: 'actions' }, [
         el('button', { class: 'btn btn-purple', onclick: repeat }, ['🔊', 'RIPETI']),
-        el('button', { class: 'btn btn-green', onclick: check }, ['✅', 'CORRETTO']),
         el('button', { class: 'btn btn-primary', onclick: next }, ['⏭️', 'SALTA'])
       ])
     ]);
@@ -68,7 +67,6 @@ IAL.Listen = (function () {
     const optsEl = document.getElementById('as-options');
     if (!optsEl) return;
 
-    selected = null;
     answered = false;
     optsEl.innerHTML = '';
 
@@ -119,25 +117,13 @@ IAL.Listen = (function () {
 
   function choose(btn, word) {
     if (!current || answered || btn.disabled) return;
-    Array.from(document.querySelectorAll('#as-options .choice-btn')).forEach(function (b) {
-      b.classList.remove('sel');
-    });
-    btn.classList.add('sel');
-    selected = { btn: btn, word: word };
-    setMsg('Ora premi ✅ CORRETTO', '');
-  }
-
-  function check() {
-    if (!current || answered) return;
-    if (!selected) { IAL.UI.toast('Scegli prima una parola 👆'); return; }
     const p = IAL.Store.active();
 
-    if (selected.word === current.word) {
+    if (word === current.word) {
       answered = true;
       IAL.Store.record(p, current, true);
       IAL.UI.starBurst('⭐');
-      selected.btn.classList.remove('sel');
-      selected.btn.classList.add('good');
+      btn.classList.add('good');
       setMsg(IAL.UI.praise(), '');
       updateNote();
 
@@ -153,10 +139,8 @@ IAL.Listen = (function () {
       });
     } else {
       IAL.Store.record(p, current, false);
-      selected.btn.classList.remove('sel');
-      selected.btn.classList.add('ko');
-      selected.btn.disabled = true;
-      selected = null;
+      btn.classList.add('ko');
+      btn.disabled = true;
       setMsg(IAL.UI.retryMsg(), 'try');
       updateNote();
     }

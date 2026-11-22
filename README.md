@@ -110,8 +110,8 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 2. Sotto compaiono **4 parole scritte**: si sceglie quella sentita.
    I distrattori sono parole simili (stessa lunghezza o stesso inizio),
    così serve ascoltare e leggere con attenzione.
-3. **🔊 RIPETI** riascolta la parola, **✅ CORRETTO** controlla la scelta,
-   **⏭️ SALTA** passa a una nuova parola.
+3. **🔊 RIPETI** riascolta la parola, **⏭️ SALTA** passa a una nuova parola.
+   La scelta è **immediata**: non serve premere «Corretto».
 4. Risposta giusta → parola **VERDE**, stellina, parola pronunciata e
    **passaggio automatico** alla successiva.
    Risposta sbagliata → parola **ROSSA** disabilitata: si sceglie un'altra

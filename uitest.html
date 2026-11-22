@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=15"></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=16"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -19,7 +19,7 @@
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
 <script src="js/ui/choice.js?v=13"></script>
-<script src="js/ui/listen.js?v=1"></script>
+<script src="js/ui/listen.js?v=2"></script>
 <script src="js/ui/ocr.js?v=14"></script>
 <script src="js/ui/custom.js?v=16"></script>
 <script src="js/ui/parent.js?v=9"></script>
@@ -239,29 +239,37 @@
   check('Ascolta e seleziona: 2-4 parole tra cui scegliere', asOpts.length >= 2 && asOpts.length <= 4);
   check('Ascolta e seleziona: la parola sentita è tra le scelte', asOpts.some(b => b.textContent === asCur.word));
   check('Ascolta e seleziona: nuvoletta (NEW-BETA) nella schermata', body().indexOf('(NEW-BETA)') !== -1);
+  check('Ascolta e seleziona: nessun pulsante CORRETTO (scelta immediata)', !btnWith('CORRETTO'));
   btnWith('RIPETI').click(); await wait(150);
   check('Ascolta e seleziona: RIPETI riascolta la parola',
     spokenAs.filter(t => t === asCur.word).length >= 2);
   const asWrong = asOpts.find(b => b.textContent !== asCur.word);
   if (asWrong) {
     const starsAs = IAL.Store.active().stats.stars;
-    asWrong.click(); await wait(30);
-    check('Ascolta e seleziona: la scelta si evidenzia', asWrong.classList.contains('sel'));
-    btnWith('CORRETTO').click(); await wait(60);
-    check('Ascolta e seleziona: scelta sbagliata → rossa, nessuna stella',
+    asWrong.click(); await wait(60);
+    check('Ascolta e seleziona: scelta sbagliata → subito rossa, nessuna stella',
       asWrong.classList.contains('ko') && asWrong.disabled && IAL.Store.active().stats.stars === starsAs);
+    check('Ascolta e seleziona: errore → invito a riprovare', !!document.getElementById('as-msg').textContent);
   }
   const asRight = asOpts.find(b => b.textContent === asCur.word);
   const starsAs2 = IAL.Store.active().stats.stars;
-  asRight.click(); await wait(30);
-  btnWith('CORRETTO').click(); await wait(80);
-  check('Ascolta e seleziona: scelta giusta → verde e +1 stella',
+  asRight.click(); await wait(60);
+  check('Ascolta e seleziona: scelta giusta → subito verde e +1 stella',
     asRight.classList.contains('good') && IAL.Store.active().stats.stars === starsAs2 + 1);
+  await wait(1200);
+  let asAfterOk = null;
+  for (let i = 0; i < 45; i++) {
+    const c = IAL.Listen.currentForTest();
+    if (c && c.word !== asCur.word) { asAfterOk = c; break; }
+    await wait(120);
+  }
+  check('Ascolta e seleziona: risposta giusta → passa da sola alla parola dopo',
+    !!asAfterOk);
   const asBefore = document.getElementById('as-options').textContent;
   btnWith('SALTA').click(); await wait(120);
   const asNew = IAL.Listen.currentForTest();
   check('Ascolta e seleziona: SALTA propone una nuova parola',
-    !!asNew && (asNew.word !== asCur.word || document.getElementById('as-options').textContent !== asBefore));
+    !!asNew && !!asAfterOk && (asNew.word !== asAfterOk.word || document.getElementById('as-options').textContent !== asBefore));
   if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakAs;
   IAL.Listen.hide();
 
