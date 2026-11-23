@@ -1,15 +1,15 @@
 /* ============================================================
    IMPARO A LEGGERE — MODO G: COMPLETA LA PAROLA
-   1. Compare l'immagine di una parola reale (più lunga, "complessa").
-   2. La parola è scritta ma mancano le ULTIME DUE lettere: sono una
-      sillaba che il bambino ha già studiato (CV attiva).
+   1. Compare l'immagine di una parola reale (anche lunga).
+   2. La parola è scritta ma mancano le ULTIME DUE lettere.
    3. Il bambino scrive le due lettere mancanti CON IL DITO sulla
       lavagna qui sotto (canvas), poi preme ✅ HO SCRITTO.
    4. L'app mostra le lettere giuste: il bambino confronta e conferma
       (✅ È GIUSTO → stellina, parola pronunciata, passaggio
       automatico) oppure 🔁 RIPROVO (cancella e riscrive la stessa
       parola).
-   Le parole proposte usano solo lettere e sillabe conosciute.
+   La sezione è svincolata da lunghezze, livelli e sillabe studiate:
+   basta che la parola contenga almeno una consonante attiva.
    ============================================================ */
 window.IAL = window.IAL || {};
 
@@ -150,8 +150,8 @@ IAL.Complete = (function () {
       renderSlots(null, false);
       const noteEl = document.getElementById('cp-note');
       if (noteEl) {
-        noteEl.textContent = 'Servono parole con immagine, leggibili con le lettere e le sillabe ' +
-          'attive, che finiscano con una sillaba studiata. Attivane di più nell’Area Genitori 🔒';
+        noteEl.textContent = 'Per questa sezione serve almeno una consonante attiva: ' +
+          'attivane una nell’Area Genitori 🔒';
       }
       return;
     }

@@ -400,15 +400,25 @@
   check('Ascolta e seleziona: mai la stessa parola due volte di seguito', !asRepeat);
 
   // 18. COMPLETA LA PAROLA: parole reali con immagine, mancano le ultime
-  //     due lettere (una sillaba CV studiata e attiva)
+  //     due lettere. Sezione svincolata da lunghezze/livelli/sillabe: conta
+  //     solo che la parola contenga almeno una consonante attiva.
   const pC = IAL.Store.createProfile('TestC', '🐨');
-  pC.letters = { vowels: ['A','E','I','O','U'], consonants: ['L','P','M','T','N','R','S','C','D'] };
+  pC.letters = { vowels: ['A','E','I','O','U'], consonants: ['T'] };
   pC.syllables = {};
-  ['L','P','M','T','N','R','S','C','D'].forEach(function (c) { pC.syllables[c] = IAL.cvSyllables(c).slice(); });
-  pC.flags = { doppie: true, gruppi: true, sc: true, gn: true, gli: true };
-  pC.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:6 };
+  pC.flags = { doppie: false, gruppi: false, sc: false, gn: false, gli: false };
+  pC.settings = { wordType:'mixed', lengths:[2], categories:{letters:true,syllables:true,words:true}, level: 3 };
   pC.customWords = [];
   IAL.Store.setActive(pC.id);
+  const extraSet = (IAL.COMPLETE_EXTRA || []).reduce(function (acc, e) { acc[e.w] = e; return acc; }, {});
+  const cpPool = E.completePool(pC).map(function (e) { return e.w; });
+  const cpWanted = ['TAZZINA','TELEVISORE','PORTA','MONETA','CIOCCOLATO','MARTELLO',
+    'TAVOLO','TIMONE','TUBETTO','TAPPETO','TENDA','RUOTA','TETTO','TETTOIA','TIGRE'];
+  const cpMissing = cpWanted.filter(function (w) { return cpPool.indexOf(w) === -1; });
+  check('Completa la parola: con solo la T ci sono molte parole (' + cpPool.length + ')',
+    cpPool.length >= 40);
+  check('Completa la parola: ci sono le parole richieste' + (cpMissing.length ? ' → mancano ' + cpMissing.join(',') : ''),
+    cpMissing.length === 0);
+
   let cpOk = true, cpDetail = '', cpLong = 0, cpRepeat = false, prevCp = '';
   for (let i = 0; i < 200; i++) {
     const ex = E.nextComplete(pC);
@@ -416,18 +426,32 @@
     if (ex.kind !== 'complete' || !ex.word || !ex.img) { cpOk = false; cpDetail = 'struttura'; break; }
     if (ex.prefix + ex.hidden !== ex.word) { cpOk = false; cpDetail = 'composizione'; break; }
     if (ex.hidden.length !== 2 || ex.word.length < 4) { cpOk = false; cpDetail = 'lunghezza'; break; }
-    if (E.studiedSyllables(pC).indexOf(ex.hidden) === -1) { cpOk = false; cpDetail = 'sillaba non studiata ' + ex.hidden; break; }
-    if (!E.canShowSyllable(pC, ex.hidden, E.enabledLetters(pC))) { cpOk = false; cpDetail = 'sillaba non attiva ' + ex.hidden; break; }
-    const entry = IAL.WORDS_BY_KEY[ex.word];
-    if (!entry || !E.canShowWord(pC, entry)) { cpOk = false; cpDetail = 'parola non leggibile'; break; }
+    if (!/[AEIOU]$/.test(ex.word)) { cpOk = false; cpDetail = 'finale consonante ' + ex.word; break; }
+    const entry = IAL.WORDS_BY_KEY[ex.word] || extraSet[ex.word];
+    if (!entry || !entry.img) { cpOk = false; cpDetail = 'parola non reale ' + ex.word; break; }
+    if (IAL.lettersOf(ex.word).indexOf('T') === -1) { cpOk = false; cpDetail = 'senza consonante attiva ' + ex.word; break; }
     if (ex.word === prevCp) cpRepeat = true;
     prevCp = ex.word;
     if (ex.word.length >= 5) cpLong++;
   }
-  check('Completa la parola: parole reali, con immagine, mancano 2 lettere' + (cpDetail ? ' → ' + cpDetail : ''), cpOk);
-  check('Completa la parola: le lettere mancanti sono una sillaba studiata e attiva', cpOk);
-  check('Completa la parola: privilegia parole lunghe (' + cpLong + '/200)', cpLong >= 150);
+  check('Completa la parola: parole reali con immagine, mancano 2 lettere' + (cpDetail ? ' → ' + cpDetail : ''), cpOk);
+  check('Completa la parola: contiene sempre una consonante attiva', cpOk);
+  check('Completa la parola: privilegia parole lunghe (' + cpLong + '/200)', cpLong >= 190);
   check('Completa la parola: mai la stessa parola due volte di seguito', !cpRepeat);
+
+  // Ogni consonante, da sola, deve offrire parecchie parole
+  const cpThin = [];
+  IAL.CONFIG.CONSONANTS.filter(function (c) { return c !== 'H'; }).forEach(function (c) {
+    const pc = IAL.Store.createProfile('C' + c, '🐨');
+    pc.letters = { vowels: ['A','E','I','O','U'], consonants: [c] };
+    pc.syllables = {}; pc.flags = { doppie:false, gruppi:false, sc:false, gn:false, gli:false };
+    pc.settings = { wordType:'mixed', lengths:[2], categories:{letters:true,syllables:true,words:true}, level: 3 };
+    const n = E.completePool(pc).length;
+    if (n < 10) cpThin.push(c + ':' + n);
+  });
+  IAL.Store.setActive(pC.id);
+  check('Completa la parola: almeno 10 parole per ogni consonante' + (cpThin.length ? ' → poche ' + cpThin.join(' ') : ''),
+    cpThin.length === 0);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));

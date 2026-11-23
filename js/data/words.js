@@ -334,6 +334,228 @@ IAL.WORDS.forEach(function (entry) {
   IAL.WORDS_BY_KEY[entry.w.toUpperCase()] = entry;
 });
 
+// ------------------------------------------------------------
+// Parole AGGIUNTIVE solo per COMPLETA LA PAROLA.
+// Questa sezione è svincolata da lunghezze, livelli e sillabe
+// dell'Area Genitori: il bambino deve solo scrivere le ultime due
+// lettere, quindi si possono usare parole lunghe e ricche.
+// L'unico requisito è che la parola contenga almeno una consonante
+// attiva (il motore fa il filtro). Qui non serve la sillabazione:
+// queste voci non entrano nelle altre sezioni.
+// ------------------------------------------------------------
+IAL.COMPLETE_EXTRA = [
+  // --- B ---
+  { w: 'BAMBOLA',    img: '🪆' },
+  { w: 'BISCOTTO',   img: '🍪' },
+  { w: 'BICCHIERE',  img: '🥛' },
+  { w: 'BANDIERA',   img: '🚩' },
+  { w: 'BOTTIGLIA',  img: '🍾' },
+  { w: 'BILANCIA',   img: '⚖️' },
+  { w: 'BOSCO',      img: '🌲' },
+  { w: 'BARBA',      img: '🧔' },
+  { w: 'BUFALO',     img: '🐃' },
+  { w: 'BIBLIOTECA', img: '📚' },
+
+  // --- C ---
+  { w: 'CANGURO',    img: '🦘' },
+  { w: 'CAMMELLO',   img: '🐫' },
+  { w: 'CORONA',     img: '👑' },
+  { w: 'CUCCHIAIO',  img: '🥄' },
+  { w: 'CAMICIA',    img: '👕' },
+  { w: 'CASTAGNA',   img: '🌰' },
+  { w: 'CILIEGIA',   img: '🍒' },
+  { w: 'CALAMARO',   img: '🦑' },
+  { w: 'CANDELA',    img: '🕯️' },
+  { w: 'CARAMELLA',  img: '🍬' },
+  { w: 'CHITARRA',   img: '🎸' },
+  { w: 'CINGHIALE',  img: '🐗' },
+  { w: 'COCCO',      img: '🥥' },
+  { w: 'CONCHIGLIA', img: '🐚' },
+  { w: 'CORALLO',    img: '🪸' },
+  { w: 'CORNETTO',   img: '🥐' },
+  { w: 'CIOCCOLATO', img: '🍫' },
+  { w: 'CUCCIOLO',   img: '🐶' },
+
+  // --- D ---
+  { w: 'DESERTO',    img: '🏜️' },
+  { w: 'DIAMANTE',   img: '💎' },
+  { w: 'DOCCIA',     img: '🚿' },
+  { w: 'DROMEDARIO', img: '🐪' },
+  { w: 'DONNA',      img: '👩' },
+  { w: 'DENTISTA',   img: '🦷' },
+  { w: 'DODICI',     img: '🔢' },
+
+  // --- F ---
+  { w: 'FAGIOLO',    img: '🫘' },
+  { w: 'FANTASMA',   img: '👻' },
+  { w: 'FARMACIA',   img: '💊' },
+  { w: 'FINESTRA',   img: '🪟' },
+  { w: 'FIOCCO',     img: '🎀' },
+  { w: 'FONTANA',    img: '⛲' },
+  { w: 'FORCHETTA',  img: '🍴' },
+  { w: 'FORMAGGIO',  img: '🧀' },
+  { w: 'FRAGOLA',    img: '🍓' },
+  { w: 'FRATELLO',   img: '👦' },
+  { w: 'FRIGORIFERO',img: '🧊' },
+  { w: 'FRUTTA',     img: '🍎' },
+  { w: 'FUNIVIA',    img: '🚠' },
+  { w: 'FURGONE',    img: '🚐' },
+  { w: 'FALENA',     img: '🦋' },
+
+  // --- G ---
+  { w: 'GABBIANO',   img: '🐦' },
+  { w: 'GALASSIA',   img: '🌌' },
+  { w: 'GEMELLO',    img: '👯' },
+  { w: 'GIACCA',     img: '🧥' },
+  { w: 'GIARDINO',   img: '🌳' },
+  { w: 'GIORNALE',   img: '📰' },
+  { w: 'GIOIELLO',   img: '💍' },
+  { w: 'GNOMO',      img: '🧙' },
+  { w: 'GONDOLA',    img: '🛶' },
+  { w: 'GRATTACIELO',img: '🏙️' },
+  { w: 'GROTTA',     img: '🕳️' },
+  { w: 'GUANTO',     img: '🧤' },
+
+  // --- L ---
+  { w: 'LAMPADA',    img: '💡' },
+  { w: 'LAMPONE',    img: '🫐' },
+  { w: 'LAVAGNA',    img: '📋' },
+  { w: 'LEGENDA',    img: '📜' },
+  { w: 'LENTE',      img: '🔍' },
+  { w: 'LEOPARDO',   img: '🐆' },
+  { w: 'LETTERA',    img: '✉️' },
+  { w: 'LIMONATA',   img: '🍋' },
+  { w: 'LUCCIOLA',   img: '✨' },
+  { w: 'LIBELLULA',  img: '🪰' },
+
+  // --- M ---
+  { w: 'MACCHINA',   img: '🚗' },
+  { w: 'MAGLIETTA',  img: '👕' },
+  { w: 'MANDARINO',  img: '🍊' },
+  { w: 'MASCHERA',   img: '🎭' },
+  { w: 'MATTINA',    img: '🌅' },
+  { w: 'MEDAGLIA',   img: '🏅' },
+  { w: 'MICROFONO',  img: '🎤' },
+  { w: 'MINESTRA',   img: '🍲' },
+  { w: 'MONOPATTINO',img: '🛴' },
+  { w: 'MONTAGNA',   img: '⛰️' },
+  { w: 'MARTELLO',   img: '🔨' },
+  { w: 'MULINO',     img: '🌾' },
+
+  // --- N ---
+  { w: 'NARANCIO',   img: '🍊' },
+  { w: 'NASTRO',     img: '🎀' },
+  { w: 'NATALE',     img: '🎄' },
+  { w: 'NEGOZIO',    img: '🏪' },
+  { w: 'NINFEA',     img: '🪷' },
+  { w: 'NOCCIOLA',   img: '🌰' },
+  { w: 'NOTTE',      img: '🌙' },
+  { w: 'NUMERO',     img: '🔢' },
+
+  // --- P ---
+  { w: 'PALLONCINO', img: '🎈' },
+  { w: 'PANDA',      img: '🐼' },
+  { w: 'PAPAVERO',   img: '🌺' },
+  { w: 'PARACADUTE', img: '🪂' },
+  { w: 'PECORA',     img: '🐑' },
+  { w: 'PENTOLA',    img: '🍲' },
+  { w: 'PEPERONE',   img: '🫑' },
+  { w: 'PIANETA',    img: '🪐' },
+  { w: 'PIANOFORTE', img: '🎹' },
+  { w: 'PINGUINO',   img: '🐧' },
+  { w: 'PIRAMIDE',   img: '🔺' },
+  { w: 'PISELLO',    img: '🫛' },
+  { w: 'PORTA',      img: '🚪' },
+  { w: 'POMPIERE',   img: '🚒' },
+  { w: 'PRINCIPESSA',img: '👸' },
+  { w: 'PULCINO',    img: '🐤' },
+
+  // --- Q ---
+  { w: 'QUADERNO',   img: '📓' },
+  { w: 'QUADRO',     img: '🖼️' },
+  { w: 'QUAGLIA',    img: '🐦' },
+  { w: 'QUARZO',     img: '💎' },
+  { w: 'QUATTRO',    img: '4️⃣' },
+  { w: 'QUADRETTO',  img: '🖼️' },
+  { w: 'QUINDICI',   img: '🔢' },
+  { w: 'QUIETE',     img: '😌' },
+
+  // --- R ---
+  { w: 'RAGAZZO',    img: '👦' },
+  { w: 'RAMO',       img: '🌿' },
+  { w: 'RAVIOLI',    img: '🥟' },
+  { w: 'REGALO',     img: '🎁' },
+  { w: 'RIGA',       img: '📏' },
+  { w: 'RIMORCHIO',  img: '🚛' },
+  { w: 'RINOCERONTE',img: '🦏' },
+  { w: 'RISOTTO',    img: '🍚' },
+  { w: 'ROSPO',      img: '🐸' },
+  { w: 'ROTELLA',    img: '🛼' },
+
+  // --- S ---
+  { w: 'SABBIA',     img: '🏖️' },
+  { w: 'SALAMANDRA', img: '🦎' },
+  { w: 'SANDALO',    img: '👡' },
+  { w: 'SATELLITE',  img: '🛰️' },
+  { w: 'SCARPA',     img: '👟' },
+  { w: 'SCOIATTOLO', img: '🐿️' },
+  { w: 'SEDIA',      img: '🪑' },
+  { w: 'SEGRETO',    img: '🤫' },
+  { w: 'SONAGLIO',   img: '🔔' },
+  { w: 'SORELLA',    img: '👧' },
+  { w: 'SPAGHETTI',  img: '🍝' },
+  { w: 'STELLA',     img: '⭐' },
+  { w: 'STIVALE',    img: '👢' },
+  { w: 'STRADA',     img: '🛣️' },
+  { w: 'STUFA',      img: '🔥' },
+  { w: 'SVEGLIA',    img: '⏰' },
+
+  // --- T ---
+  { w: 'TAMBURO',    img: '🥁' },
+  { w: 'TAPPETO',    img: '🟫' },
+  { w: 'TAZZINA',    img: '☕' },
+  { w: 'TOSTAPANE',  img: '🍞' },
+  { w: 'TASTIERA',   img: '⌨️' },
+  { w: 'TELEVISORE', img: '📺' },
+  { w: 'TEMPESTA',   img: '⛈️' },
+  { w: 'TENDA',      img: '🪟' },
+  { w: 'TETTOIA',    img: '⛱️' },
+  { w: 'TIMONE',     img: '🛞' },
+  { w: 'TONNO',      img: '🐟' },
+  { w: 'TORNADO',    img: '🌪️' },
+  { w: 'TORRE',      img: '🗼' },
+  { w: 'TRATTORE',   img: '🚜' },
+  { w: 'TROMBA',     img: '🎺' },
+  { w: 'TROTA',      img: '🐟' },
+  { w: 'TUBETTO',    img: '🧴' },
+  { w: 'TUCANO',     img: '🦜' },
+  { w: 'TRICICLO',   img: '🛺' },
+
+  // --- V ---
+  { w: 'VACCA',      img: '🐄' },
+  { w: 'VASCA',      img: '🛁' },
+  { w: 'VASSOIO',    img: '🍽️' },
+  { w: 'VELIERO',    img: '⛵' },
+  { w: 'VENTAGLIO',  img: '🪭' },
+  { w: 'VENTO',      img: '🌬️' },
+  { w: 'VERDURA',    img: '🥬' },
+  { w: 'VETERINARIO',img: '🩺' },
+  { w: 'VIGILE',     img: '👮' },
+  { w: 'VILLAGGIO',  img: '🏘️' },
+  { w: 'VIPERA',     img: '🐍' },
+  { w: 'VULCANO',    img: '🌋' },
+
+  // --- Z ---
+  { w: 'ZAMPA',      img: '🐾' },
+  { w: 'ZATTERA',    img: '🛶' },
+  { w: 'ZENZERO',    img: '🫚' },
+  { w: 'ZERO',       img: '0️⃣' },
+  { w: 'ZOCCOLO',    img: '👠' },
+  { w: 'ZOLFO',      img: '🟡' },
+  { w: 'ZUCCHERO',   img: '🍬' },
+  { w: 'ZOMBIE',     img: '🧟' }
+];
+
 // Parole inventate "curate": combinazioni buffe ma leggibili con le sillabe
 // CV di L, M, P, T + vocali. Servono a dare varietà in SOLO LETTURA senza
 // uscire dal percorso didattico (nessuna lettera o struttura non studiata:

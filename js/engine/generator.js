@@ -394,29 +394,42 @@ IAL.Engine = (function () {
   }
 
   // ---------- Esercizi COMPLETA LA PAROLA ----------
-  // Parole reali con immagine e più lunghe ("complesse"): si nascondono le
-  // ULTIME DUE lettere, che devono formare la sillaba finale della parola
-  // (una sillaba CV studiata e attiva). Tutta la parola è leggibile con le
-  // lettere e le sillabe conosciute, quindi anche le lettere mancanti sono
-  // lettere che il bambino ha già studiato.
+  // Sezione volutamente SVINCOLATA da lunghezze, livelli e sillabe studiate:
+  // al bambino serve solo scrivere le ultime due lettere, quindi si possono
+  // proporre parole lunghe e ricche. L'unico vincolo è che la parola contenga
+  // almeno una consonante attiva: così l'esercizio allena le lettere scelte
+  // dal genitore. Le due lettere finali si nascondono sempre.
+  function completeWords() {
+    const out = [];
+    const seen = {};
+    function add(e) {
+      if (!e || !e.w || !e.img || e.w.length < 4) return;
+      if (seen[e.w]) return;
+      seen[e.w] = true;
+      out.push(e);
+    }
+    (IAL.WORDS || []).forEach(add);
+    (IAL.COMPLETE_EXTRA || []).forEach(add);
+    // solo parole che finiscono con vocale: le due lettere mancanti restano
+    // leggibili come finale di parola italiana (niente ROBOT, TRAM…)
+    return out.filter(function (e) { return /[AEIOU]$/.test(e.w); });
+  }
+
   function completePool(p) {
-    const letters = enabledLetters(p);
-    return IAL.WORDS.filter(function (e) {
-      if (!e.img || e.w.length < 4 || !e.s.length) return false;
-      const tail = e.s[e.s.length - 1];
-      if (tail.length !== 2) return false;            // solo sillabe CV
-      if (e.w.slice(-2) !== tail) return false;       // proprio in fondo
-      if (!canShowSyllable(p, tail, letters)) return false;
-      return canShowWord(p, e, letters);
+    const consonants = (p.letters && p.letters.consonants) || [];
+    if (!consonants.length) return [];
+    return completeWords().filter(function (e) {
+      const used = IAL.lettersOf(e.w);
+      return used.some(function (ch) { return consonants.indexOf(ch) !== -1; });
     });
   }
 
   function nextComplete(p) {
     const pool = completePool(p);
     if (!pool.length) return null;
-    // Privilegia le parole più lunghe quando ce ne sono abbastanza
+    // Privilegia le parole più lunghe (dai 5 caratteri in su)
     const longer = pool.filter(function (e) { return e.w.length >= 5; });
-    const use = longer.length >= 3 ? longer : pool;
+    const use = longer.length >= 5 ? longer : pool;
     const entry = pick(use, recent);
     if (!entry) return null;
     remember({ text: entry.w });
@@ -459,6 +472,7 @@ IAL.Engine = (function () {
     nextListen: nextListen,
     nextComplete: nextComplete,
     completePool: completePool,
+    completeWords: completeWords,
     makeInvented: makeInvented,
     availability: availability
   };

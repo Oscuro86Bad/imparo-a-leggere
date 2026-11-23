@@ -131,9 +131,11 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    parola pronunciata e passaggio automatico) oppure **🔁 RIPROVO**
    (si cancella la lavagna e si riscrive la stessa parola).
 4. **🧽 CANCELLA** pulisce la lavagna, **⏭️ SALTA** cambia parola.
-5. Le due lettere mancanti sono sempre una **sillaba studiata e attiva**
-   (PA, NE, NO…): compaiono solo parole con immagine leggibili con le
-   lettere e le sillabe conosciute, quindi mai lettere non ancora studiate.
+5. La sezione è **svincolata da lunghezze, livelli e sillabe** dell'Area
+   Genitori: le parole possono essere lunghe e ricche (TAZZINA, TELEVISORE,
+   CIOCCOLATO, MARTELLO, TETTOIA…). L'unico vincolo è che la parola contenga
+   **almeno una consonante attiva**, così l'esercizio allena le lettere scelte
+   dal genitore. Le due lettere finali si nascondono sempre.
 
 ### PAROLE PERSONALIZZATE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,
