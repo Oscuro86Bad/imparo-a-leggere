@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Tutù">
+  <defs>
+    <linearGradient id="tulle1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbcfe8"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="tulle2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f9a8d4"/>
+      <stop offset="1" stop-color="#db2777"/>
+    </linearGradient>
+    <linearGradient id="tulle3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbcfe8"/>
+      <stop offset="0.55" stop-color="#ec4899"/>
+      <stop offset="1" stop-color="#be185d"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="100" cy="184" rx="72" ry="8" fill="#000" opacity="0.07"/>
+
+  <!-- gonna a strati: tutù -->
+  <path d="M68 82 Q42 128 20 166 Q66 156 100 166 Q134 156 180 166 Q158 128 132 82 Z"
+        fill="url(#tulle3)" stroke="#be185d" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M72 88 Q52 126 34 158 Q72 148 100 158 Q128 148 166 158 Q148 126 128 88 Z"
+        fill="url(#tulle2)" stroke="#db2777" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M76 94 Q60 126 46 150 Q76 142 100 150 Q124 142 154 150 Q140 126 124 94 Z"
+        fill="url(#tulle1)" stroke="#f472b6" stroke-width="2.5" stroke-linejoin="round"/>
+
+  <!-- pieghe del tulle -->
+  <g stroke="#ffffff" stroke-width="2.5" opacity="0.55" fill="none" stroke-linecap="round">
+    <path d="M84 98 Q76 124 66 150"/>
+    <path d="M100 98 L100 154"/>
+    <path d="M116 98 Q124 124 134 150"/>
+  </g>
+
+  <!-- vita con elastico -->
+  <rect x="64" y="64" width="72" height="20" rx="10" fill="#ec4899" stroke="#be185d" stroke-width="3"/>
+  <g stroke="#fbcfe8" stroke-width="2.5" opacity="0.8" fill="none">
+    <path d="M74 66 L74 82"/>
+    <path d="M88 66 L88 82"/>
+    <path d="M100 66 L100 82"/>
+    <path d="M112 66 L112 82"/>
+    <path d="M126 66 L126 82"/>
+  </g>
+
+  <!-- fiocco laterale -->
+  <path d="M64 74 L44 62 L46 82 Z" fill="#f472b6" stroke="#be185d" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M64 74 L52 92 L70 86 Z" fill="#f472b6" stroke="#be185d" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="64" cy="74" r="6" fill="#db2777" stroke="#be185d" stroke-width="2"/>
+
+  <!-- scintille -->
+  <g fill="#fbbf24">
+    <path d="M158 58 l3 7 l7 3 l-7 3 l-3 7 l-3 -7 l-7 -3 l7 -3 Z"/>
+    <path d="M34 104 l2.5 6 l6 2.5 l-6 2.5 l-2.5 6 l-2.5 -6 l-6 -2.5 l6 -2.5 Z"/>
+    <path d="M168 118 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2 Z"/>
+  </g>
+</svg>

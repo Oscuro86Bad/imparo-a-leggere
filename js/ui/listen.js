@@ -8,8 +8,10 @@
       parola e passaggio automatico alla successiva.
       Risposta sbagliata → parola ROSSA (disabilitata): si sceglie
       un'altra parola e si riprova.
-   Le parole proposte sono solo reali e leggibili con le lettere e
-   le sillabe studiate (come LEGGI E GUARDA).
+   Le parole proposte sono reali. Si privilegiano quelle interamente
+   leggibili con le lettere e le sillabe studiate; quando sono poche
+   (per esempio con la sola consonante T) il vocabolario si allarga a
+   parole reali con al massimo una lettera ancora da studiare.
    ============================================================ */
 window.IAL = window.IAL || {};
 
@@ -76,7 +78,7 @@ IAL.Listen = (function () {
       setMsg('', '');
       const noteEl = document.getElementById('as-note');
       if (noteEl) {
-        noteEl.textContent = 'Servono almeno 2 parole leggibili con le lettere e le sillabe attive. ' +
+        noteEl.textContent = 'Servono almeno 2 parole reali con le lettere attive. ' +
           'Attivane di più nell’Area Genitori 🔒';
       }
       return;

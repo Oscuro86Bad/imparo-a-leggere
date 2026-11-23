@@ -117,8 +117,11 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    **passaggio automatico** alla successiva.
    Risposta sbagliata → parola **ROSSA** disabilitata: si sceglie un'altra
    parola e si riprova.
-5. Solo parole reali e leggibili con le **lettere e sillabe studiate**:
-   la sezione è svincolata da lunghezze e categorie (come LEGGI E GUARDA).
+5. Si usano parole reali. Con molte lettere attive le scelte sono **tutte
+   interamente leggibili** con le lettere e sillabe studiate; quando sono
+   poche (per esempio con la **sola consonante T**) il vocabolario si
+   allarga a parole reali con **al massimo una lettera nuova**, così
+   l'esercizio non si esaurisce in tre parole.
 
 ### COMPLETA LA PAROLA (novità — NEW-BETA)
 1. Compare l'**immagine** di una parola reale e più lunga (es. 🍞 PANE),

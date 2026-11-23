@@ -14,10 +14,10 @@
 <h1>🧪 Collaudo automatico del motore</h1>
 <pre id="out">In corso…</pre>
 <script src="js/config.js?v=8"></script>
-<script src="js/data/words.js?v=20"></script>
+<script src="js/data/words.js?v=21"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=13"></script>
+<script src="js/engine/generator.js?v=14"></script>
 <script>
 (function () {
   const out = [];
@@ -375,7 +375,10 @@
   check('Inventate curate generate davvero (TATU esce)', seenTatu);
   check('Inventate: solo lettere attive (vocali + L/P/M/T)', !invBadLetter);
 
-  // 17. ASCOLTA E SELEZIONA: la parola sentita è tra le scelte, tutte leggibili
+  // 17. ASCOLTA E SELEZIONA: l'app pronuncia una parola reale e il bambino
+  //     sceglie tra 4 parole scritte. Con molte lettere attive si usano solo
+  //     parole interamente leggibili; con poche consonanti (es. solo T) il
+  //     vocabolario si allarga a parole reali con al massimo una lettera nuova.
   IAL.Store.setActive(pT.id);
   let asOk = true, asDetail = '', asFour = 0, asRepeat = false, prevAs = '';
   for (let i = 0; i < 200; i++) {
@@ -398,6 +401,44 @@
   check('Ascolta e seleziona: scelte reali e leggibili, corretta inclusa' + (asDetail ? ' → ' + asDetail : ''), asOk);
   check('Ascolta e seleziona: 4 scelte quando l’archivio lo permette (' + asFour + '/200)', asFour >= 190);
   check('Ascolta e seleziona: mai la stessa parola due volte di seguito', !asRepeat);
+
+  // Con la sola T il vocabolario deve essere molto più ricco (non solo 3-6
+  // parole): si aggiungono parole reali con al massimo una lettera nuova.
+  IAL.Store.setActive(pTonly.id);
+  const asExtra = (IAL.COMPLETE_EXTRA || []).reduce(function (acc, e) { acc[e.w] = e; return acc; }, {});
+  const asPoolT = E.listenCandidates(pTonly);
+  check('Ascolta e seleziona: con la sola T il vocabolario si allarga (' + asPoolT.length + ')',
+    asPoolT.length >= 30);
+  let asTOk = true, asTDetail = '', asTFour = 0, asTRepeat = false, prevAsT = '';
+  const asTAllowed = ['A','E','I','O','U','T'];
+  function asTUnknown(w) {
+    const seen = {};
+    IAL.lettersOf(w).forEach(function (ch) { if (asTAllowed.indexOf(ch) === -1) seen[ch] = 1; });
+    return Object.keys(seen);
+  }
+  for (let i = 0; i < 200; i++) {
+    const ex = E.nextListen(pTonly);
+    if (!ex) { asTOk = false; asTDetail = 'nessun esercizio'; break; }
+    if (!ex.word || !Array.isArray(ex.options)) { asTOk = false; asTDetail = 'struttura'; break; }
+    if (ex.options.length === 4) asTFour++;
+    if (ex.options.length < 2) { asTOk = false; asTDetail = 'troppe poche scelte'; break; }
+    if (ex.options.indexOf(ex.word) === -1) { asTOk = false; asTDetail = 'corretta mancante'; break; }
+    if (new Set(ex.options).size !== ex.options.length) { asTOk = false; asTDetail = 'duplicati'; break; }
+    const entry = IAL.WORDS_BY_KEY[ex.word] || asExtra[ex.word];
+    if (!entry || !entry.w) { asTOk = false; asTDetail = 'parola non reale ' + ex.word; break; }
+    if (IAL.lettersOf(ex.word).indexOf('T') === -1) { asTOk = false; asTDetail = 'senza consonante attiva ' + ex.word; break; }
+    if (asTUnknown(ex.word).length > 1) { asTOk = false; asTDetail = 'troppe lettere nuove ' + ex.word; break; }
+    if (ex.options.some(function (o) {
+      const w = IAL.WORDS_BY_KEY[o] || asExtra[o];
+      return !w || !w.w || asTUnknown(o).length > 1;
+    })) { asTOk = false; asTDetail = 'distrattore non adatto'; break; }
+    if (ex.word === prevAsT) asTRepeat = true;
+    prevAsT = ex.word;
+  }
+  check('Ascolta e seleziona: con la sola T parole reali con al massimo 1 lettera nuova' + (asTDetail ? ' → ' + asTDetail : ''),
+    asTOk);
+  check('Ascolta e seleziona: con la sola T sempre 4 scelte (' + asTFour + '/200)', asTFour >= 190);
+  check('Ascolta e seleziona: con la sola T mai la stessa parola due volte di seguito', !asTRepeat);
 
   // 18. COMPLETA LA PAROLA: parole reali con immagine, mancano le ultime
   //     due lettere. Sezione svincolata da lunghezze/livelli/sillabe: la

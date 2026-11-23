@@ -366,20 +366,60 @@ IAL.Engine = (function () {
 
   // ---------- Esercizi ASCOLTA E SELEZIONA ----------
   // L'app pronuncia una parola reale: il bambino sceglie tra 4 parole
-  // scritte quella che ha sentito. Come LEGGI E GUARDA e DICO LA PAROLA è
-  // svincolata da lunghezze e categorie: valgono solo lettere e sillabe
-  // studiate, così tutte le scelte si sanno leggere.
+  // scritte quella che ha sentito. La sezione è svincolata da lunghezze e
+  // categorie: valgono le lettere e le sillabe studiate.
   // I distrattori sono parole simili (stessa lunghezza, se possibile anche
   // stesso inizio), per allenare l'orecchio e la lettura attenta.
+
+  // Parole proposte. Si parte dalle parole interamente leggibili (tutte le
+  // lettere note e le sillabe studiate). Se sono poche — tipico con una sola
+  // consonante attiva, per esempio la T — il vocabolario si allarga con
+  // parole reali che contengono almeno una consonante attiva, ordinate per
+  // numero di lettere ancora da studiare: prima quelle con una sola lettera
+  // nuova, poi due, ecc. Ci si ferma appena ci sono 12 parole, così le
+  // scelte restano leggibili.
+  function listenCandidates(p) {
+    const strict = realWords(p, null, true);
+    if (strict.length >= 12) return strict;
+    const letters = enabledLetters(p);
+    const consonants = (p.letters && p.letters.consonants) || [];
+    if (!consonants.length) return strict;
+
+    const chosen = {};
+    const out = [];
+    function add(e) {
+      if (!e || !e.w || chosen[e.w]) return;
+      chosen[e.w] = true;
+      out.push(e);
+    }
+    strict.forEach(add);
+
+    const tiers = {};
+    completeWords().forEach(function (e) {
+      if (chosen[e.w]) return;
+      const used = IAL.lettersOf(e.w);
+      if (!used.some(function (ch) { return consonants.indexOf(ch) !== -1; })) return;
+      const n = unknownLetters(e, letters);
+      if (!tiers[n]) tiers[n] = [];
+      tiers[n].push(e);
+    });
+    Object.keys(tiers).map(Number).sort(function (a, b) { return a - b; }).forEach(function (n) {
+      if (out.length >= 12) return;
+      tiers[n].forEach(add);
+    });
+    return out.length >= 2 ? out : strict;
+  }
+
   function nextListen(p) {
-    const pool = realWords(p, null, true);
+    const pool = listenCandidates(p);
     if (pool.length < 2) return null;
     const entry = pick(pool, recent);
     if (!entry) return null;
 
     const others = pool.filter(function (e) { return e.w !== entry.w; });
     const sameLen = others.filter(function (e) { return e.w.length === entry.w.length; });
-    const sameStart = sameLen.filter(function (e) { return e.s[0] === entry.s[0]; });
+    const start = entry.s && entry.s[0];
+    const sameStart = start ? sameLen.filter(function (e) { return e.s && e.s[0] === start; }) : [];
     let candidates = others;
     if (sameLen.length >= 3) candidates = sameLen;
     if (sameStart.length >= 3) candidates = sameStart;
@@ -506,6 +546,7 @@ IAL.Engine = (function () {
     nextCustom: nextCustom,
     nextChoice: nextChoice,
     nextListen: nextListen,
+    listenCandidates: listenCandidates,
     nextComplete: nextComplete,
     completePool: completePool,
     completeWords: completeWords,
