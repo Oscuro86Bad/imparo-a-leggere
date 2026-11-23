@@ -133,9 +133,11 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 4. **🧽 CANCELLA** pulisce la lavagna, **⏭️ SALTA** cambia parola.
 5. La sezione è **svincolata da lunghezze, livelli e sillabe** dell'Area
    Genitori: le parole possono essere lunghe e ricche (TAZZINA, TELEVISORE,
-   CIOCCOLATO, MARTELLO, TETTOIA…). L'unico vincolo è che la parola contenga
-   **almeno una consonante attiva**, così l'esercizio allena le lettere scelte
-   dal genitore. Le due lettere finali si nascondono sempre.
+   CIOCCOLATO, MARTELLO, TETTOIA…). I vincoli sono due: la parola contiene
+   **almeno una consonante attiva** e le **due lettere da scrivere** sono
+   sempre tra quelle conosciute (vocali + consonanti attive), così il bambino
+   può davvero tracciarle. L'app preferisce comunque le parole con **poche
+   lettere nuove** (prima quelle note, poi con una sola lettera nuova…).
 
 ### PAROLE PERSONALIZZATE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,

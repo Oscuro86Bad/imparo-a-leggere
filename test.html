@@ -14,10 +14,10 @@
 <h1>🧪 Collaudo automatico del motore</h1>
 <pre id="out">In corso…</pre>
 <script src="js/config.js?v=8"></script>
-<script src="js/data/words.js?v=19"></script>
+<script src="js/data/words.js?v=20"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=11"></script>
+<script src="js/engine/generator.js?v=13"></script>
 <script>
 (function () {
   const out = [];
@@ -400,8 +400,9 @@
   check('Ascolta e seleziona: mai la stessa parola due volte di seguito', !asRepeat);
 
   // 18. COMPLETA LA PAROLA: parole reali con immagine, mancano le ultime
-  //     due lettere. Sezione svincolata da lunghezze/livelli/sillabe: conta
-  //     solo che la parola contenga almeno una consonante attiva.
+  //     due lettere. Sezione svincolata da lunghezze/livelli/sillabe: la
+  //     parola contiene una consonante attiva e le DUE lettere da scrivere
+  //     sono sempre conosciute.
   const pC = IAL.Store.createProfile('TestC', '🐨');
   pC.letters = { vowels: ['A','E','I','O','U'], consonants: ['T'] };
   pC.syllables = {};
@@ -411,15 +412,15 @@
   IAL.Store.setActive(pC.id);
   const extraSet = (IAL.COMPLETE_EXTRA || []).reduce(function (acc, e) { acc[e.w] = e; return acc; }, {});
   const cpPool = E.completePool(pC).map(function (e) { return e.w; });
-  const cpWanted = ['TAZZINA','TELEVISORE','PORTA','MONETA','CIOCCOLATO','MARTELLO',
-    'TAVOLO','TIMONE','TUBETTO','TAPPETO','TENDA','RUOTA','TETTO','TETTOIA','TIGRE'];
-  const cpMissing = cpWanted.filter(function (w) { return cpPool.indexOf(w) === -1; });
+  const cpWantedTT = ['PORTA','MONETA','CIOCCOLATO','TUBETTO','TAPPETO','RUOTA','TETTO','TETTOIA'];
+  const cpMissingTT = cpWantedTT.filter(function (w) { return cpPool.indexOf(w) === -1; });
   check('Completa la parola: con solo la T ci sono molte parole (' + cpPool.length + ')',
-    cpPool.length >= 40);
-  check('Completa la parola: ci sono le parole richieste' + (cpMissing.length ? ' → mancano ' + cpMissing.join(',') : ''),
-    cpMissing.length === 0);
+    cpPool.length >= 30);
+  check('Completa la parola: con la T ci sono le parole con finale conosciuta' + (cpMissingTT.length ? ' → mancano ' + cpMissingTT.join(',') : ''),
+    cpMissingTT.length === 0);
 
   let cpOk = true, cpDetail = '', cpLong = 0, cpRepeat = false, prevCp = '';
+  const cpAllowed = ['A','E','I','O','U','T'];
   for (let i = 0; i < 200; i++) {
     const ex = E.nextComplete(pC);
     if (!ex) { cpOk = false; cpDetail = 'nessun esercizio'; break; }
@@ -430,16 +431,31 @@
     const entry = IAL.WORDS_BY_KEY[ex.word] || extraSet[ex.word];
     if (!entry || !entry.img) { cpOk = false; cpDetail = 'parola non reale ' + ex.word; break; }
     if (IAL.lettersOf(ex.word).indexOf('T') === -1) { cpOk = false; cpDetail = 'senza consonante attiva ' + ex.word; break; }
+    if (!IAL.lettersOf(ex.hidden).every(function (ch) { return cpAllowed.indexOf(ch) !== -1; })) {
+      cpOk = false; cpDetail = 'lettere da scrivere non conosciute ' + ex.hidden + ' in ' + ex.word; break;
+    }
     if (ex.word === prevCp) cpRepeat = true;
     prevCp = ex.word;
     if (ex.word.length >= 5) cpLong++;
   }
   check('Completa la parola: parole reali con immagine, mancano 2 lettere' + (cpDetail ? ' → ' + cpDetail : ''), cpOk);
-  check('Completa la parola: contiene sempre una consonante attiva', cpOk);
+  check('Completa la parola: le 2 lettere da scrivere sono sempre conosciute', cpOk);
   check('Completa la parola: privilegia parole lunghe (' + cpLong + '/200)', cpLong >= 190);
   check('Completa la parola: mai la stessa parola due volte di seguito', !cpRepeat);
 
-  // Ogni consonante, da sola, deve offrire parecchie parole
+  // Con più consonanti attive arrivano anche le altre parole richieste
+  const pAll = IAL.Store.createProfile('TestC2', '🐨');
+  pAll.letters = { vowels: ['A','E','I','O','U'], consonants: ['T','L','N','R','D'] };
+  pAll.syllables = {}; pAll.flags = { doppie:false, gruppi:false, sc:false, gn:false, gli:false };
+  pAll.settings = { wordType:'mixed', lengths:[2], categories:{letters:true,syllables:true,words:true}, level: 3 };
+  const cpAll = E.completePool(pAll).map(function (e) { return e.w; });
+  const cpWanted = ['TAZZINA','TELEVISORE','PORTA','MONETA','CIOCCOLATO','MARTELLO',
+    'TAVOLO','TIMONE','TUBETTO','TAPPETO','TENDA','RUOTA','TETTO','TETTOIA','TIGRE'];
+  const cpMissing = cpWanted.filter(function (w) { return cpAll.indexOf(w) === -1; });
+  check('Completa la parola: con T+L+N+R+D ci sono tutte le parole richieste' + (cpMissing.length ? ' → mancano ' + cpMissing.join(',') : ''),
+    cpMissing.length === 0);
+
+  // Ogni consonante, da sola, deve offrire almeno qualche parola
   const cpThin = [];
   IAL.CONFIG.CONSONANTS.filter(function (c) { return c !== 'H'; }).forEach(function (c) {
     const pc = IAL.Store.createProfile('C' + c, '🐨');
@@ -447,10 +463,10 @@
     pc.syllables = {}; pc.flags = { doppie:false, gruppi:false, sc:false, gn:false, gli:false };
     pc.settings = { wordType:'mixed', lengths:[2], categories:{letters:true,syllables:true,words:true}, level: 3 };
     const n = E.completePool(pc).length;
-    if (n < 10) cpThin.push(c + ':' + n);
+    if (n < 4) cpThin.push(c + ':' + n);
   });
   IAL.Store.setActive(pC.id);
-  check('Completa la parola: almeno 10 parole per ogni consonante' + (cpThin.length ? ' → poche ' + cpThin.join(' ') : ''),
+  check('Completa la parola: almeno 4 parole per ogni consonante' + (cpThin.length ? ' → poche ' + cpThin.join(' ') : ''),
     cpThin.length === 0);
 
   out.push('');

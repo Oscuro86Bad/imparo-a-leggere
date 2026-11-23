@@ -396,9 +396,13 @@ IAL.Engine = (function () {
   // ---------- Esercizi COMPLETA LA PAROLA ----------
   // Sezione volutamente SVINCOLATA da lunghezze, livelli e sillabe studiate:
   // al bambino serve solo scrivere le ultime due lettere, quindi si possono
-  // proporre parole lunghe e ricche. L'unico vincolo è che la parola contenga
-  // almeno una consonante attiva: così l'esercizio allena le lettere scelte
-  // dal genitore. Le due lettere finali si nascondono sempre.
+  // proporre parole lunghe e ricche. Due soli vincoli:
+  //  1. la parola contiene almeno una consonante attiva (allena le lettere
+  //     scelte dal genitore);
+  //  2. le DUE lettere da scrivere sono conosciute (vocali + consonanti
+  //     attive), perché è quello che il bambino deve tracciare.
+  // Le altre lettere della parola possono essere nuove: l'immagine e la voce
+  // aiutano, e comunque si preferiscono parole con meno lettere nuove.
   function completeWords() {
     const out = [];
     const seen = {};
@@ -416,21 +420,53 @@ IAL.Engine = (function () {
   }
 
   function completePool(p) {
+    const letters = enabledLetters(p);
     const consonants = (p.letters && p.letters.consonants) || [];
     if (!consonants.length) return [];
     return completeWords().filter(function (e) {
+      // 1. la parola deve contenere almeno una consonante attiva
       const used = IAL.lettersOf(e.w);
-      return used.some(function (ch) { return consonants.indexOf(ch) !== -1; });
+      if (!used.some(function (ch) { return consonants.indexOf(ch) !== -1; })) return false;
+      // 2. le DUE lettere da scrivere devono essere conosciute: sono quelle
+      //    che il bambino deve tracciare sulla lavagna.
+      return IAL.lettersOf(e.w.slice(-2)).every(function (ch) { return letters.has(ch); });
     });
+  }
+
+  // Quante lettere della parola il bambino non ha ancora studiato
+  function unknownLetters(e, letters) {
+    const seen = {};
+    let n = 0;
+    for (const ch of e.w) {
+      if (!letters.has(ch) && !seen[ch]) { seen[ch] = 1; n++; }
+    }
+    return n;
   }
 
   function nextComplete(p) {
     const pool = completePool(p);
     if (!pool.length) return null;
+    const letters = enabledLetters(p);
+    // Preferisce le parole più leggibili: prima quelle fatte solo di lettere
+    // conosciute, poi quelle con UNA sola lettera nuova, e così via, finché
+    // non ci sono abbastanza scelte (le due lettere mancanti sono comunque
+    // sempre conosciute).
+    const tiers = {};
+    pool.forEach(function (e) {
+      const n = unknownLetters(e, letters);
+      if (!tiers[n]) tiers[n] = [];
+      tiers[n].push(e);
+    });
+    let use = [];
+    Object.keys(tiers).map(Number).sort(function (a, b) { return a - b; }).forEach(function (n) {
+      if (use.length >= 12) return;
+      use = use.concat(tiers[n]);
+    });
+    if (!use.length) use = pool;
     // Privilegia le parole più lunghe (dai 5 caratteri in su)
-    const longer = pool.filter(function (e) { return e.w.length >= 5; });
-    const use = longer.length >= 5 ? longer : pool;
-    const entry = pick(use, recent);
+    const longer = use.filter(function (e) { return e.w.length >= 5; });
+    const finalPool = longer.length >= 5 ? longer : use;
+    const entry = pick(finalPool, recent);
     if (!entry) return null;
     remember({ text: entry.w });
     return {

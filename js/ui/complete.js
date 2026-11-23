@@ -9,7 +9,8 @@
       automatico) oppure 🔁 RIPROVO (cancella e riscrive la stessa
       parola).
    La sezione è svincolata da lunghezze, livelli e sillabe studiate:
-   basta che la parola contenga almeno una consonante attiva.
+   basta che la parola contenga una consonante attiva e che le due
+   lettere da scrivere siano conosciute dal bambino.
    ============================================================ */
 window.IAL = window.IAL || {};
 
