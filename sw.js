@@ -4,10 +4,13 @@
  *   una sola ricarica della pagina basta per vedere gli aggiornamenti.
  * - OFFLINE: usa la copia salvata in cache.
  */
-const CACHE_NAME = 'imparo-a-leggere-v31';
+const CACHE_NAME = 'imparo-a-leggere-v32';
 // Cache separata per i file del motore OCR (CDN): non vengono cancellati
 // a ogni aggiornamento dell'app, così la lettura da foto resta offline.
 const VENDOR_CACHE = 'imparo-a-leggere-vendor-v1';
+// Cache separata per gli audio preregistrati delle parole: restano validi
+// anche quando l'app si aggiorna (cambiano solo se cambia questa versione).
+const AUDIO_CACHE = 'imparo-a-leggere-audio-v1';
 const CDN_HOSTS = ['cdn.jsdelivr.net'];
 const ASSETS = [
   './',
@@ -17,6 +20,7 @@ const ASSETS = [
   './js/config.js',
   './js/data/words.js',
   './js/data/associations.js',
+  './js/data/audio.js',
   './js/state/store.js',
   './js/engine/generator.js',
   './js/ui/components.js',
@@ -56,7 +60,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k !== CACHE_NAME && k !== VENDOR_CACHE)
+          .filter((k) => k !== CACHE_NAME && k !== VENDOR_CACHE && k !== AUDIO_CACHE)
           .map((k) => caches.delete(k))
       )
     ).then(() => self.clients.claim())
@@ -84,6 +88,23 @@ self.addEventListener('fetch', (event) => {
         )
       );
     }
+    return;
+  }
+
+  // Audio preregistrato delle parole: dopo il primo ascolto resta in cache
+  // (cache dedicata, non cancellata dagli aggiornamenti dell'app).
+  if (url.pathname.indexOf('/audio/') !== -1) {
+    event.respondWith(
+      caches.open(AUDIO_CACHE).then((cache) =>
+        cache.match(event.request).then((hit) => {
+          if (hit) return hit;
+          return fetch(event.request).then((response) => {
+            if (response && response.ok) cache.put(event.request, response.clone());
+            return response;
+          });
+        })
+      )
+    );
     return;
   }
 

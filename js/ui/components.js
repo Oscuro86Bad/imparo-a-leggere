@@ -51,6 +51,23 @@ IAL.UI = (function () {
   let preferredVoice = null;
   let unlockDone = false;
   let unlockAudio = null;
+  let wordAudio = null;
+
+  // Punteggio delle voci: prima le voci di qualità (Migliorata/Premium/Neural),
+  // poi i nomi italiani femminili più chiari, poi le voci locali. Le voci
+  // "compact" di iOS sono quelle che suonano peggio: finiscono in fondo.
+  function voiceScore(v, exact) {
+    const name = String(v.name || '');
+    const uri = String(v.voiceURI || '');
+    const all = name + ' ' + uri;
+    let score = exact ? 20 : 0;
+    if (/premium|enhanced|neural|siri/i.test(all)) score += 40;
+    if (/alice|elsa|isabella|federica|serena|giulia|sofia|aurora/i.test(name)) score += 16;
+    if (v.localService) score += 10;
+    if (/compact|eloquence|espeak|festival/i.test(all)) score -= 20;
+    if (/luca|diego|giuseppe|paolo|matteo/i.test(name)) score += 2;
+    return score;
+  }
 
   function loadVoices() {
     if (!('speechSynthesis' in window)) return;
@@ -64,8 +81,11 @@ IAL.UI = (function () {
       else if (/^it([-_]|$)/i.test(lang) || /italian|italiano/i.test(name)) other.push(v);
     });
     const pool = exact.length ? exact : other;
-    const local = pool.filter(function (v) { return v.localService; });
-    preferredVoice = local[0] || pool[0] || null;
+    const ranked = pool.slice().sort(function (a, b) {
+      return voiceScore(b, exact.length && exact.indexOf(b) !== -1) -
+             voiceScore(a, exact.length && exact.indexOf(a) !== -1);
+    });
+    preferredVoice = ranked[0] || null;
   }
 
   if ('speechSynthesis' in window) {
@@ -129,19 +149,91 @@ IAL.UI = (function () {
 
   let activeSay = null;
 
+  // iOS tende a compitare (lettera per lettera) le parole TUTTE MAIUSCOLE.
+  // Alla sintesi di sistema passiamo il minuscolo: in italiano la pronuncia
+  // non cambia. Le parole dell'archivio usano comunque l'audio registrato.
+  function spokenText(text) {
+    const s = String(text);
+    return s === s.toUpperCase() ? s.toLowerCase() : s;
+  }
+
+  function stopAudio() {
+    if (!wordAudio) return;
+    wordAudio.onended = null;
+    wordAudio.onerror = null;
+    try { wordAudio.pause(); } catch (e) { /* ignora */ }
+    try {
+      wordAudio.removeAttribute('src');
+      wordAudio.load();
+    } catch (e) { /* ignora */ }
+  }
+
   function stopSpeech() {
     if (activeSay) {
       try { activeSay.cancel(); } catch (e) { /* ignora */ }
       activeSay = null;
     }
+    stopAudio();
     if (!('speechSynthesis' in window)) return;
     try { window.speechSynthesis.cancel(); } catch (e) { /* nessuna voce attiva */ }
   }
 
-  // Pronuncia un testo e chiama done() quando ha finito (o al massimo dopo
-  // 6 secondi, per non bloccare mai l'esercizio se il motore voce non
-  // risponde). Usata dopo ogni risposta corretta.
-  function say(text, done) {
+  // Riproduce l'MP3 preregistrato della parola (voce neurale). Se il file
+  // non è disponibile o il browser blocca la riproduzione, ripiega sulla
+  // sintesi vocale del dispositivo.
+  function playAudio(src, text, done) {
+    let finished = false;
+    let safety = null;
+    const el = wordAudio || (wordAudio = new Audio());
+    el.onended = null;
+    el.onerror = null;
+
+    const finish = function () {
+      if (finished) return;
+      finished = true;
+      if (safety) { clearTimeout(safety); safety = null; }
+      if (activeSay && activeSay.cancel === cancel) activeSay = null;
+      if (done) done();
+    };
+    const cancel = function () {
+      if (finished) return;
+      finished = true;
+      if (safety) { clearTimeout(safety); safety = null; }
+      try { el.pause(); } catch (e) { /* ignora */ }
+      if (activeSay && activeSay.cancel === cancel) activeSay = null;
+    };
+    activeSay = { cancel: cancel };
+
+    el.onended = finish;
+    el.onerror = function () {
+      cancel();
+      speakTTS(text, done);
+    };
+
+    try {
+      el.pause();
+      el.src = src;
+      el.currentTime = 0;
+      el.volume = 1;
+      const play = el.play();
+      if (play && play.catch) {
+        play.catch(function () {
+          cancel();
+          speakTTS(text, done);
+        });
+      }
+    } catch (e) {
+      cancel();
+      speakTTS(text, done);
+      return;
+    }
+    // Safari a volte perde l'evento "ended": non bloccare mai l'esercizio.
+    safety = setTimeout(finish, 8000);
+  }
+
+  // Sintesi vocale del dispositivo: fallback per sillabe, parole inventate,
+  // parole personalizzate e testi non preregistrati.
+  function speakTTS(text, done) {
     let finished = false;
     let started = false;
     let retried = false;
@@ -180,10 +272,10 @@ IAL.UI = (function () {
 
     function attempt(useVoice) {
       if (finished) return;
-      const u = new SpeechSynthesisUtterance(String(text));
+      const u = new SpeechSynthesisUtterance(spokenText(text));
       u.lang = 'it-IT';
       u.rate = 0.85;
-      u.pitch = 1.05;
+      u.pitch = 1;
       u.volume = 1;
       if (useVoice && voice) u.voice = voice;
       u.onstart = function () { started = true; };
@@ -229,14 +321,30 @@ IAL.UI = (function () {
     }
   }
 
+  // Pronuncia un testo e chiama done() quando ha finito. Le parole reali
+  // usano l'audio preregistrato (voce neurale, chiara anche su iPad); tutto
+  // il resto usa la voce del dispositivo.
+  function say(text, done) {
+    if (!text) { if (done) done(); return; }
+    const key = String(text).toUpperCase();
+    const src = (window.IAL && IAL.AUDIO_MAP) ? IAL.AUDIO_MAP[key] : '';
+    if (src) { playAudio(src, text, done); return; }
+    speakTTS(text, done);
+  }
+
   // Informazioni sulla voce (per il collaudo nell'Area Genitori)
   function speechInfo() {
-    if (!('speechSynthesis' in window)) return { ok: false, count: 0, voice: '' };
+    const map = (window.IAL && IAL.AUDIO_MAP) || null;
+    const audio = map ? Object.keys(map).length : 0;
+    if (!('speechSynthesis' in window)) {
+      return { ok: audio > 0, count: 0, voice: '', audio: audio };
+    }
     if (!voices.length) loadVoices();
     return {
       ok: true,
       count: voices.length,
-      voice: preferredVoice ? String(preferredVoice.name || '') : ''
+      voice: preferredVoice ? String(preferredVoice.name || '') : '',
+      audio: audio
     };
   }
 

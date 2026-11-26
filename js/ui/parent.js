@@ -431,17 +431,26 @@ IAL.Parent = (function () {
           class: 'btn btn-soft btn-sm',
           onclick: function () {
             const inf = IAL.UI.speechInfo();
-            IAL.UI.say('Ciao! Sono la voce dell’app. Tetto. Tatu. Mamma.');
-            if (!inf.ok) IAL.UI.toast('Questo dispositivo non ha la sintesi vocale');
+            IAL.UI.say('TETTOIA');
+            if (inf.audio) {
+              IAL.UI.toast('Parole: voce registrata (' + inf.audio + ' audio) · Sillabe: ' +
+                (inf.voice || 'voce del dispositivo'));
+            } else if (!inf.ok) IAL.UI.toast('Questo dispositivo non ha la sintesi vocale');
             else if (!inf.count) IAL.UI.toast('Nessuna voce installata: aggiungila nelle impostazioni del telefono');
             else IAL.UI.toast('Voce: ' + (inf.voice || 'predefinita') + ' (' + inf.count + ' voci)');
           }
         }, ['🔊 Prova la voce'])
       ]),
       el('div', { class: 'note' }, [
+        'Le parole degli esercizi usano una voce registrata, chiara anche su iPad. ',
+        'Sillabe, parole inventate e parole personalizzate usano la voce del dispositivo. ',
         'Se non senti la voce: alza il volume dei contenuti multimediali, togli il silenzioso ',
         '(su iPhone è l’interruttore laterale) e verifica che nel telefono sia installata una voce ',
         'italiana (Accessibilità → Sintesi vocale). Ogni sezione ha anche il pulsante 🔊 SENTI.'
+      ]),
+      el('div', { class: 'note' }, [
+        'Su iPhone/iPad puoi migliorare anche le sillabe: Impostazioni → Accessibilità → ',
+        'Contenuto letto → Voci → Italiano, poi scarica una voce Migliorata o Premium.'
       ]),
       el('div', { class: 'note' }, [
         'Il livello limita automaticamente lunghezza e difficoltà degli esercizi in TUTTE le sezioni: ',

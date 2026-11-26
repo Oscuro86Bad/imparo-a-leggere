@@ -10,6 +10,8 @@ inventate, associazione parola-immagine.
 - ✅ Installabile sulla schermata Home (PWA).
 - ✅ Funziona **completamente offline** (unica eccezione: la lettura delle parole da
   foto scarica una volta il motore OCR, poi resta in cache sul dispositivo).
+- ✅ Le parole sono lette da una **voce registrata** (neurale, chiara anche su iPad),
+  non dalla sintesi vocale del telefono.
 - ✅ Nessuna pubblicità, nessun tracciamento.
 - ✅ Multi-profilo: ogni bambino ha lettere, esercizi e progressi indipendenti.
 - ✅ I dati restano sul dispositivo (privacy, GDPR: nessun dato dei minori raccolto online).
@@ -176,15 +178,26 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 - Dopo ogni risposta corretta l'app **pronuncia la parola** e poi passa alla
   successiva (in LEGGI E GUARDA la pronuncia accompagna il disegno).
 - Ogni sezione con le parole ha anche il pulsante **🔊 SENTI** per riascoltare.
-- La voce italiana viene scelta automaticamente; se non è installata l'app
-  ripiega sulla voce predefinita del dispositivo.
+- **Le parole reali usano un audio preregistrato** con una voce neurale italiana
+  (485 parole, ~5 MB): è chiaro anche su iPhone/iPad, dove Safari spesso espone
+  solo le voci "compact" robotiche. Gli audio sono file MP3 in `audio/w/`,
+  elencati in `js/data/audio.js`.
+- **Sillabe, parole inventate e parole personalizzate** usano la voce del
+  dispositivo (non ha senso registrarle tutte): l'app sceglie la voce italiana
+  migliore disponibile e pronuncia il testo in minuscolo (su iOS le parole tutte
+  maiuscole vengono a volte compitate lettera per lettera).
+- Se un audio manca o il browser blocca la riproduzione, l'app ripiega in
+  automatico sulla sintesi vocale: l'esercizio non si blocca mai.
+- **Offline**: gli audio vengono scaricati in background dopo il primo avvio e
+  conservati in una cache separata (`imparo-a-leggere-audio-v1`) che non viene
+  cancellata dagli aggiornamenti dell'app.
 - Se non si sente nulla: alzare il volume dei **contenuti multimediali**,
-  togliere il **silenzioso** (su iPhone è l'interruttore laterale) e verificare
-  una voce italiana in *Accessibilità → Sintesi vocale*.
-- Nell'**Area Genitori → Esercizi** c'è **🔊 Prova la voce**: dice una frase di
-  prova e mostra quale voce è in uso. Nelle app aggiunte alla schermata Home
-  di iPhone/iPad la sintesi vocale può essere limitata dal sistema: in quel
-  caso usare Safari (o il pulsante 🔊 SENTI, che parte da un tocco diretto).
+  togliere il **silenzioso** (su iPhone è l'interruttore laterale).
+- Nell'**Area Genitori → Esercizi** c'è **🔊 Prova la voce**: pronuncia una parola
+  registrata e mostra quale voce del dispositivo è in uso per le sillabe.
+- Su iPhone/iPad si possono migliorare anche le sillabe scaricando una voce
+  **Migliorata** o **Premium**: *Impostazioni → Accessibilità → Contenuto letto →
+  Voci → Italiano*.
 
 ### AREA GENITORI (protetta da PIN opzionale a 4 cifre)
 - **Profili**: profili multipli indipendenti, modifica, eliminazione.
@@ -233,14 +246,18 @@ IMPARO A LEGGERE/
 │   ├── config.js           # alfabeto, sillabe, livelli, messaggi
 │   ├── data/words.js       # archivio parole reali (con immagini)
 │   ├── data/associations.js# associazioni sillaba→parola→immagine
+│   ├── data/audio.js       # elenco parole → audio preregistrato
 │   ├── state/store.js      # profili, impostazioni, progressi (localStorage)
 │   ├── engine/generator.js # motore di generazione con controlli didattici
 │   ├── ui/*.js             # schermate: home, lettura, leggi e guarda, area genitori, parole personalizzate
 │   ├── ui/ocr.js           # lettura parole da FOTO (Tesseract.js, tutto in locale)
 │   └── app.js              # avvio
+├── audio/w/                # 485 MP3 preregistrati (voce neurale italiana)
 ├── icons/                  # icone (generate con scripts/make-icon.ps1)
 ├── img/                    # disegni delle parole (SVG: mimo, magia, lago, merenda, pirata)
 ├── scripts/make-icon.ps1   # rigenera le icone (Windows, senza dipendenze)
+├── tools/generate_audio.py # rigenera gli audio delle parole (edge-tts)
+├── tools/audio-words.txt   # elenco delle parole da registrare
 ├── supabase/schema.sql     # schema database online (opzionale, vedi sotto)
 ├── .github/workflows/deploy.yml  # pubblicazione automatica su GitHub Pages
 ├── test.html               # collaudo automatico del motore
@@ -294,10 +311,12 @@ Il progetto è già predisposto: schema completo, separazione netta tra dati
 
 Due pagine di collaudo automatico (apribili da browser, anche da `file://`):
 - `test.html` — motore di generazione: nessuna lettera non abilitata, nessuna combinazione
-  non studiata, correttezza reali/inventate, filtro lunghezza, zero esercizi se tutto spento.
+  non studiata, correttezza reali/inventate, filtro lunghezza, zero esercizi se tutto spento
+  (69 controlli).
 - `uitest.html` — interfaccia completa: creazione profilo, 30 esercizi in SOLO LETTURA con
   controllo delle lettere, ciclo CORRETTO/AVANTI in LEGGI E GUARDA, tutte le schede
-  dell'Area Genitori, PIN, stelline e statistiche.
+  dell'Area Genitori, PIN, stelline e statistiche, uso dell'audio preregistrato e
+  fallback alla sintesi vocale (124 controlli).
 
 Checklist manuale consigliata (2 minuti):
 - [ ] Attiva solo vocali + P: nessuna parola con altre lettere compare.
@@ -319,8 +338,17 @@ Checklist manuale consigliata (2 minuti):
   come immagine vera (es. MAGIA, MIMO, LAGO, MERENDA, PIRATA). I disegni nuovi vanno messi in `img/`
   e aggiunti a `ASSETS` in `sw.js` per averli anche offline.
 - **Rigenerare le icone**: `powershell -ExecutionPolicy Bypass -File scripts/make-icon.ps1`
-- **Funzionalità presenti**: pronuncia audio (sintesi vocale) e riconoscimento
-  vocale della lettura in **DICO LA PAROLA** (Web Speech API).
+- **Rigenerare gli audio delle parole** (dopo aver aggiunto parole nuove):
+  1. `pip install edge-tts`
+  2. aggiorna `tools/audio-words.txt` con le parole in maiuscolo (una per riga)
+  3. `python tools/generate_audio.py` → crea gli MP3 mancanti in `audio/w/` e
+     riscrive `js/data/audio.js`.
+  Voce predefinita: `it-IT-ElsaNeural`, velocità `-30%` (si può cambiare con
+  `--voice` e `--rate`). Se gli audio cambiano, aggiorna `AUDIO_CACHE` in
+  `sw.js` (es. `imparo-a-leggere-audio-v2`) per farli riscaricare.
+- **Funzionalità presenti**: pronuncia con audio preregistrato + sintesi vocale
+  come riserva, riconoscimento vocale della lettura in **DICO LA PAROLA**
+  (Web Speech API).
 - **Funzionalità future predisposte**: frasi brevi (livello 6), esercizi
   personalizzati sugli errori.
 

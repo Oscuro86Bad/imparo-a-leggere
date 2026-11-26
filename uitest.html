@@ -105,7 +105,7 @@
   const readWord0 = document.getElementById('ex-word').textContent;
   const origSpeakRead = window.speechSynthesis && window.speechSynthesis.speak;
   const spokenRead = [];
-  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenRead.push(t); };
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenRead.push(t.toUpperCase()); };
   btnWith('CORRETTO').click(); await wait(400);
   check('CORRETTO → +1 stella', IAL.Store.active().stats.stars === stars0 + 1);
   check('CORRETTO → pronuncia la parola corretta (' + readWord0 + ')',
@@ -124,7 +124,7 @@
   const mxWord0 = document.getElementById('mx-word').textContent;
   const origSpeakMx = window.speechSynthesis && window.speechSynthesis.speak;
   const spokenMx = [];
-  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenMx.push(t); };
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenMx.push(t.toUpperCase()); };
   btnWith('CORRETTO').click(); await wait(400);
   check('LEGGI E GUARDA → CORRETTO pronuncia la parola (' + mxWord0 + ')',
     !window.speechSynthesis || (spokenMx.length >= 1 && spokenMx[0] === mxWord0));
@@ -199,13 +199,40 @@
     (document.getElementById('vc-msg') || {}).textContent === 'Con cosa inizia? 🔍');
   const origSpeakVc = window.speechSynthesis && window.speechSynthesis.speak;
   const spokenVc = [];
-  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenVc.push(t); };
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenVc.push(t.toUpperCase()); };
   const vcWordForSay = IAL.Choice.currentForTest().word;
   check('Pulsante 🔊 SENTI presente in VEDI E SCEGLI', !!btnWith('SENTI'));
   btnWith('SENTI').click(); await wait(150);
   check('Vedi e scegli: SENTI pronuncia la parola (' + vcWordForSay + ')',
     spokenVc.indexOf(vcWordForSay) !== -1);
   if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakVc;
+
+  // La voce delle parole usa l'audio preregistrato quando è disponibile
+  // (voce neurale chiara anche su iOS); la sintesi del dispositivo resta
+  // come fallback per sillabe, parole inventate e parole personalizzate.
+  const RealAudio = window.Audio;
+  let fakeAudioLast = null, fakeAudioDone = 0;
+  function FakeAudio() {
+    fakeAudioLast = this;
+    this.play = function () { return Promise.resolve(); };
+    this.pause = function () {};
+    this.load = function () {};
+    this.removeAttribute = function () {};
+    this.currentTime = 0;
+    this.volume = 1;
+  }
+  window.Audio = FakeAudio;
+  const oldAudioMap = IAL.AUDIO_MAP;
+  IAL.AUDIO_MAP = { 'TETTOIA': 'audio/w/tettoia.mp3' };
+  IAL.UI.say('TETTOIA', function () { fakeAudioDone++; });
+  check('Voce parole: usa l’audio preregistrato (TETTOIA)',
+    !!fakeAudioLast && fakeAudioLast.src === 'audio/w/tettoia.mp3');
+  if (fakeAudioLast && fakeAudioLast.onended) fakeAudioLast.onended();
+  check('Voce parole: a fine audio chiama done()', fakeAudioDone === 1);
+  IAL.UI.stopSpeech();
+  IAL.AUDIO_MAP = oldAudioMap;
+  window.Audio = RealAudio;
+
   check('Immagini: MAGIA e MIMO usano i disegni (non emoji confuse)',
     IAL.WORDS_BY_KEY.MAGIA.img === 'img/magia.svg' && IAL.WORDS_BY_KEY.MIMO.img === 'img/mimo.svg');
   check('Immagini: LAGO, MERENDA e PIRATA usano disegni dedicati',
@@ -258,7 +285,7 @@
   // --- ASCOLTA E SELEZIONA ---
   const origSpeakAs = window.speechSynthesis && window.speechSynthesis.speak;
   const spokenAs = [];
-  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenAs.push(t); };
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenAs.push(t.toUpperCase()); };
   IAL.Listen.show();
   await wait(250);
   const asCur = IAL.Listen.currentForTest();
@@ -304,7 +331,7 @@
   // --- COMPLETA LA PAROLA ---
   const origSpeakCp = window.speechSynthesis && window.speechSynthesis.speak;
   const spokenCp = [];
-  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenCp.push(t); };
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenCp.push(t.toUpperCase()); };
   IAL.Complete.show();
   await wait(200);
   const cpCur = IAL.Complete.currentForTest();
@@ -392,7 +419,7 @@
   const starsCm = IAL.Store.active().stats.stars;
   const origSpeakCm = window.speechSynthesis && window.speechSynthesis.speak;
   const spokenCm = [];
-  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenCm.push(t); };
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) { const t = String((u && u.text) || '').trim(); if (t) spokenCm.push(t.toUpperCase()); };
   btnWith('CORRETTO').click(); await wait(400);
   check('Parole mie: CORRETTO → +1 stella', IAL.Store.active().stats.stars === starsCm + 1);
   check('Parole mie: CORRETTO pronuncia la parola (' + cmWord + ')',
