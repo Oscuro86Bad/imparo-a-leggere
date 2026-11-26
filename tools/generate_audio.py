@@ -9,7 +9,7 @@ Uso:
 Richiede il pacchetto edge-tts (pip install edge-tts).
 I file vengono salvati in audio/w/<parola>.mp3 e l'elenco in
 js/data/audio.js, usato dall'app per pronunciare le parole senza la
-sintesi vocale del dispositivo (che su iOS Ã¨ spesso scadente).
+sintesi vocale del dispositivo (che su iOS è spesso scadente).
 """
 import argparse
 import asyncio
@@ -32,15 +32,24 @@ def slug(word: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", word.lower()).strip("-")
 
 
+def audio_path(word: str) -> Path:
+    return OUT_DIR / (slug(word) + ".mp3")
+
+
+def is_ready(word: str) -> bool:
+    path = audio_path(word)
+    return path.exists() and path.stat().st_size > 2000
+
+
 async def make_one(text: str, voice: str, rate: str, sem: asyncio.Semaphore, errors: list):
-    path = OUT_DIR / (slug(text) + ".mp3")
-    if path.exists() and path.stat().st_size > 2000:
+    if is_ready(text):
         return True
+    path = audio_path(text)
     async with sem:
         for attempt in range(3):
             try:
                 await edge_tts.Communicate(text, voice, rate=rate).save(str(path))
-                if path.exists() and path.stat().st_size > 2000:
+                if is_ready(text):
                     return True
             except Exception as exc:  # rete instabile o servizio occupato
                 if attempt == 2:
@@ -49,10 +58,15 @@ async def make_one(text: str, voice: str, rate: str, sem: asyncio.Semaphore, err
     return False
 
 
-def write_manifest(words):
-    rows = []
-    for w in sorted(words):
-        rows.append(f'  "{w}": "audio/w/{slug(w)}.mp3"')
+def write_manifest():
+    """Elenca tutte le parole che hanno un audio valido.
+
+    Non dipende da --limit: una prova su poche parole non deve mai
+    rimpicciolire il manifesto usato dall'app.
+    """
+    words = [w.strip() for w in WORDS_FILE.read_text(encoding="utf-8").splitlines() if w.strip()]
+    available = [w for w in words if is_ready(w)]
+    rows = [f'  "{w}": "audio/w/{slug(w)}.mp3"' for w in sorted(available)]
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
     MANIFEST.write_text(
         "/* Audio preregistrato delle parole (voce neurale italiana).\n"
@@ -61,6 +75,7 @@ def write_manifest(words):
         "IAL.AUDIO_MAP = {\n" + ",\n".join(rows) + "\n};\n",
         encoding="utf-8",
     )
+    return available
 
 
 async def main():
@@ -79,8 +94,8 @@ async def main():
     sem = asyncio.Semaphore(max(1, args.concurrency))
     errors = []
     done = 0
-    todo = len([w for w in words if not (OUT_DIR / (slug(w) + ".mp3")).exists()])
-    print(f"Parole: {len(words)} Â· da generare: {todo} Â· voce: {args.voice}", flush=True)
+    todo = len([w for w in words if not is_ready(w)])
+    print(f"Parole: {len(words)} · da generare: {todo} · voce: {args.voice}", flush=True)
 
     async def worker(w):
         nonlocal done
@@ -91,12 +106,14 @@ async def main():
                 print(f"  {done}/{todo}", flush=True)
         return ok
 
-    results = await asyncio.gather(*(worker(w) for w in words))
+    await asyncio.gather(*(worker(w) for w in words))
 
-    available = [w for w, ok in zip(words, results) if ok]
-    write_manifest(available)
-    total_bytes = sum((OUT_DIR / (slug(w) + ".mp3")).stat().st_size for w in available)
-    print(f"Generate {len(available)}/{len(words)} Â· {total_bytes / 1024 / 1024:.1f} MB", flush=True)
+    available = write_manifest()
+    total_bytes = sum(audio_path(w).stat().st_size for w in available)
+    print(
+        f"Manifesto: {len(available)} parole · {total_bytes / 1024 / 1024:.1f} MB",
+        flush=True,
+    )
     if errors:
         print("Errori:", file=sys.stderr)
         for e in errors[:20]:
@@ -107,4 +124,3 @@ async def main():
 
 if __name__ == "__main__":
     raise SystemExit(asyncio.run(main()))
-
