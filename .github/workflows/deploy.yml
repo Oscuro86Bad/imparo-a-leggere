@@ -35,6 +35,12 @@ jobs:
         with:
           path: '.'
 
+      # L'API degli artifact può impiegare qualche secondo a rendere
+      # visibile il pacchetto appena caricato: senza questa attesa
+      # deploy-pages a volte non lo trova (o lo conta due volte).
+      - name: Attendi la visibilità dell'artifact
+        run: sleep 10
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
