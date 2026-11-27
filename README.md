@@ -261,13 +261,21 @@ In alternativa basta l'estensione *Live Server* di VS Code.
   successiva (in LEGGI E GUARDA la pronuncia accompagna il disegno).
 - Ogni sezione con le parole ha anche il pulsante **🔊 SENTI** per riascoltare.
 - **Le parole reali usano un audio preregistrato** con una voce neurale italiana
-  (485 parole, ~5 MB): è chiaro anche su iPhone/iPad, dove Safari spesso espone
+  (2252 parole, ~24 MB): è chiaro anche su iPhone/iPad, dove Safari spesso espone
   solo le voci "compact" robotiche. Gli audio sono file MP3 in `audio/w/`,
   elencati in `js/data/audio.js`.
+- **Parole con l'accento**: l'app scrive tutto in maiuscolo, ma alcune parole
+  vanno pronunciate con l'accento (PAPA → papà, META → metà, CAFFE → caffè,
+  PRINCIPI → prìncipi, COMPITI → cómpiti…). La tabella `SPOKEN` in
+  `tools/generate_audio.py` registra la forma corretta e `IAL.PRONOUNCE_MAP`
+  in `js/data/audio.js` la usa anche per le frasi lette dalla voce del
+  dispositivo. I file rigenerati hanno un `?v=<hash>` nel manifesto: il
+  browser scarica solo quelli cambiati, senza invalidare tutta la cache audio.
 - **Sillabe, parole inventate e parole personalizzate** usano la voce del
   dispositivo (non ha senso registrarle tutte): l'app sceglie la voce italiana
   migliore disponibile e pronuncia il testo in minuscolo (su iOS le parole tutte
-  maiuscole vengono a volte compitate lettera per lettera).
+  maiuscole vengono a volte compitate lettera per lettera). Nelle frasi la
+  voce normalizza anche `PAPA`, `BEBE` e la `E` del verbo (→ è).
 - Se un audio manca o il browser blocca la riproduzione, l'app ripiega in
   automatico sulla sintesi vocale: l'esercizio non si blocca mai.
 - **Offline**: gli audio vengono scaricati in background dopo il primo avvio e

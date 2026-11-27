@@ -14,7 +14,7 @@
 <script src="js/data/associations.js?v=9"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=18"></script>
-<script src="js/ui/components.js?v=18"></script>
+<script src="js/ui/components.js?v=19"></script>
 <script src="js/ui/home.js?v=19"></script>
 <script src="js/ui/blend.js?v=3"></script>
 <script src="js/ui/reading.js?v=12"></script>
@@ -920,6 +920,14 @@
     IAL.CONFIG.CONSONANTS.indexOf('H') !== -1 &&
     IAL.Engine.canShowSentence(pHyesUI, hSentUI) && !IAL.Engine.canShowSentence(pHnoUI, hSentUI));
   IAL.Sentences.hide();
+
+  // Pronuncia: le parole accentate vengono passate correttamente alla voce.
+  IAL.PRONOUNCE_MAP = { PAPA: 'papà', BEBE: 'bebè', E: 'è', META: 'metà' };
+  check('Voce: PAPA dentro una frase diventa papà', IAL.UI.spokenText('PAPA BALLA.') === 'papà balla.');
+  check('Voce: BEBE diventa bebè e la E verbo diventa è', IAL.UI.spokenText('IL BEBE E BELLO.') === 'il bebè è bello.');
+  check('Voce: la lettera E da sola resta e', IAL.UI.spokenText('E') === 'e');
+  check('Voce: META diventa metà', IAL.UI.spokenText('META') === 'metà');
+  delete IAL.PRONOUNCE_MAP;
 
   out.push('');
   out.push(fail === 0 ? 'UI TEST SUPERATI (' + pass + ')' : 'UI TEST FALLITI: ' + fail + ' su ' + (pass + fail));

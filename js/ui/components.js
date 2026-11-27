@@ -152,12 +152,26 @@ IAL.UI = (function () {
 
   let activeSay = null;
 
-  // iOS tende a compitare (lettera per lettera) le parole TUTTE MAIUSCOLE.
-  // Alla sintesi di sistema passiamo il minuscolo: in italiano la pronuncia
-  // non cambia. Le parole dell'archivio usano comunque l'audio registrato.
+  // iOS tende a compitare (lettera per lettera) le parole TUTTE MAIUSCOLE:
+  // alla sintesi di sistema passiamo il minuscolo. Alcune parole però hanno
+  // bisogno dell'accento (PAPA -> papà, BEBE -> bebè, E -> è): senza accento
+  // la voce del dispositivo sbaglia la pronuncia. La mappa arriva da audio.js.
   function spokenText(text) {
     const s = String(text);
-    return s === s.toUpperCase() ? s.toLowerCase() : s;
+    const upper = s === s.toUpperCase();
+    const map = (window.IAL && IAL.PRONOUNCE_MAP) || null;
+    const phrase = /\s/.test(s);
+    return s.split(/(\s+)/).map(function (part) {
+      if (!part || /^\s+$/.test(part)) return part;
+      const m = part.match(/^([A-Za-zÀ-ÖØ-öø-ÿ]+)([^A-Za-zÀ-ÖØ-öø-ÿ]*)$/);
+      if (!m) return upper ? part.toLowerCase() : part;
+      const key = m[1].toUpperCase();
+      const rec = map && map[key];
+      // "E" da sola è il verbo "è" solo dentro una frase: come parola
+      // singola resta la lettera E.
+      if (rec && (key !== 'E' || phrase)) return rec + m[2];
+      return upper ? m[1].toLowerCase() + m[2] : part;
+    }).join('');
   }
 
   // Parole di un testo con la loro posizione in caratteri: serve per
@@ -512,6 +526,6 @@ IAL.UI = (function () {
     modal: modal, alertModal: alertModal, confirmModal: confirmModal, closeModal: closeModal,
     toast: toast, starBurst: starBurst, praise: praise, retryMsg: retryMsg,
     rand: rand, pic: pic, say: say, stopSpeech: stopSpeech, speechInfo: speechInfo,
-    wordSpans: wordSpans, readAloud: readAloud
+    wordSpans: wordSpans, readAloud: readAloud, spokenText: spokenText
   };
 })();
