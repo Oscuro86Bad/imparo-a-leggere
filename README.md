@@ -245,13 +245,16 @@ Nessuna parola casuale: il motore verifica **prima** di proporre qualunque eserc
    **solo con sillabe studiate** e se per caso coincidono con una parola reale
    dell'archivio vengono classificate come reali (es. PUMA).
 
-Archivio incluso: **380 parole italiane reali**, di cui **364 con immagine**, più 172 parole
+Archivio incluso: **2036 parole italiane reali**, di cui **2020 con immagine**, più 172 parole
 aggiuntive per COMPLETA LA PAROLA (`js/data/words.js`). Tutte le **74 combinazioni
 consonante+vocale** (Q incluso) hanno almeno una parola illustrata e una parola che inizia
-con quella sillaba; 71 su 74 ne hanno almeno tre. Le combinazioni più rare sono coperte da
+con quella sillaba. Le combinazioni più rare sono coperte da
 parole concrete: QUOTA (QUO), QUI (QUI), QUESTO (QUE), VULCANO (VU), ZIA/ZIO/ZIBIBBO (ZI).
 
-Ogni parola illustrata ha il suo **MP3 preregistrato** (579 voci in `audio/w/`, manifesto
+Il vocabolario esteso proviene dalle annotazioni CLDR italiane (emoji validate con `pyphen`
+e le regole sillabiche del motore), con inflessioni reali attestate da `wordfreq`.
+
+Ogni parola illustrata ha il suo **MP3 preregistrato** (2235 voci in `audio/w/`, manifesto
 `js/data/audio.js`): la voce neurale è sempre disponibile anche offline, senza ricorrere alla
 sintesi vocale del dispositivo.
 

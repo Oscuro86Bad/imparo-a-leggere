@@ -14,9 +14,9 @@
 <h1>🧪 Collaudo automatico del motore</h1>
 <pre id="out">In corso…</pre>
 <script src="js/config.js?v=8"></script>
-<script src="js/data/words.js?v=22"></script>
+<script src="js/data/words.js?v=23"></script>
 <script src="js/data/associations.js?v=9"></script>
-<script src="js/data/audio.js?v=2"></script>
+<script src="js/data/audio.js?v=3"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=14"></script>
 <script>
@@ -236,8 +236,8 @@
   check('PILA bloccata senza L', pilOk);
   check('MAMMA disponibile con doppie e MA/MMA', mamOk);
   check('APE disponibile con vocali e PE (parola con vocale iniziale)', apeOk);
-  const newWordsOk = IAL.WORDS.length >= 170 && IAL.WORDS.filter(w => w.img).length >= 80;
-  check('Archivio espanso: oltre 170 parole, oltre 80 con immagine (attuali: ' + IAL.WORDS.length + ' / ' + IAL.WORDS.filter(w => w.img).length + ')', newWordsOk);
+  const newWordsOk = IAL.WORDS.length >= 2000 && IAL.WORDS.filter(w => w.img).length >= 2000;
+  check('Archivio espanso: oltre 2000 parole, oltre 2000 con immagine (attuali: ' + IAL.WORDS.length + ' / ' + IAL.WORDS.filter(w => w.img).length + ')', newWordsOk);
 
   // 10b. Copertura completa di TUTTE le combinazioni consonante+vocale.
   //      Ogni sillaba CV deve avere almeno una parola con immagine e almeno
@@ -282,7 +282,7 @@
   });
   check('Audio preregistrato: tutte le ' + audioTotal + ' parole illustrate hanno un MP3' +
     (audioMissing.length ? ' → mancano ' + audioMissing.slice(0, 8).join(',') : ''), audioMissing.length === 0);
-  check('Audio preregistrato: manifesto ampio (' + Object.keys(IAL.AUDIO_MAP || {}).length + ' voci)', Object.keys(IAL.AUDIO_MAP || {}).length >= 570);
+  check('Audio preregistrato: manifesto ampio (' + Object.keys(IAL.AUDIO_MAP || {}).length + ' voci)', Object.keys(IAL.AUDIO_MAP || {}).length >= 2200);
 
   // 11. Attivare una consonante attiva automaticamente le sue sillabe CV
   const p3 = IAL.Store.createProfile('Test3', '🐹');
