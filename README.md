@@ -175,9 +175,10 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 4. **Lunghezza e difficoltà crescono con le consonanti conosciute**: con 1
    consonante fino a 3 parole (livello 1); con 2–3 consonanti fino a 4 parole;
    con 4–5 fino a 5; con 6 fino a 6; con 7 o più fino a 9 parole e livello 4.
-5. L'archivio contiene **1400 frasi** (`js/data/sentences.js`): 300 brevi
-   (livello 1), 500 facili (livello 2), 350 più lunghe (livello 3) e 250
-   ricche (livello 4). Ogni consonante, H e Q comprese, compare in almeno
+5. L'archivio contiene **1455 frasi** (`js/data/sentences.js`): 313 brevi
+   (livello 1), 533 facili (livello 2), 359 più lunghe (livello 3) e 250
+   ricche (livello 4). Le 1400 frasi precedenti sono state conservate e si
+   aggiungono le 55 frasi chieste dall'utente. Ogni consonante, H e Q comprese, compare in almeno
    60 frasi. Niente virgole tra le parole, nessuna vignetta e nessun campo
    `e`/immagine nei dati. Le frasi sono generate da lessico e modelli
    italiani curati (`tools/generate_sentences.py`), senza ripetere la stessa
@@ -284,9 +285,9 @@ Ogni parola illustrata ha il suo **MP3 preregistrato** (2252 voci in `audio/w/`,
 `js/data/audio.js`): la voce neurale è sempre disponibile anche offline, senza ricorrere alla
 sintesi vocale del dispositivo.
 
-Per **LEGGI LA FRASE** l'archivio aggiunge **1400 frasi italiane compiute** in
-`js/data/sentences.js`: 300 brevi (livello 1), 500 facili (livello 2),
-350 più lunghe (livello 3) e 250 ricche (livello 4). Ogni frase richiede solo
+Per **LEGGI LA FRASE** l'archivio aggiunge **1455 frasi italiane compiute** in
+`js/data/sentences.js`: 313 brevi (livello 1), 533 facili (livello 2),
+359 più lunghe (livello 3) e 250 ricche (livello 4). Ogni frase richiede solo
 lettere già attivate, vocali comprese (H come consonante), e non contiene
 immagini. Le frasi non hanno MP3 dedicati: la lettura usa la voce del
 dispositivo, mentre le singole parole dell'archivio restano preregistrate.
@@ -304,7 +305,7 @@ IMPARO A LEGGERE/
 ├── js/
 │   ├── config.js           # alfabeto, sillabe, livelli, messaggi
 │   ├── data/words.js       # archivio parole reali (con immagini)
-│   ├── data/sentences.js   # 1400 frasi compiute, senza immagini
+│   ├── data/sentences.js   # 1455 frasi compiute, senza immagini
 │   ├── data/associations.js# associazioni sillaba→parola→immagine
 │   ├── data/audio.js       # elenco parole → audio preregistrato
 │   ├── state/store.js      # profili, impostazioni, progressi (localStorage)

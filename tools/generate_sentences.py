@@ -15,6 +15,9 @@ Il motore dell'app (IAL.Engine.canShowSentence) controlla TUTTE le lettere
 del testo — vocali comprese — rispetto a quelle attivate nell'Area Genitori.
 Una frase non compare mai se contiene una lettera non attivata.
 
+Le 55 frasi richieste dall'utente (USER_SENTENCES) sono aggiunte dopo la
+selezione storica di 1400 frasi: nessuna frase esistente viene rimossa.
+
 Uso: python tools/generate_sentences.py
 """
 import os
@@ -172,6 +175,69 @@ MUST_HAVE = [
     'IO AMO LA NONNA.', 'IO AMO IL NONNO.',
     'TU AMI LA MAMMA.', 'LUI AMA LA MAMMA.'
 ]
+
+# Frasi chieste esplicitamente dall'utente (numeri 147-201). Vengono
+# aggiunte DOPO le 1400 già selezionate: la selezione storica resta
+# identica, queste si sommano senza sostituire nessuna frase esistente.
+# Testo normalizzato in MAIUSCOLO, senza accenti né apostrofi.
+USER_SENTENCES = [
+    'IL NONNO AMA LA MATTINA.',        # 147
+    'LA NONNA AMA IL MATTINO.',        # 148
+    'LA MAMMA NOMINA NINA.',           # 149
+    'LA NONNA NOMINA MILA.',           # 150
+    'IL PAPA NOMINA PAOLO.',           # 151
+    'ELENA NOMINA ANITA.',             # 152
+    'EMMA NOMINA MILENA.',             # 153
+    'ANITA NOMINA ELENA.',             # 154
+    'PAOLO NOMINA IL NONNO.',          # 155
+    'NINA NOMINA LA NONNA.',           # 156
+    'MILA NOMINA LA MAMMA.',           # 157
+    'IL NONNO NOMINA IL PAPA.',        # 158
+    'LA MAMMA MIMA IL NONNO.',         # 159
+    'LA NONNA MIMA LA MAMMA.',         # 160
+    'PAOLO MIMA NINA.',                # 161
+    'NINA MIMA PAOLO.',                # 162
+    'MILA MIMA ELENA.',                # 163
+    'EMMA MIMA ANITA.',                # 164
+    'ELENA MIMA MILENA.',              # 165
+    'ANITA MIMA LA NONNA.',            # 166
+    'IL PAPA MIMA IL NONNO.',          # 167
+    'LA MAMMA MIMA LA LUNA.',          # 168
+    'IL NONNO TEME IL TEMPORALE.',     # 169
+    'LA MAMMA TEME LA NOTTE.',         # 170
+    'LA NONNA TEME IL TEMPORALE.',     # 171
+    'IL PAPA TEME IL TEMPORALE.',      # 172
+    'NINA TEME LA NOTTE.',             # 173
+    'MILA TEME LA NOTTE.',             # 174
+    'ELENA TEME IL TEMPORALE.',        # 175
+    'EMMA TEME LA LUNA.',              # 176
+    'ANITA TEME LA NOTTE.',            # 177
+    'IL NONNO TEME IL NULLA.',         # 178
+    'LA MAMMA TEME IL MALE.',          # 179
+    'LA NONNA TEME IL MALE.',          # 180
+    'IL PAPA TEME IL MALE.',           # 181
+    'LA MENTE E LIMPIDA.',             # 182
+    'LA MENTE AMA LA PACE.',           # 183
+    'IL TALENTO NON TEME.',            # 184
+    'IL TALENTO E INNATO.',            # 185
+    'LA MAMMA HA TALENTO.',            # 186
+    'IL NONNO HA TALENTO.',            # 187
+    'IL PAPA HA TALENTO.',             # 188
+    'PAOLO HA TALENTO.',               # 189
+    'ELENA HA TALENTO.',               # 190
+    'ANITA HA TALENTO.',               # 191
+    'LA MAMMA E CALMA.',               # 192
+    'LA NONNA E CALMA.',               # 193
+    'IL NONNO E LENTO.',               # 194
+    'IL PAPA E LENTO.',                # 195
+    'NINA E UNA NANA.',                # 196
+    'MILA E UNA NANA.',                # 197
+    'LA MAMMA E UNA MAMMA.',           # 198
+    'IL NONNO E UN NONNO.',            # 199
+    'LA NONNA E UNA NONNA.',           # 200
+    'IL PAPA E UN PAPA.',              # 201
+]
+USER_TEXTS = set(USER_SENTENCES)
 
 # Accoppiamenti semanticamente plausibili: evita frasi del tipo
 # «IL CANE AMA LA BICI» mantenendo comunque molte combinazioni.
@@ -365,6 +431,12 @@ def generate():
             add(subj + ' ' + BE[person] + ' ' + adj_for(forms, person, gender) + '?', 'question')
     add('CHI E?', 'question')
 
+    # 9. Frasi esplicite dell'utente: entrano nel bacino dei candidati, ma
+    #    la selezione di base le esclude (vedi select) per non alterare
+    #    le 1400 frasi già pubblicate.
+    for text in USER_SENTENCES:
+        add(text, 'user')
+
     return list(out.values())
 
 
@@ -372,8 +444,13 @@ def generate():
 # Selezione con copertura garantita di tutte le consonanti
 # ---------------------------------------------------------------------------
 
-def select(candidates):
-    targets = {1: 300, 2: 500, 3: 350, 4: 250}
+OLD_TARGETS = {1: 300, 2: 500, 3: 350, 4: 250}
+USER_TARGETS = Counter(make(t, 'user')['d'] for t in USER_SENTENCES)
+FINAL_TARGETS = {d: OLD_TARGETS[d] + USER_TARGETS[d] for d in (1, 2, 3, 4)}
+
+
+def select_base(candidates, targets):
+    """Selezione storica: identica a quella che ha prodotto le 1400 frasi."""
     rng = random.Random(20261128)
     bydiff = defaultdict(list)
     for c in candidates:
@@ -423,6 +500,25 @@ def select(candidates):
             seen.add(c['t'])
             for ch in c['c']:
                 counts[ch] += 1
+
+    return chosen_by_d, counts, seen
+
+
+def select(candidates):
+    # Le 1400 frasi pubblicate restano intatte: la selezione di base usa
+    # solo i candidati storici, poi le 55 nuove frasi si aggiungono.
+    base_candidates = [c for c in candidates if c['t'] not in USER_TEXTS]
+    chosen_by_d, counts, seen = select_base(base_candidates, OLD_TARGETS)
+
+    by_text = {c['t']: c for c in candidates}
+    for text in USER_SENTENCES:
+        cand = by_text.get(text)
+        if not cand or cand['t'] in seen:
+            continue
+        chosen_by_d[cand['d']].append(cand)
+        seen.add(cand['t'])
+        for ch in cand['c']:
+            counts[ch] += 1
 
     chosen = [c for d in (1, 2, 3, 4) for c in chosen_by_d[d]]
     chosen.sort(key=lambda c: (c['d'], c['w'], c['t']))
