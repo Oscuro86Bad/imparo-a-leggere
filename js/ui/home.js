@@ -50,6 +50,11 @@ IAL.Home = (function () {
         el('span', { class: 'txt' }, ['COMPLETA LA PAROLA', el('span', { class: 'small' }, ['Scrivi le lettere mancanti'])]),
         el('span', { class: 'new-tag' }, ['NEW'])
       ]),
+      el('button', { class: 'btn btn-indigo btn-block', onclick: function () { IAL.Link.show(); } }, [
+        el('span', { class: 'emoji' }, ['🧩']),
+        el('span', { class: 'txt' }, ['COLLEGA L’IMMAGINE', el('span', { class: 'small' }, ['Unisci lettere e figure'])]),
+        el('span', { class: 'new-tag' }, ['NEW'])
+      ]),
       el('button', { class: 'btn btn-slate btn-block', onclick: function () { IAL.Parent.show(); } }, [
         el('span', { class: 'emoji' }, ['🔒']),
         el('span', { class: 'txt' }, ['AREA GENITORI', el('span', { class: 'small' }, ['Lettere, livelli, progressi'])])

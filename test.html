@@ -185,6 +185,7 @@
   check('Nessuna lettera → nessun esercizio di ascolto', E.nextListen(p) === null);
   check('Nessuna lettera → nessun esercizio COMPLETA LA PAROLA', E.nextComplete(p) === null);
   check('Nessuna lettera → nessuna associazione', E.nextMatch(p, { wordType:'mixed', lengths:[2,3,4,5,6] }) === null);
+  check('Nessuna lettera → nessuna coppia per COLLEGA L’IMMAGINE', E.linkPairs(p, 8).length === 0);
 
   // 8. Lunghezza selezionata
   p.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M','L','T','S','N','B','D','F','R','V','Z','C','G'] };
@@ -204,6 +205,25 @@
     if (!E.canShowWord(p, IAL.WORDS_BY_KEY[w])) grpOk = false;
   });
   check('Parole con gruppi consonantici valutabili e disponibili con flag attive', grpOk);
+
+  // 9b. COLLEGA L'IMMAGINE: coppie immagine + prime due lettere
+  const pairsLk = E.linkPairs(p, 8);
+  check('Collega l’immagine: 8 coppie con il profilo completo', pairsLk.length === 8);
+  check('Collega l’immagine: inizi di 2 lettere tutti diversi',
+    pairsLk.every(pa => /^[A-Z]{2}$/.test(pa.key)) &&
+    new Set(pairsLk.map(pa => pa.key)).size === pairsLk.length &&
+    new Set(pairsLk.map(pa => pa.word)).size === pairsLk.length);
+  check('Collega l’immagine: solo parole reali con immagine, interamente leggibili',
+    pairsLk.every(pa => {
+      const e = IAL.WORDS_BY_KEY[pa.word];
+      return !!e && !!pa.img && e.w.slice(0, 2) === pa.key &&
+        IAL.lettersOf(pa.word).every(L => E.enabledLetters(p).has(L)) &&
+        E.canShowWord(p, e);
+    }));
+  const pairsLk2 = E.linkPairs(p2, 8);
+  check('Collega l’immagine: con poche consonanti nessuna lettera nuova',
+    pairsLk2.every(pa => IAL.lettersOf(pa.word).every(L => E.enabledLetters(p2).has(L))) &&
+    new Set(pairsLk2.map(pa => pa.key)).size === pairsLk2.length);
 
   // 10. Parole nuove dell'archivio: gating corretto
   p.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M'] };

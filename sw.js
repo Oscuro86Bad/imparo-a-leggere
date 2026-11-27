@@ -4,7 +4,7 @@
  *   una sola ricarica della pagina basta per vedere gli aggiornamenti.
  * - OFFLINE: usa la copia salvata in cache.
  */
-const CACHE_NAME = 'imparo-a-leggere-v32';
+const CACHE_NAME = 'imparo-a-leggere-v33';
 // Cache separata per i file del motore OCR (CDN): non vengono cancellati
 // a ogni aggiornamento dell'app, così la lettura da foto resta offline.
 const VENDOR_CACHE = 'imparo-a-leggere-vendor-v1';
@@ -31,6 +31,7 @@ const ASSETS = [
   './js/ui/choice.js',
   './js/ui/listen.js',
   './js/ui/complete.js',
+  './js/ui/link.js',
   './js/ui/ocr.js',
   './js/ui/custom.js',
   './js/ui/parent.js',

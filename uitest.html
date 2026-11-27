@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=20"></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=21"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -12,15 +12,16 @@
 <script src="js/data/words.js?v=21"></script>
 <script src="js/data/associations.js?v=8"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=14"></script>
+<script src="js/engine/generator.js?v=15"></script>
 <script src="js/ui/components.js?v=15"></script>
-<script src="js/ui/home.js?v=14"></script>
+<script src="js/ui/home.js?v=15"></script>
 <script src="js/ui/reading.js?v=12"></script>
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
 <script src="js/ui/choice.js?v=13"></script>
 <script src="js/ui/listen.js?v=3"></script>
 <script src="js/ui/complete.js?v=6"></script>
+<script src="js/ui/link.js?v=1"></script>
 <script src="js/ui/ocr.js?v=14"></script>
 <script src="js/ui/custom.js?v=16"></script>
 <script src="js/ui/parent.js?v=9"></script>
@@ -48,22 +49,25 @@
   const menuBtns = Array.from(document.querySelectorAll('.menu .btn'));
   const bgSet = new Set(menuBtns.map(b => getComputedStyle(b).backgroundColor));
   const cNames = menuBtns.map(b => (b.className.match(/btn-(\w+)/) || [])[1]).join(',');
-  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 8 && bgSet.size === 8);
+  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 9 && bgSet.size === 9);
 
-  // Home: PAROLE PERSONALIZZATE viene prima delle due sezioni nuove
+  // Home: PAROLE PERSONALIZZATE viene prima delle sezioni nuove
   const homeOrder = Array.from(document.querySelectorAll('.menu .btn .txt')).map(t => (t.firstChild.textContent || '').trim());
   const iCustom = homeOrder.indexOf('PAROLE PERSONALIZZATE');
   const iListen = homeOrder.indexOf('ASCOLTA E SELEZIONA');
   const iComplete = homeOrder.indexOf('COMPLETA LA PAROLA');
+  const iLink = homeOrder.indexOf('COLLEGA L’IMMAGINE');
   check('Home: ordine [' + homeOrder.join(' → ') + ']',
-    iCustom !== -1 && iListen !== -1 && iComplete !== -1 && iCustom < iListen && iListen < iComplete);
+    iCustom !== -1 && iListen !== -1 && iComplete !== -1 && iLink !== -1 &&
+    iCustom < iListen && iListen < iComplete && iComplete < iLink);
 
-  // Home: fumetto "NEW" solo sulle due sezioni appena aggiunte
+  // Home: fumetto "NEW" solo sulle sezioni appena aggiunte
   const tagged = Array.from(document.querySelectorAll('.menu .btn')).filter(b => b.querySelector('.new-tag'));
   const taggedNames = tagged.map(b => (b.querySelector('.txt').firstChild.textContent || '').trim());
   check('Home: fumetto NEW solo sulle sezioni nuove [' + taggedNames.join(', ') + ']',
-    tagged.length === 2 && taggedNames.indexOf('ASCOLTA E SELEZIONA') !== -1 &&
-    taggedNames.indexOf('COMPLETA LA PAROLA') !== -1);
+    tagged.length === 3 && taggedNames.indexOf('ASCOLTA E SELEZIONA') !== -1 &&
+    taggedNames.indexOf('COMPLETA LA PAROLA') !== -1 &&
+    taggedNames.indexOf('COLLEGA L’IMMAGINE') !== -1);
 
   // Home: tutte le sezioni della stessa altezza (niente sezioni "giganti")
   const appEl = document.querySelector('.app');
@@ -82,6 +86,8 @@
     body().indexOf('ASCOLTA E SELEZIONA') !== -1);
   check('Home: nuova sezione COMPLETA LA PAROLA',
     body().indexOf('COMPLETA LA PAROLA') !== -1);
+  check('Home: nuova sezione COLLEGA L’IMMAGINE',
+    body().indexOf('COLLEGA L’IMMAGINE') !== -1);
   const homeChips = Array.from(document.querySelectorAll('.topbar .chip')).map(c => c.textContent);
   check('Home: nessun punteggio stelline in alto [' + homeChips.join(' | ') + ']',
     homeChips.length === 1 && !homeChips.some(t => t.indexOf('⭐') !== -1));
@@ -402,6 +408,149 @@
     !!cp2 && IAL.Complete.currentForTest().word === cp2.word);
   if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakCp;
   IAL.Complete.hide();
+
+  // --- COLLEGA L'IMMAGINE ---
+  // Profilo ricco (tutte le consonanti e le sillabe CV) per avere 8 coppie.
+  const linkProf = IAL.Store.active();
+  const linkSaved = JSON.parse(JSON.stringify({
+    letters: linkProf.letters, syllables: linkProf.syllables, flags: linkProf.flags
+  }));
+  const linkCons = IAL.CONFIG.CONSONANTS.filter(c => c !== 'H');
+  const linkSyl = {};
+  linkCons.forEach(c => { linkSyl[c] = IAL.cvSyllables(c); });
+  IAL.Store.updateActive(pr => {
+    pr.letters = { vowels: ['A','E','I','O','U'], consonants: linkCons };
+    pr.syllables = linkSyl;
+    pr.flags = { doppie: true, gruppi: true, vc: true, sc: true, gn: true, gli: true };
+  });
+
+  const origSayLink = IAL.UI.say;
+  const saidLink = [];
+  IAL.UI.say = function (t) { saidLink.push(String(t).toUpperCase()); };
+
+  IAL.Link.show();
+  await wait(120);
+  const lk = IAL.Link.currentForTest();
+  check('Collega l’immagine: nuova sezione con 8 coppie', !!lk && lk.pairs.length === 8 &&
+    body().indexOf('COLLEGA L’IMMAGINE') !== -1);
+  const imgTiles = Array.from(document.querySelectorAll('#link-images .link-img'));
+  const letTiles = Array.from(document.querySelectorAll('#link-letters .link-letters'));
+  check('Collega l’immagine: 8 immagini e 8 inizi', imgTiles.length === 8 && letTiles.length === 8);
+  check('Collega l’immagine: ogni inizio è di due lettere maiuscole',
+    letTiles.every(t => /^[A-Z]{2}$/.test(t.textContent.trim())));
+  check('Collega l’immagine: inizi tutti diversi (una sola immagine giusta)',
+    new Set(letTiles.map(t => t.dataset.key)).size === 8);
+  check('Collega l’immagine: solo parole reali con immagine, già leggibili',
+    lk.pairs.every(pa => {
+      const e = IAL.WORDS_BY_KEY[pa.word];
+      return !!e && !!pa.img && IAL.Engine.canShowWord(IAL.Store.active(), e);
+    }));
+  check('Collega l’immagine: gli inizi sono in riquadri bianchi',
+    letTiles.every(t => getComputedStyle(t).backgroundColor === 'rgb(255, 255, 255)'));
+
+  // Eventi pointer come su un tablet (dito) + coordinate reali dei riquadri.
+  let linkPid = 40;
+  const lkCenter = (n) => {
+    const r = n.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  };
+  const lkDown = (n, pt, id) => n.dispatchEvent(new PointerEvent('pointerdown', {
+    bubbles: true, cancelable: true, clientX: pt.x, clientY: pt.y,
+    pointerId: id, isPrimary: true, button: 0
+  }));
+  const lkMove = (pt, id) => window.dispatchEvent(new PointerEvent('pointermove', {
+    bubbles: true, cancelable: true, clientX: pt.x, clientY: pt.y, pointerId: id, isPrimary: true
+  }));
+  const lkUp = (pt, id) => window.dispatchEvent(new PointerEvent('pointerup', {
+    bubbles: true, cancelable: true, clientX: pt.x, clientY: pt.y, pointerId: id, isPrimary: true
+  }));
+  const lkDrag = (from, to) => {
+    const a = lkCenter(from), b = lkCenter(to), id = ++linkPid;
+    lkDown(from, a, id);
+    lkMove({ x: a.x + 12, y: a.y + 12 }, id);
+    lkMove(b, id);
+    lkUp(b, id);
+  };
+  const lkTap = (n) => {
+    const c = lkCenter(n), id = ++linkPid;
+    lkDown(n, c, id);
+    lkUp(c, id);
+  };
+
+  // Trascinamento giusto: verde, stellina, sparizione.
+  const linkLetter0 = letTiles[0];
+  const linkImg0 = imgTiles.find(t => t.dataset.key === linkLetter0.dataset.key);
+  const linkWord0 = linkLetter0.dataset.word;
+  const linkStars0 = IAL.Store.active().stats.stars;
+  lkDrag(linkLetter0, linkImg0);
+  check('Collega l’immagine: coppia giusta → verde subito',
+    linkLetter0.classList.contains('ok') && linkImg0.classList.contains('ok'));
+  await wait(420);
+  check('Collega l’immagine: coppia giusta → i due riquadri spariscono',
+    linkLetter0.classList.contains('gone') && linkImg0.classList.contains('gone'));
+  check('Collega l’immagine: coppia giusta → +1 stella e conteggio 1',
+    IAL.Store.active().stats.stars === linkStars0 + 1 && IAL.Link.matchedForTest() === 1);
+  check('Collega l’immagine: la parola collegata viene pronunciata',
+    saidLink[0] === linkWord0);
+
+  // Trascinamento sbagliato: rosso e ritorno al suo posto.
+  const linkLetter1 = letTiles.find(t => !t.classList.contains('gone'));
+  const linkImgWrong = imgTiles.find(t => !t.classList.contains('gone') &&
+    t.dataset.key !== linkLetter1.dataset.key);
+  const linkStarsWrong = IAL.Store.active().stats.stars;
+  lkDrag(linkLetter1, linkImgWrong);
+  check('Collega l’immagine: coppia sbagliata → rosso subito',
+    linkLetter1.classList.contains('ko') && linkImgWrong.classList.contains('ko'));
+  await wait(650);
+  check('Collega l’immagine: coppia sbagliata → torna al suo posto, non sparisce',
+    !linkLetter1.classList.contains('gone') && !linkImgWrong.classList.contains('gone') &&
+    linkLetter1.style.transform === '');
+  check('Collega l’immagine: coppia sbagliata → nessuna stella',
+    IAL.Store.active().stats.stars === linkStarsWrong && IAL.Link.matchedForTest() === 1);
+
+  // Tocco (alternativa al trascinamento): inizio, poi immagine.
+  const linkImg1 = imgTiles.find(t => t.dataset.key === linkLetter1.dataset.key);
+  lkTap(linkLetter1);
+  check('Collega l’immagine: con un tocco l’inizio resta selezionato',
+    linkLetter1.classList.contains('sel'));
+  lkTap(linkImg1);
+  await wait(420);
+  check('Collega l’immagine: tocco inizio + immagine → coppia collegata',
+    linkLetter1.classList.contains('gone') && linkImg1.classList.contains('gone') &&
+    IAL.Link.matchedForTest() === 2);
+
+  // Completa le altre coppie e verifica la fine della partita.
+  letTiles.forEach(t => {
+    if (t.classList.contains('gone')) return;
+    const im = imgTiles.find(i => i.dataset.key === t.dataset.key);
+    lkTap(t);
+    lkTap(im);
+  });
+  await wait(700);
+  check('Collega l’immagine: tutte le coppie collegate (8 su 8)',
+    IAL.Link.matchedForTest() === 8);
+  check('Collega l’immagine: messaggio di fine e RICOMINCIA pronto',
+    body().indexOf('Hai collegato tutte le parole') !== -1 &&
+    document.getElementById('link-restart').classList.contains('ready'));
+
+  // RICOMINCIA: nuova partita, stesse regole.
+  const linkOldRound = IAL.Link.currentForTest();
+  document.getElementById('link-restart').click();
+  await wait(140);
+  const linkNewImgs = Array.from(document.querySelectorAll('#link-images .link-img'));
+  const linkNewLets = Array.from(document.querySelectorAll('#link-letters .link-letters'));
+  check('Collega l’immagine: RICOMINCIA prepara una nuova partita',
+    IAL.Link.currentForTest() !== linkOldRound && IAL.Link.matchedForTest() === 0 &&
+    linkNewImgs.length === 8 && linkNewLets.length === 8 &&
+    linkNewImgs.every(t => !t.classList.contains('gone')));
+
+  IAL.UI.say = origSayLink;
+  IAL.Link.hide();
+  IAL.Store.updateActive(pr => {
+    pr.letters = linkSaved.letters;
+    pr.syllables = linkSaved.syllables;
+    pr.flags = linkSaved.flags;
+  });
 
   // --- PAROLE MIE ---
   IAL.Custom.show();

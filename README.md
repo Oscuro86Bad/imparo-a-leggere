@@ -28,8 +28,8 @@ inventate, associazione parola-immagine.
    sillabe (PA, PE, PI…): se serve, in **Combinazioni** togli quelle non ancora
    studiate o attiva strutture speciali (doppie, gruppi, GN, GLI…).
 5. Il bambino usa **SOLO LETTURA**, **LEGGI E GUARDA**, **DICO LA PAROLA**,
-   **VEDI E SCEGLI**, **ASCOLTA E SELEZIONA** e **COMPLETA LA PAROLA**
-   (le ultime due con etichetta NEW-BETA).
+   **VEDI E SCEGLI**, **ASCOLTA E SELEZIONA**, **COMPLETA LA PAROLA** e
+   **COLLEGA L'IMMAGINE** (le ultime tre con etichetta NEW-BETA).
 
 > Nota: per l'installazione come PWA e l'offline completo serve servire l'app via `http(s)`
 > (GitHub Pages, o un mini-server locale, vedi sotto). Aprendo il file direttamente
@@ -143,6 +143,22 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    sempre tra quelle conosciute (vocali + consonanti attive), così il bambino
    può davvero tracciarle. L'app preferisce comunque le parole con **poche
    lettere nuove** (prima quelle note, poi con una sola lettera nuova…).
+
+### COLLEGA L'IMMAGINE (novità — NEW-BETA)
+1. Compaiono **8 immagini** di parole che il bambino sa già leggere e, sotto,
+   i loro **inizi (prime due lettere)** dentro riquadri bianchi.
+2. Si **trascina** l'inizio sopra la sua immagine (dito o mouse). In alternativa
+   si può **toccare** l'inizio e poi l'immagine: più facile per le dita piccole.
+3. Coppia giusta → i due riquadri diventano **verdi**, arriva una **stellina**,
+   la parola viene **pronunciata** e i due riquadri **spariscono**.
+4. Coppia sbagliata → i riquadri diventano **rossi** per un attimo e quello
+   trascinato **torna al suo posto**; nessuna voce rivela la parola.
+5. Quando tutte le coppie sono collegate, il pulsante **🔄 RICOMINCIA** in
+   basso prepara **parole nuove** (si può usare anche prima di finire).
+6. Solo **parole reali con immagine**, interamente leggibili con le lettere e le
+   sillabe attive. Ogni inizio è diverso dagli altri: c'è **una sola immagine
+   giusta** per ogni riquadro. Se le parole disponibili sono meno di 8, si gioca
+   con tutte quelle che ci sono.
 
 ### PAROLE PERSONALIZZATE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,

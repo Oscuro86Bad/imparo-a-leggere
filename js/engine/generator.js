@@ -364,6 +364,34 @@ IAL.Engine = (function () {
     };
   }
 
+  // ---------- Esercizi COLLEGA L'IMMAGINE ----------
+  // Coppie "immagine + prime due lettere". Si usano SOLO parole reali
+  // INTERAMENTE leggibili (stesse regole di LEGGI E GUARDA) e con l'inizio
+  // di due lettere già studiate: il bambino non incontra nulla di nuovo.
+  // L'inizio (es. PA) è unico dentro il gioco: ogni riquadro di lettere ha
+  // una sola immagine giusta. Se le parole disponibili sono meno di `count`,
+  // si mostrano tutte quelle che ci sono.
+  function linkPairs(p, count) {
+    const letters = enabledLetters(p);
+    const max = count || 8;
+    const seenKey = {};
+    const seenWord = {};
+    const out = [];
+    const pool = realWords(p, null, true).filter(function (e) {
+      return !!e.img && e.s && e.s.length &&
+        e.s[0].length === 2 && e.w.slice(0, 2) === e.s[0] &&
+        canShowSyllable(p, e.s[0], letters);
+    });
+    shuffleArr(pool).forEach(function (e) {
+      if (out.length >= max) return;
+      if (seenKey[e.s[0]] || seenWord[e.w]) return;
+      seenKey[e.s[0]] = true;
+      seenWord[e.w] = true;
+      out.push({ word: e.w, key: e.s[0], img: e.img });
+    });
+    return out;
+  }
+
   // ---------- Esercizi ASCOLTA E SELEZIONA ----------
   // L'app pronuncia una parola reale: il bambino sceglie tra 4 parole
   // scritte quella che ha sentito. La sezione è svincolata da lunghezze e
@@ -545,6 +573,7 @@ IAL.Engine = (function () {
     nextSpeech: nextSpeech,
     nextCustom: nextCustom,
     nextChoice: nextChoice,
+    linkPairs: linkPairs,
     nextListen: nextListen,
     listenCandidates: listenCandidates,
     nextComplete: nextComplete,
