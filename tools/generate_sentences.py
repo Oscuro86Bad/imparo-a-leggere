@@ -17,7 +17,6 @@ Una frase non compare mai se contiene una lettera non attivata.
 
 Uso: python tools/generate_sentences.py
 """
-import itertools
 import os
 import random
 import re
@@ -63,7 +62,15 @@ ANIMALS = [
     ('GATTO', 'm'), ('GATTA', 'f'), ('CANE', 'm'), ('GUFO', 'm'),
     ('ORSO', 'm'), ('LEONE', 'm'), ('TOPO', 'm'), ('UCCELLO', 'm')
 ]
-NOUN_SUBJECTS = [(w, '3s', g) for w, g in PEOPLE + ANIMALS]
+# Le frasi con articolo non possono usare L'/GLI: escludiamo le parole
+# che iniziano per vocale dai modelli con articolo esplicito.
+NO_ARTICLE = {'AMICA', 'AMICO', 'ORSO', 'UCCELLO', 'UCCELLI'}
+
+# Soggetti nominali: solo persone/animali al singolare, per evitare
+# frasi del tipo «I DADI E ALTO» o «IL CIBO AMA LA MELA».
+NOUN_SUBJECTS = [
+    (w, '3s', g) for w, g in PEOPLE + ANIMALS if w not in NO_ARTICLE
+]
 
 # Verbi transitivi con tutte le persone.
 VERBS = {
@@ -121,6 +128,8 @@ OBJECTS = [
     ('TAVOLI', 'I', 'm'), ('BICI', 'LE', 'f'), ('ZIE', 'LE', 'f')
 ]
 
+ARTICLES_OK = [(w, art, g) for w, art, g in OBJECTS if w not in NO_ARTICLE]
+
 BARE_OBJECTS = [
     'MAMMA', 'PAPA', 'NONNA', 'NONNO', 'BEBE', 'ZIA', 'ZIO',
     'GATTO', 'GATTA', 'CANE', 'GUFO', 'MELA', 'PERA', 'CIBO',
@@ -128,17 +137,31 @@ BARE_OBJECTS = [
     'PENNA', 'QUADRO', 'MUSICA'
 ]
 
+# (maschile sing., femminile sing., maschile plur., femminile plur.)
 ADJECTIVES = [
-    ('BUONO', 'BUONA'), ('BELLO', 'BELLA'), ('PICCOLO', 'PICCOLA'),
-    ('GRANDE', 'GRANDE'), ('NUOVO', 'NUOVA'), ('VECCHIO', 'VECCHIA'),
-    ('ROSSO', 'ROSSA'), ('CALDO', 'CALDA'), ('FREDDO', 'FREDDA'),
-    ('ALTO', 'ALTA'), ('BASSO', 'BASSA'), ('LUNGO', 'LUNGA'),
-    ('CORTO', 'CORTA'), ('FELICE', 'FELICE'), ('CONTENTO', 'CONTENTA')
+    ('BUONO', 'BUONA', 'BUONI', 'BUONE'),
+    ('BELLO', 'BELLA', 'BELLI', 'BELLE'),
+    ('PICCOLO', 'PICCOLA', 'PICCOLI', 'PICCOLE'),
+    ('GRANDE', 'GRANDE', 'GRANDI', 'GRANDI'),
+    ('NUOVO', 'NUOVA', 'NUOVI', 'NUOVE'),
+    ('VECCHIO', 'VECCHIA', 'VECCHI', 'VECCHIE'),
+    ('ROSSO', 'ROSSA', 'ROSSI', 'ROSSE'),
+    ('CALDO', 'CALDA', 'CALDI', 'CALDE'),
+    ('FREDDO', 'FREDDA', 'FREDDI', 'FREDDE'),
+    ('ALTO', 'ALTA', 'ALTI', 'ALTE'),
+    ('BASSO', 'BASSA', 'BASSI', 'BASSE'),
+    ('LUNGO', 'LUNGA', 'LUNGHI', 'LUNGHE'),
+    ('CORTO', 'CORTA', 'CORTI', 'CORTE'),
+    ('FELICE', 'FELICE', 'FELICI', 'FELICI'),
+    ('CONTENTO', 'CONTENTA', 'CONTENTI', 'CONTENTE')
 ]
 
 PEOPLE_WORDS = set(w for w, _ in PEOPLE)
 ANIMAL_WORDS = set(w for w, _ in ANIMALS)
-THING_WORDS = set(w for w, _, _ in OBJECTS) - PEOPLE_WORDS - ANIMAL_WORDS
+PLURAL_LIVING = {'MAMME', 'ZIE', 'CANI', 'GATTI', 'GUFI', 'UCCELLI'}
+THING_WORDS = (
+    set(w for w, _, _ in OBJECTS) - PEOPLE_WORDS - ANIMAL_WORDS - PLURAL_LIVING
+)
 READERS = PEOPLE_WORDS - {'BEBE'}
 
 # Frasi esplicite che riproducono il modello chiesto dall'utente.
@@ -174,6 +197,28 @@ ALLOWED_OBJ = {
     'PRENDO': TAKE_OBJ,
     'TOCCO': TAKE_OBJ | PEOPLE_WORDS
 }
+
+# Gli animali non "amano la bici" né "prendono lo zaino": per loro
+# usiamo solo complementi concreti o altri esseri viventi.
+AMO_ANIMAL_OBJ = PEOPLE_WORDS | ANIMAL_WORDS | {'MELA', 'PERA', 'CIBO'}
+TAKE_ANIMAL_OBJ = {'MELA', 'PERA', 'CIBO', 'DADO', 'PALLONE'}
+ASCOLTO_ANIMAL_OBJ = PEOPLE_WORDS | ANIMAL_WORDS | {'MUSICA', 'SUONO'}
+ANIMAL_ALLOWED_OBJ = {
+    'AMO': AMO_ANIMAL_OBJ,
+    'VEDO': VISIBLE_OBJ,
+    'GUARDO': VISIBLE_OBJ,
+    'SALUTO': SALUTO_OBJ,
+    'ASCOLTO': ASCOLTO_ANIMAL_OBJ,
+    'PRENDO': TAKE_ANIMAL_OBJ,
+    'TOCCO': TAKE_ANIMAL_OBJ | PEOPLE_WORDS
+}
+
+
+def allowed_for(verb, subject):
+    """Complementi ammessi per quel verbo e quel soggetto."""
+    if subject in ANIMAL_WORDS:
+        return ANIMAL_ALLOWED_OBJ[verb]
+    return ALLOWED_OBJ[verb]
 
 
 # ---------------------------------------------------------------------------
@@ -226,35 +271,46 @@ def generate():
             out[cand['t']] = cand
 
     subjects_all = PRONOUNS + NOUN_SUBJECTS
+    have_obj = [(w, art) for w, art, _ in ARTICLES_OK if w in THING_WORDS]
+
+    def adj_for(forms, person, gender):
+        index = 2 if person in ('1p', '2p', '3p') else 0
+        return forms[index + (1 if gender == 'f' else 0)]
 
     # 1. Soggetto + verbo transitivo + oggetto senza articolo.
     for subj, person, _ in subjects_all:
         for v in TRANSITIVE:
             form = VERBS[v][person]
+            allowed = allowed_for(v, subj)
             for obj in BARE_OBJECTS:
                 if obj == subj:
                     continue
-                if obj in ALLOWED_OBJ[v]:
+                if obj in allowed:
                     add(subj + ' ' + form + ' ' + obj + '.', 'bare')
 
     # 2. Soggetto + verbo transitivo + articolo + oggetto.
     for subj, person, _ in subjects_all:
         for v in TRANSITIVE:
             form = VERBS[v][person]
-            for obj, art, _ in OBJECTS:
+            allowed = allowed_for(v, subj)
+            for obj, art, _ in ARTICLES_OK:
                 if obj == subj:
                     continue
-                if obj in ALLOWED_OBJ[v]:
+                if obj in allowed:
                     add(subj + ' ' + form + ' ' + art + ' ' + obj + '.', 'svo')
 
     # 3. Articolo + nome + verbo + articolo + oggetto.
-    for subj, art_s, _ in OBJECTS:
+    # Solo persone/animali singolari come soggetto: niente «I CANI AMA…».
+    noun_articles = {w: art for w, art, _ in ARTICLES_OK}
+    for subj, _, _ in NOUN_SUBJECTS:
+        art_s = noun_articles[subj]
         for v in TRANSITIVE:
             form = VERBS[v]['3s']
-            for obj, art_o, _ in OBJECTS:
+            allowed = allowed_for(v, subj)
+            for obj, art_o, _ in ARTICLES_OK:
                 if subj == obj:
                     continue
-                if obj not in ALLOWED_OBJ[v] or subj in THING_WORDS and v == 'SALUTO':
+                if obj not in allowed:
                     continue
                 add(art_s + ' ' + subj + ' ' + form + ' ' + art_o + ' ' + obj + '.', 'nvo')
 
@@ -270,15 +326,13 @@ def generate():
                 continue
             add(subj + ' ' + forms['3s'] + '.', 'intrans')
 
-    # 5. Verbo essere + aggettivo concordato.
+    # 5. Verbo essere + aggettivo concordato (singolare/plurale).
     for subj, person, gender in subjects_all:
-        for m, f in ADJECTIVES:
-            adj = f if gender == 'f' else m
-            add(subj + ' ' + BE[person] + ' ' + adj + '.', 'copula')
-    for noun, art, gender in OBJECTS:
-        for m, f in ADJECTIVES:
-            adj = f if gender == 'f' else m
-            add(art + ' ' + noun + ' E ' + adj + '.', 'nounadj')
+        for forms in ADJECTIVES:
+            add(subj + ' ' + BE[person] + ' ' + adj_for(forms, person, gender) + '.', 'copula')
+    for noun, _, gender in NOUN_SUBJECTS:
+        for forms in ADJECTIVES:
+            add(noun_articles[noun] + ' ' + noun + ' E ' + forms[1 if gender == 'f' else 0] + '.', 'nounadj')
 
     # 6. "Qui/qua" con il verbo essere (copre Q anche nei primi livelli).
     for subj, person, _ in subjects_all:
@@ -286,12 +340,13 @@ def generate():
             add(subj + ' ' + BE[person] + ' ' + place + '.', 'place')
 
     # 7. Verbo avere: copre H come consonante, non come vocale.
+    # Solo oggetti concreti (niente «HO LA MAMMA» o «HA IL NONNO»).
     for subj, person in PRONOUNS_UNIQUE:
-        for obj, art, _ in OBJECTS:
+        for obj, art in have_obj:
             add(subj + ' ' + HAVE[person] + ' ' + art + ' ' + obj + '.', 'have')
         add(subj + ' ' + HAVE[person] + ' QUATTRO DADI.', 'have')
     for subj, _, _ in NOUN_SUBJECTS:
-        for obj, art, _ in OBJECTS:
+        for obj, art in have_obj:
             add(subj + ' ' + HAVE['3s'] + ' ' + art + ' ' + obj + '.', 'have')
         add(subj + ' ' + HAVE['3s'] + ' QUATTRO DADI.', 'have')
 
@@ -299,13 +354,15 @@ def generate():
     for v in TRANSITIVE:
         add('COSA ' + VERBS[v]['2s'] + '?', 'question')
         add('COSA ' + VERBS[v]['3s'] + '?', 'question')
-    for obj, art, _ in OBJECTS:
+    for obj, art, _ in ARTICLES_OK:
         add('DOVE E ' + art + ' ' + obj + '?', 'question')
-        add('CHI E ' + art + ' ' + obj + '?', 'question')
+        if obj in PEOPLE_WORDS | ANIMAL_WORDS:
+            add('CHI E ' + art + ' ' + obj + '?', 'question')
     for place in ('QUI', 'QUA'):
         add('CHI E ' + place + '?', 'question')
-    for subj, _, gender in PRONOUNS + NOUN_SUBJECTS:
-        add('E ' + subj + ' ' + ('CONTENTA' if gender == 'f' else 'CONTENTO') + '?', 'question')
+    for subj, person, gender in subjects_all:
+        for forms in ADJECTIVES:
+            add(subj + ' ' + BE[person] + ' ' + adj_for(forms, person, gender) + '?', 'question')
     add('CHI E?', 'question')
 
     return list(out.values())
