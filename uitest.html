@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=21"></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=22"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -8,13 +8,14 @@
 <div id="overlay" class="overlay hidden"></div>
 <script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
 <script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push((e.message || 'errore') + ' @ riga ' + e.lineno + ' | ' + ((e.error && e.error.stack) || '').replace(/\n/g, ' ¦ ')); });</script>
-<script src="js/config.js?v=8"></script>
+<script src="js/config.js?v=9"></script>
 <script src="js/data/words.js?v=23"></script>
+<script src="js/data/sentences.js?v=1"></script>
 <script src="js/data/associations.js?v=9"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=15"></script>
+<script src="js/engine/generator.js?v=16"></script>
 <script src="js/ui/components.js?v=15"></script>
-<script src="js/ui/home.js?v=15"></script>
+<script src="js/ui/home.js?v=16"></script>
 <script src="js/ui/reading.js?v=12"></script>
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
@@ -22,6 +23,7 @@
 <script src="js/ui/listen.js?v=3"></script>
 <script src="js/ui/complete.js?v=6"></script>
 <script src="js/ui/link.js?v=1"></script>
+<script src="js/ui/sentences.js?v=1"></script>
 <script src="js/ui/ocr.js?v=14"></script>
 <script src="js/ui/custom.js?v=16"></script>
 <script src="js/ui/parent.js?v=9"></script>
@@ -49,7 +51,7 @@
   const menuBtns = Array.from(document.querySelectorAll('.menu .btn'));
   const bgSet = new Set(menuBtns.map(b => getComputedStyle(b).backgroundColor));
   const cNames = menuBtns.map(b => (b.className.match(/btn-(\w+)/) || [])[1]).join(',');
-  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 9 && bgSet.size === 9);
+  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 10 && bgSet.size === 10);
 
   // Home: PAROLE PERSONALIZZATE viene prima delle sezioni nuove
   const homeOrder = Array.from(document.querySelectorAll('.menu .btn .txt')).map(t => (t.firstChild.textContent || '').trim());
@@ -65,9 +67,10 @@
   const tagged = Array.from(document.querySelectorAll('.menu .btn')).filter(b => b.querySelector('.new-tag'));
   const taggedNames = tagged.map(b => (b.querySelector('.txt').firstChild.textContent || '').trim());
   check('Home: fumetto NEW solo sulle sezioni nuove [' + taggedNames.join(', ') + ']',
-    tagged.length === 3 && taggedNames.indexOf('ASCOLTA E SELEZIONA') !== -1 &&
+    tagged.length === 4 && taggedNames.indexOf('ASCOLTA E SELEZIONA') !== -1 &&
     taggedNames.indexOf('COMPLETA LA PAROLA') !== -1 &&
-    taggedNames.indexOf('COLLEGA L’IMMAGINE') !== -1);
+    taggedNames.indexOf('COLLEGA L’IMMAGINE') !== -1 &&
+    taggedNames.indexOf('LEGGI LA FRASE') !== -1);
 
   // Home: tutte le sezioni della stessa altezza (niente sezioni "giganti")
   const appEl = document.querySelector('.app');
@@ -679,6 +682,68 @@
   // ricarica lo stato "bloccato" tramite location non possibile qui: verifichiamo la logica
   check('PIN salvato', IAL.Store.parentPin() === '1234');
   IAL.Store.setParentPin(null);
+
+  // --- LEGGI LA FRASE ---
+  const sentCons = IAL.CONFIG.CONSONANTS.filter(c => c !== 'H');
+  const sentSyl = {};
+  sentCons.forEach(c => { sentSyl[c] = IAL.cvSyllables(c); });
+  IAL.Store.updateActive(pr => {
+    pr.letters = { vowels: ['A','E','I','O','U'], consonants: sentCons };
+    pr.syllables = sentSyl;
+    pr.flags = { doppie:true, gruppi:true, vc:true, sc:true, gn:true, gli:true };
+  });
+  IAL.Home.show();
+  await wait(40);
+  check('LEGGI LA FRASE: colore dedicato (oro) nella home',
+    !!Array.from(document.querySelectorAll('.menu .btn')).find(b => b.classList.contains('btn-gold')));
+
+  IAL.Sentences.show();
+  await wait(80);
+  const curSent = IAL.Sentences.currentForTest();
+  check('LEGGI LA FRASE: schermata con frase grande e fumetto',
+    !!curSent && !!document.getElementById('sentence-text') &&
+    document.getElementById('sentence-text').textContent === curSent.t &&
+    !!document.querySelector('.comic-bubble') && !!document.querySelector('.comic-card'));
+  const sentPics = Array.from(document.querySelectorAll('#sentence-scene .comic-pic'));
+  check('LEGGI LA FRASE: vignetta con una emoji per parola (' + sentPics.length + ')',
+    sentPics.length === curSent.e.length && sentPics.length >= 1 &&
+    sentPics.every(n => n.textContent.length >= 1));
+  check('LEGGI LA FRASE: pulsanti NUOVA, HO LETTO e 🔊 SENTI LA FRASE',
+    !!btnWith('NUOVA') && !!btnWith('HO LETTO') && !!btnWith('SENTI LA FRASE'));
+
+  const origSpeakSent = window.speechSynthesis && window.speechSynthesis.speak;
+  const spokenSent = [];
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) {
+    const t = String((u && u.text) || '').trim();
+    if (t) spokenSent.push(t.toLowerCase());
+  };
+  btnWith('SENTI LA FRASE').click(); await wait(400);
+  check('LEGGI LA FRASE: SENTI pronuncia la frase',
+    !window.speechSynthesis || spokenSent.indexOf(curSent.t.toLowerCase()) !== -1);
+  if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakSent;
+
+  const starsSent = IAL.Store.active().stats.stars;
+  btnWith('HO LETTO').click(); await wait(40);
+  check('LEGGI LA FRASE: HO LETTO assegna una stellina',
+    IAL.Store.active().stats.stars === starsSent + 1);
+  IAL.Sentences.hide();
+
+  // Con poche consonanti: frasi brevi, solo consonanti attive (vocali date)
+  IAL.Store.updateActive(pr => { pr.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M'] }; });
+  IAL.Sentences.show();
+  await wait(60);
+  let sentFewOk = true, sentFewDetail = '';
+  for (let i = 0; i < 25; i++) {
+    const s = IAL.Sentences.currentForTest();
+    if (!s || !s.c.split('').every(ch => ch === 'P' || ch === 'M') || s.w > 3 || s.d > 1) {
+      sentFewOk = false; sentFewDetail = s ? s.t : 'nessuna frase'; break;
+    }
+    btnWith('NUOVA').click(); await wait(15);
+  }
+  check('LEGGI LA FRASE: con P+M solo frasi brevi con P/M [' + sentFewDetail + ']', sentFewOk);
+  check('LEGGI LA FRASE: nessuna parola da scrivere, solo lettura e vignetta',
+    document.querySelectorAll('#sentence-scene input').length === 0);
+  IAL.Sentences.hide();
 
   out.push('');
   out.push(fail === 0 ? 'UI TEST SUPERATI (' + pass + ')' : 'UI TEST FALLITI: ' + fail + ' su ' + (pass + fail));

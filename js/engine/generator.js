@@ -546,6 +546,44 @@ IAL.Engine = (function () {
     };
   }
 
+  // ---------- LEGGI LA FRASE ----------
+  // Qui le vocali si danno per apprese: il gating riguarda SOLO le consonanti.
+  // La difficoltà cresce con il numero di consonanti conosciute: all'inizio
+  // frasi brevi di 2-3 parole, poi frasi sempre più lunghe e articolate.
+  function sentenceCap(p) {
+    const n = (p.letters.consonants || []).filter(function (c) { return c !== 'H'; }).length;
+    return {
+      maxWords: Math.min(9, 2 + Math.ceil(n / 2)),
+      maxDiff: Math.min(4, 1 + Math.floor(Math.max(0, n - 1) / 2))
+    };
+  }
+
+  function canShowSentence(p, entry) {
+    if (!entry || !entry.c) return false;
+    const letters = enabledLetters(p);
+    return entry.c.split('').every(function (ch) { return letters.has(ch); });
+  }
+
+  function sentencePool(p) {
+    const cap = sentenceCap(p);
+    return (IAL.SENTENCES || []).filter(function (entry) {
+      return canShowSentence(p, entry) && entry.w <= cap.maxWords && entry.d <= cap.maxDiff;
+    });
+  }
+
+  const recentSentences = [];
+
+  function nextSentence(p) {
+    const pool = sentencePool(p);
+    if (!pool.length) return null;
+    const fresh = pool.filter(function (s) { return recentSentences.indexOf(s.t) === -1; });
+    const list = fresh.length ? fresh : pool;
+    const entry = list[Math.floor(Math.random() * list.length)];
+    recentSentences.push(entry.t);
+    if (recentSentences.length > 12) recentSentences.shift();
+    return entry;
+  }
+
   // Descrizione leggibile di ciò che il profilo rende disponibile
   function availability(p) {
     const letters = enabledLetters(p);
@@ -556,7 +594,8 @@ IAL.Engine = (function () {
       letters: p.letters.vowels.length + p.letters.consonants.length,
       syllables: usableSyllables.length,
       realWords: realWords(p, null).length,
-      invented: usableSyllables.length >= 2
+      invented: usableSyllables.length >= 2,
+      sentences: sentencePool(p).length
     };
   }
 
@@ -580,6 +619,10 @@ IAL.Engine = (function () {
     completePool: completePool,
     completeWords: completeWords,
     makeInvented: makeInvented,
+    sentenceCap: sentenceCap,
+    canShowSentence: canShowSentence,
+    sentencePool: sentencePool,
+    nextSentence: nextSentence,
     availability: availability
   };
 })();

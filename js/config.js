@@ -35,7 +35,7 @@ IAL.CONFIG = {
     { n: 3, title: 'Sillabe semplici',  desc: 'Sillabe e prime parole brevi e semplici (fino a 4 lettere).', cap: { cats: ['letters', 'syllables', 'words'], maxLen: 4, maxDiff: 1 } },
     { n: 4, title: 'Parole brevi',      desc: 'Parole fino a 4 lettere, anche più complesse.', cap: { cats: ['letters', 'syllables', 'words'], maxLen: 4, maxDiff: 2 } },
     { n: 5, title: 'Parole più lunghe', desc: 'Parole fino a 5 lettere, doppie e gruppi (se attivati).', cap: { cats: ['letters', 'syllables', 'words'], maxLen: 5, maxDiff: 2 } },
-    { n: 6, title: 'Tutto',             desc: 'Tutti gli esercizi attivati, parole fino a 6 lettere (frasi in arrivo!).', cap: { cats: ['letters', 'syllables', 'words'], maxLen: 6, maxDiff: 2 } }
+    { n: 6, title: 'Tutto',             desc: 'Tutti gli esercizi attivati, parole fino a 6 lettere e frasi complete.', cap: { cats: ['letters', 'syllables', 'words'], maxLen: 6, maxDiff: 2 } }
   ],
 
   PRAISE: [

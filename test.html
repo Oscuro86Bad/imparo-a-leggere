@@ -15,10 +15,11 @@
 <pre id="out">In corso…</pre>
 <script src="js/config.js?v=8"></script>
 <script src="js/data/words.js?v=23"></script>
+<script src="js/data/sentences.js?v=1"></script>
 <script src="js/data/associations.js?v=9"></script>
 <script src="js/data/audio.js?v=3"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=14"></script>
+<script src="js/engine/generator.js?v=16"></script>
 <script>
 (function () {
   const out = [];
@@ -575,6 +576,79 @@
   IAL.Store.setActive(pC.id);
   check('Completa la parola: almeno 4 parole per ogni consonante' + (cpThin.length ? ' → poche ' + cpThin.join(' ') : ''),
     cpThin.length === 0);
+
+  // 19. LEGGI LA FRASE: archivio, gating consonanti, difficoltà progressiva
+  const S = IAL.SENTENCES || [];
+  check('Frasi: almeno 1000 frasi reali (attuali: ' + S.length + ')', S.length >= 1000);
+
+  const consAll = IAL.CONFIG.CONSONANTS.filter(function (c) { return c !== 'H'; });
+  let shapeOk = true, dupOk2 = true, seenS = {}, emojiOk = true;
+  const byD = {}, byC = {};
+  consAll.forEach(function (c) { byC[c] = 0; });
+  S.forEach(function (s) {
+    if (!s.t || typeof s.t !== 'string' || typeof s.c !== 'string' || !s.c.length ||
+        !(s.d >= 1 && s.d <= 4) || !Array.isArray(s.e) || !s.e.length) { shapeOk = false; return; }
+    if (seenS[s.t]) dupOk2 = false;
+    seenS[s.t] = 1;
+    if (/[^A-Z]/.test(s.c.replace(/H/g, '')) || /[^BCDFGLMNPRSTVZQ]/.test(s.c)) shapeOk = false;
+    if (s.w !== s.t.replace(/[,!?.]/g, ' ').trim().split(/\s+/).length) shapeOk = false;
+    if (!s.e.every(function (x) { return typeof x === 'string' && x.length >= 1 && !/[A-Za-z0-9]/.test(x); })) emojiOk = false;
+    byD[s.d] = (byD[s.d] || 0) + 1;
+    s.c.split('').forEach(function (c) { if (byC[c] !== undefined) byC[c]++; });
+  });
+  check('Frasi: struttura valida (testo, consonanti, difficoltà, parole)', shapeOk);
+  check('Frasi: nessun testo duplicato', dupOk2);
+  check('Frasi: vignetta con almeno una emoji per frase', emojiOk);
+  check('Frasi: quattro livelli di difficoltà popolati [' +
+    [1,2,3,4].map(function (d) { return 'd' + d + ':' + (byD[d] || 0); }).join(' ') + ']',
+    [1,2,3,4].every(function (d) { return (byD[d] || 0) >= 100; }));
+  const thinC = consAll.filter(function (c) { return byC[c] < 50; }).map(function (c) { return c + ':' + byC[c]; });
+  check('Frasi: ogni consonante ha almeno 50 frasi' + (thinC.length ? ' → poche ' + thinC.join(' ') : ''), thinC.length === 0);
+  const d1Ok = S.filter(function (s) { return s.d === 1; })
+    .every(function (s) { return s.w <= 3 && s.c.length <= 2; });
+  check('Frasi: il livello 1 ha solo frasi brevi (2-3 parole, al massimo 2 consonanti)', d1Ok);
+
+  function sentenceProfile(consonants) {
+    const pr = IAL.Store.createProfile('Frasi' + consonants.join(''), '🦉');
+    pr.letters = { vowels: ['A','E','I','O','U'], consonants: consonants.slice() };
+    pr.syllables = {};
+    consonants.forEach(function (c) { pr.syllables[c] = IAL.cvSyllables(c).slice(); });
+    pr.flags = { doppie:false, gruppi:false, sc:false, gn:false, gli:false };
+    pr.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:6 };
+    pr.customWords = [];
+    return pr;
+  }
+  const pfew = sentenceProfile(['P','M']);
+  const pmedium = sentenceProfile(['P','M','N','T']);
+  const pmany = sentenceProfile(['B','C','D','F','G','L','M','N','P','R','S','T','V','Z','Q']);
+  const capFew = E.sentenceCap(pfew), capMed = E.sentenceCap(pmedium), capMany = E.sentenceCap(pmany);
+  check('Frasi: 2 consonanti → al massimo 3 parole, difficoltà 1', capFew.maxWords === 3 && capFew.maxDiff === 1);
+  check('Frasi: 4 consonanti → al massimo 4 parole, difficoltà 2', capMed.maxWords === 4 && capMed.maxDiff === 2);
+  check('Frasi: tutte le consonanti → frasi lunghe e difficili', capMany.maxWords >= 6 && capMany.maxDiff === 4);
+
+  const poolFew = E.sentencePool(pfew), poolMed = E.sentencePool(pmedium), poolMany = E.sentencePool(pmany);
+  check('Frasi: il bacino cresce con le consonanti apprese (' +
+    poolFew.length + ' → ' + poolMed.length + ' → ' + poolMany.length + ')',
+    poolFew.length > 0 && poolFew.length < poolMed.length && poolMed.length < poolMany.length);
+  check('Frasi: con 2 consonanti compaiono solo frasi con P/M (vocali date per apprese)',
+    poolFew.every(function (s) { return s.c.split('').every(function (c) { return c === 'P' || c === 'M'; }); }));
+  check('Frasi: il livello 2 non mostra mai frasi di difficile (>4 parole)',
+    poolMed.every(function (s) { return s.w <= 4 && s.d <= 2; }));
+  check('Availability: conta anche le frasi disponibili (' + E.availability(pfew).sentences + ')',
+    E.availability(pfew).sentences === poolFew.length);
+
+  let sGateOk = true, sRepeat = false, prevS = '', sCount = 0;
+  IAL.Store.setActive(pmany.id);
+  for (let i = 0; i < 300; i++) {
+    const s = E.nextSentence(pmany);
+    if (!s) { sGateOk = false; break; }
+    if (!E.canShowSentence(pmany, s) || s.w > capMany.maxWords || s.d > capMany.maxDiff) { sGateOk = false; break; }
+    if (s.t === prevS) sRepeat = true;
+    prevS = s.t;
+    sCount++;
+  }
+  check('Frasi: 300 estrazioni solo tra consonanti attive e difficoltà consentita', sGateOk && sCount === 300);
+  check('Frasi: mai la stessa frase due volte di seguito', !sRepeat);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));
