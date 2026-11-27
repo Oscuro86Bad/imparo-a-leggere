@@ -14,10 +14,10 @@
 <h1>🧪 Collaudo automatico del motore</h1>
 <pre id="out">In corso…</pre>
 <script src="js/config.js?v=10"></script>
-<script src="js/data/words.js?v=23"></script>
+<script src="js/data/words.js?v=24"></script>
 <script src="js/data/sentences.js?v=3"></script>
 <script src="js/data/associations.js?v=9"></script>
-<script src="js/data/audio.js?v=3"></script>
+<script src="js/data/audio.js?v=4"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=17"></script>
 <script>
@@ -396,21 +396,29 @@
   IAL.Store.save();
   check('PAROLE MIE: lista vuota → nessun esercizio', E.nextCustom(p) === null);
 
-  // 16. Vocali + L/P/M/T: molte più parole reali (incluse TATA, TUTU, TETTO…)
+  // 16. Vocali + M/N/L/T/P: molte più parole reali, vecchie e nuove.
   const pT = IAL.Store.createProfile('TestT', '🐯');
-  pT.letters = { vowels: ['A','E','I','O','U'], consonants: ['L','P','M','T'] };
+  pT.letters = { vowels: ['A','E','I','O','U'], consonants: ['M','N','L','T','P'] };
   pT.syllables = {};
-  ['L','P','M','T'].forEach(function (c) { pT.syllables[c] = IAL.cvSyllables(c).slice(); });
+  ['M','N','L','T','P'].forEach(function (c) { pT.syllables[c] = IAL.cvSyllables(c).slice(); });
   pT.flags = { doppie: true, gruppi: false, sc: false, gn: false, gli: false };
   pT.settings = { wordType:'mixed', lengths:[2,3,4,5,6], categories:{letters:true,syllables:true,words:true}, level:6 };
   pT.customWords = [];
   IAL.Store.setActive(pT.id);
   IAL.Store.save();
   const tPool = E.realWords(pT, null, true).map(function (e) { return e.w; });
-  const wanted = ['TUTA','TATA','TUTU','TETTO','TATTO','TUTTO','TAPPO','LETTO','LOTO','LUME','MUTA','MOLO','MOTO','MULO','POMATA','TELA','TELE'];
+  const wanted = [
+    'TUTA','TATA','TUTU','TETTO','TATTO','TUTTO','TAPPO','LETTO','LOTO','LUME',
+    'MUTA','MOLO','MOTO','MULO','POMATA','TELA','TELE',
+    'OLIO','PIANO','MULINO','NATALE','TANA','LINEA','UMANO','LUMI','TOPINI',
+    'PINI','NIPOTI','MANINA','TOPOLINA','PANINI','OMINO','PULITI','TONNO',
+    'LETTI','TETTI','TUTTI'
+  ];
   const missing = wanted.filter(function (w) { return tPool.indexOf(w) === -1; });
-  check('Vocali + L/P/M/T: ' + tPool.length + ' parole reali disponibili (mancanti: ' + (missing.join(',') || 'nessuna') + ')',
-    missing.length === 0 && tPool.length >= 40);
+  check('Vocali + M/N/L/T/P: ' + tPool.length + ' parole reali disponibili (mancanti: ' + (missing.join(',') || 'nessuna') + ')',
+    missing.length === 0 && tPool.length >= 120);
+  check('Vocali + M/N/L/T/P: nessuna parola con lettere non attive',
+    tPool.every(function (w) { return !/[^AEIOUMN LTP]/.test(w); }));
 
   // Con le sole vocali + T le parole reali non sono più solo TUTA
   const pTonly = IAL.Store.createProfile('TestT2', '🐯');

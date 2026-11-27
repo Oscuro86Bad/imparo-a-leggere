@@ -2123,6 +2123,30 @@ IAL.WORDS = [
   { w: 'SETTEMBRE', s: ['SET', 'TEM', 'BRE'], img: '🍂', diff: 2 },
   { w: 'NOVEMBRE', s: ['NO', 'VEM', 'BRE'], img: '🍁', diff: 2 },
   { w: 'DICEMBRE', s: ['DI', 'CEM', 'BRE'], img: '🎄', diff: 2 },
+
+  // --- Varietà con sole vocali + M, N, L, T, P ---
+  // Parole reali e concrete, con sillabe già studiabili (CV / vocale
+  // singola / doppie). Nessuna lettera fuori dal gruppo M-N-L-T-P.
+  { w: 'OLIO',      s: ['O', 'LI', 'O'],    img: '🫒',  diff: 2 },
+  { w: 'PIANO',     s: ['PI', 'A', 'NO'],   img: '🎹',  diff: 2 },
+  { w: 'MULINO',    s: ['MU', 'LI', 'NO'],  img: '🌾',  diff: 2 },
+  { w: 'NATALE',    s: ['NA', 'TA', 'LE'],  img: '🎄',  diff: 2 },
+  { w: 'TANA',      s: ['TA', 'NA'],        img: '🕳️', diff: 1 },
+  { w: 'LINEA',     s: ['LI', 'NE', 'A'],   img: '➖',  diff: 2 },
+  { w: 'UMANO',     s: ['U', 'MA', 'NO'],   img: '🧑',  diff: 2 },
+  { w: 'LUMI',      s: ['LU', 'MI'],        img: '💡',  diff: 1 },
+  { w: 'TOPINI',    s: ['TO', 'PI', 'NI'],  img: '🐭',  diff: 1 },
+  { w: 'PINI',      s: ['PI', 'NI'],        img: '🌲',  diff: 1 },
+  { w: 'NIPOTI',    s: ['NI', 'PO', 'TI'],  img: '🧒',  diff: 2 },
+  { w: 'MANINA',    s: ['MA', 'NI', 'NA'],  img: '✋',  diff: 1 },
+  { w: 'TOPOLINA',  s: ['TO', 'PO', 'LI', 'NA'], img: '🐭', diff: 2 },
+  { w: 'PANINI',    s: ['PA', 'NI', 'NI'],  img: '🥪',  diff: 1 },
+  { w: 'OMINO',     s: ['O', 'MI', 'NO'],   img: '🧍',  diff: 2 },
+  { w: 'PULITI',    s: ['PU', 'LI', 'TI'],  img: '🧼',  diff: 1 },
+  { w: 'TONNO',     s: ['TO', 'NNO'],       img: '🐟',  diff: 2 },
+  { w: 'LETTI',     s: ['LE', 'TTI'],       img: '🛏️', diff: 2 },
+  { w: 'TETTI',     s: ['TE', 'TTI'],       img: '🏠',  diff: 2 },
+  { w: 'TUTTI',     s: ['TU', 'TTI'],       img: '👥',  diff: 1 },
 ];
 
 // Indice rapido per parola (maiuscole)

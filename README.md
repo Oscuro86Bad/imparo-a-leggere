@@ -268,8 +268,11 @@ Nessuna parola casuale: il motore verifica **prima** di proporre qualunque eserc
    **solo con sillabe studiate** e se per caso coincidono con una parola reale
    dell'archivio vengono classificate come reali (es. PUMA).
 
-Archivio incluso: **2036 parole italiane reali**, di cui **2020 con immagine**, più 172 parole
-aggiuntive per COMPLETA LA PAROLA (`js/data/words.js`). Tutte le **74 combinazioni
+Archivio incluso: **2056 parole italiane reali**, di cui **2040 con immagine**, più 172 parole
+aggiuntive per COMPLETA LA PAROLA (`js/data/words.js`). Un blocco curato di 20 parole
+(OLIO, PIANO, MULINO, NATALE, TANA, LINEA, UMANO, LUMI, TOPINI, PINI, NIPOTI,
+MANINA, TOPOLINA, PANINI, OMINO, PULITI, TONNO, LETTI, TETTI, TUTTI) dà più varietà
+quando sono attivate solo le vocali e le consonanti **M, N, L, T, P**. Tutte le **74 combinazioni
 consonante+vocale** (Q incluso) hanno almeno una parola illustrata e una parola che inizia
 con quella sillaba. Le combinazioni più rare sono coperte da
 parole concrete: QUOTA (QUO), QUI (QUI), QUESTO (QUE), VULCANO (VU), ZIA/ZIO/ZIBIBBO (ZI).
@@ -277,7 +280,7 @@ parole concrete: QUOTA (QUO), QUI (QUI), QUESTO (QUE), VULCANO (VU), ZIA/ZIO/ZIB
 Il vocabolario esteso proviene dalle annotazioni CLDR italiane (emoji validate con `pyphen`
 e le regole sillabiche del motore), con inflessioni reali attestate da `wordfreq`.
 
-Ogni parola illustrata ha il suo **MP3 preregistrato** (2235 voci in `audio/w/`, manifesto
+Ogni parola illustrata ha il suo **MP3 preregistrato** (2252 voci in `audio/w/`, manifesto
 `js/data/audio.js`): la voce neurale è sempre disponibile anche offline, senza ricorrere alla
 sintesi vocale del dispositivo.
 
@@ -310,7 +313,7 @@ IMPARO A LEGGERE/
 │   ├── ui/sentences.js     # LEGGI LA FRASE (solo frase grande, nessuna immagine)
 │   ├── ui/ocr.js           # lettura parole da FOTO (Tesseract.js, tutto in locale)
 │   └── app.js              # avvio
-├── audio/w/                # 2235 MP3 preregistrati (voce neurale italiana)
+├── audio/w/                # 2252 MP3 preregistrati (voce neurale italiana)
 ├── icons/                  # icone (generate con scripts/make-icon.ps1)
 ├── img/                    # disegni delle parole (SVG: mimo, magia, lago, merenda, pirata)
 ├── scripts/make-icon.ps1   # rigenera le icone (Windows, senza dipendenze)
