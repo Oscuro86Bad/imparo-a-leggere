@@ -14,8 +14,9 @@
 <h1>🧪 Collaudo automatico del motore</h1>
 <pre id="out">In corso…</pre>
 <script src="js/config.js?v=8"></script>
-<script src="js/data/words.js?v=21"></script>
-<script src="js/data/associations.js?v=8"></script>
+<script src="js/data/words.js?v=22"></script>
+<script src="js/data/associations.js?v=9"></script>
+<script src="js/data/audio.js?v=2"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=14"></script>
 <script>
@@ -237,6 +238,51 @@
   check('APE disponibile con vocali e PE (parola con vocale iniziale)', apeOk);
   const newWordsOk = IAL.WORDS.length >= 170 && IAL.WORDS.filter(w => w.img).length >= 80;
   check('Archivio espanso: oltre 170 parole, oltre 80 con immagine (attuali: ' + IAL.WORDS.length + ' / ' + IAL.WORDS.filter(w => w.img).length + ')', newWordsOk);
+
+  // 10b. Copertura completa di TUTTE le combinazioni consonante+vocale.
+  //      Ogni sillaba CV deve avere almeno una parola con immagine e almeno
+  //      una parola che inizia con quella sillaba (Q incluso: QUA/QUE/QUI/QUO).
+  const cvAll = [];
+  IAL.CONFIG.CONSONANTS.forEach(function (c) {
+    if (c === 'H') return;
+    IAL.CONFIG.VOWELS.forEach(function (v) {
+      const syl = (c === 'Q' ? 'QU' : c) + v;
+      if (syl !== 'QUU') cvAll.push(syl);
+    });
+  });
+  const cvNoImg = [], cvNoStart = [];
+  let cvStrong = 0;
+  cvAll.forEach(function (syl) {
+    const imgs = IAL.WORDS.filter(function (e) {
+      return !!e.img && ((e.s || []).indexOf(syl) !== -1 || e.w.indexOf(syl) === 0);
+    });
+    const starts = IAL.WORDS.filter(function (e) { return !!e.img && e.w.indexOf(syl) === 0; });
+    if (!imgs.length) cvNoImg.push(syl);
+    if (!starts.length) cvNoStart.push(syl);
+    if (imgs.length >= 3) cvStrong++;
+  });
+  check('Copertura: ' + cvAll.length + ' combinazioni consonante+vocale', cvAll.length === 74);
+  check('Copertura: ogni sillaba ha almeno una parola con immagine' + (cvNoImg.length ? ' → mancano ' + cvNoImg.join(' ') : ''), cvNoImg.length === 0);
+  check('Copertura: ogni sillaba ha almeno una parola che inizia con essa' + (cvNoStart.length ? ' → mancano ' + cvNoStart.join(' ') : ''), cvNoStart.length === 0);
+  check('Copertura: almeno 70 sillabe con 3+ parole illustrate (' + cvStrong + '/74)', cvStrong >= 70);
+  check('Copertura: parole rappresentative delle sillabe rare presenti',
+    ['FENICOTTERO', 'QUOTA', 'QUESTO', 'VULCANO', 'ZIA', 'ZIO', 'DUNA', 'GUSCIO']
+      .every(function (w) { return !!IAL.WORDS_BY_KEY[w] && !!IAL.WORDS_BY_KEY[w].img; }));
+
+  // 10c. Ogni parola con immagine (archivio principale + COMPLETA LA PAROLA)
+  //      deve avere il suo audio preregistrato: nessun ritorno alla voce
+  //      sintetica del dispositivo per le parole illustrate.
+  const audioMissing = [], audioSeen = {};
+  let audioTotal = 0;
+  IAL.WORDS.concat(IAL.COMPLETE_EXTRA || []).forEach(function (e) {
+    if (!e || !e.w || !e.img || audioSeen[e.w]) return;
+    audioSeen[e.w] = 1;
+    audioTotal++;
+    if (!IAL.AUDIO_MAP || !IAL.AUDIO_MAP[e.w]) audioMissing.push(e.w);
+  });
+  check('Audio preregistrato: tutte le ' + audioTotal + ' parole illustrate hanno un MP3' +
+    (audioMissing.length ? ' → mancano ' + audioMissing.slice(0, 8).join(',') : ''), audioMissing.length === 0);
+  check('Audio preregistrato: manifesto ampio (' + Object.keys(IAL.AUDIO_MAP || {}).length + ' voci)', Object.keys(IAL.AUDIO_MAP || {}).length >= 570);
 
   // 11. Attivare una consonante attiva automaticamente le sue sillabe CV
   const p3 = IAL.Store.createProfile('Test3', '🐹');

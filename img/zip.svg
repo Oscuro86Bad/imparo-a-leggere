@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Cerniera lampo aperta con cursore">
+  <defs>
+    <linearGradient id="tapeA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4a7fd4"/>
+      <stop offset="1" stop-color="#2f5fa8"/>
+    </linearGradient>
+    <linearGradient id="tapeB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e05a5a"/>
+      <stop offset="1" stop-color="#b83a3a"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f7fa"/>
+      <stop offset="1" stop-color="#9aa5b0"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="192" height="192" rx="24" fill="#f2f7ff"/>
+  <circle cx="100" cy="104" r="78" fill="#e3edfb"/>
+
+  <!-- nastro blu (sinistra) -->
+  <path d="M62 26 L94 26 L94 176 L62 176 Q 54 176 54 168 L54 34 Q 54 26 62 26 Z" fill="url(#tapeA)"/>
+  <!-- nastro rosso (destra) -->
+  <path d="M106 26 L138 26 Q 146 26 146 34 L146 168 Q 146 176 138 176 L106 176 Z" fill="url(#tapeB)"/>
+
+  <!-- denti metallici: chiusi in alto, aperti in basso -->
+  <g fill="#c7d1da" stroke="#7f8b96" stroke-width="1.6">
+    <rect x="90" y="34" width="20" height="7" rx="2"/>
+    <rect x="90" y="50" width="20" height="7" rx="2"/>
+    <rect x="90" y="66" width="20" height="7" rx="2"/>
+    <rect x="90" y="82" width="20" height="7" rx="2"/>
+  </g>
+  <g fill="#c7d1da" stroke="#7f8b96" stroke-width="1.6">
+    <rect x="80" y="128" width="18" height="7" rx="2" transform="rotate(-8 80 128)"/>
+    <rect x="102" y="128" width="18" height="7" rx="2" transform="rotate(8 102 128)"/>
+    <rect x="76" y="146" width="16" height="7" rx="2" transform="rotate(-10 76 146)"/>
+    <rect x="108" y="146" width="16" height="7" rx="2" transform="rotate(10 108 146)"/>
+    <rect x="72" y="164" width="14" height="7" rx="2" transform="rotate(-12 72 164)"/>
+    <rect x="114" y="164" width="14" height="7" rx="2" transform="rotate(12 114 164)"/>
+  </g>
+
+  <!-- cursore -->
+  <path d="M78 96 L122 96 L116 122 Q 100 132 84 122 Z" fill="url(#metal)" stroke="#6f7b86" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="92" y="100" width="16" height="10" rx="3" fill="#5c6772"/>
+  <!-- linguetta -->
+  <path d="M100 124 L100 150" stroke="#8b96a1" stroke-width="5" stroke-linecap="round"/>
+  <path d="M88 148 L112 148 L108 168 Q 100 176 92 168 Z" fill="url(#metal)" stroke="#6f7b86" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="100" cy="158" r="4" fill="#6f7b86"/>
+
+  <!-- cuciture -->
+  <g stroke="#ffffff" stroke-width="2" stroke-dasharray="4 4" opacity="0.55">
+    <path d="M66 30 L66 172"/><path d="M134 30 L134 172"/>
+  </g>
+</svg>

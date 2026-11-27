@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Zufolo di legno con fori e note musicali">
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9a35f"/>
+      <stop offset="0.45" stop-color="#b97a3e"/>
+      <stop offset="1" stop-color="#8a5427"/>
+    </linearGradient>
+    <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0c27b"/>
+      <stop offset="1" stop-color="#c58b45"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="192" height="192" rx="24" fill="#fff8ee"/>
+  <circle cx="100" cy="104" r="78" fill="#ffefd8"/>
+
+  <!-- note musicali -->
+  <g fill="#e05a8a">
+    <ellipse cx="148" cy="52" rx="9" ry="7" transform="rotate(-18 148 52)"/>
+    <path d="M156 50 L156 24" stroke="#e05a8a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M156 24 q 12 3 10 14" stroke="#e05a8a" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="172" cy="82" rx="7" ry="5.5" transform="rotate(-18 172 82)"/>
+    <path d="M178 80 L178 60" stroke="#e05a8a" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- corpo dello zufolo -->
+  <g transform="rotate(-32 100 120)">
+    <rect x="34" y="108" width="132" height="30" rx="15" fill="url(#wood)" stroke="#6f421c" stroke-width="3"/>
+    <!-- imboccatura -->
+    <rect x="32" y="110" width="20" height="26" rx="8" fill="#7a4a20" stroke="#5c3515" stroke-width="2.5"/>
+    <path d="M44 114 L58 114" stroke="#3f2410" stroke-width="5" stroke-linecap="round"/>
+    <!-- fascette -->
+    <rect x="58" y="108" width="8" height="30" fill="url(#band)"/>
+    <rect x="138" y="108" width="8" height="30" fill="url(#band)"/>
+    <!-- fori -->
+    <g fill="#4a2a10">
+      <circle cx="82" cy="123" r="5"/>
+      <circle cx="102" cy="123" r="5"/>
+      <circle cx="122" cy="123" r="5"/>
+    </g>
+    <g fill="#f6d9a8" opacity="0.8">
+      <circle cx="82" cy="121" r="1.6"/><circle cx="102" cy="121" r="1.6"/><circle cx="122" cy="121" r="1.6"/>
+    </g>
+    <!-- riflesso -->
+    <path d="M64 114 L132 114" stroke="#f3cf9a" stroke-width="3" opacity="0.6" stroke-linecap="round"/>
+  </g>
+
+  <!-- puntini decorativi -->
+  <g fill="#e0b27a" opacity="0.7">
+    <circle cx="40" cy="54" r="4"/><circle cx="58" cy="38" r="3"/><circle cx="30" cy="74" r="3"/>
+  </g>
+</svg>

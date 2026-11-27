@@ -9,8 +9,8 @@
 <script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
 <script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push((e.message || 'errore') + ' @ riga ' + e.lineno + ' | ' + ((e.error && e.error.stack) || '').replace(/\n/g, ' ¦ ')); });</script>
 <script src="js/config.js?v=8"></script>
-<script src="js/data/words.js?v=21"></script>
-<script src="js/data/associations.js?v=8"></script>
+<script src="js/data/words.js?v=22"></script>
+<script src="js/data/associations.js?v=9"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=15"></script>
 <script src="js/ui/components.js?v=15"></script>
@@ -255,6 +255,9 @@
     ['TATA','TUTU','TETTO','TATTO','TAPPO','LETTO','LOTO','LUME','MUTA','MOLO','MOTORE','POMATA']
       .every(function (w) { return !!IAL.WORDS_BY_KEY[w].img; }));
   check('Immagini: TETTO ha il disegno dedicato', IAL.WORDS_BY_KEY.TETTO.img === 'img/tetto.svg');
+  check('Immagini: nuovi disegni dedicati (FARO, FISCHIO, NUTRIA, QUOTA, SUSINA, ZUFOLO, ZIP)',
+    ['FARO','FISCHIO','NUTRIA','QUOTA','SUSINA','ZUFOLO','ZIP']
+      .every(function (w) { return !!IAL.WORDS_BY_KEY[w] && IAL.WORDS_BY_KEY[w].img.indexOf('img/') === 0; }));
   check('Parole inventate curate: TATU (e altre) pronte, mai parole reali',
     (IAL.INVENTED_WORDS || []).length >= 20 &&
     IAL.INVENTED_WORDS.some(function (e) { return e.w === 'TATU'; }) &&

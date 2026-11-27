@@ -325,7 +325,145 @@ IAL.WORDS = [
   { w: 'UOVA',     s: ['UO', 'VA'],            img: '🥚',  diff: 2 },
   { w: 'EDERA',    s: ['E', 'DE', 'RA'],       img: '🌿',  diff: 2 },
   { w: 'SCIROPPO', s: ['SCI', 'ROP', 'PO'],    img: '🧃',  diff: 2 },
-  { w: 'XILOFONO', s: ['XI', 'LO', 'FO', 'NO'],img: '🎶',  diff: 2 }
+  { w: 'XILOFONO', s: ['XI', 'LO', 'FO', 'NO'],img: '🎶',  diff: 2 },
+
+  // --- ampliamento del vocabolario: parole concrete, una o più per
+  //     ogni combinazione consonante+vocale, con immagine chiara ---
+
+  // --- B ---
+  { w: 'BENE',     s: ['BE', 'NE'],             img: '👍',  diff: 1 },
+  { w: 'BEFANA',   s: ['BE', 'FA', 'NA'],       img: '🧙‍♀️', diff: 2 },
+  { w: 'BEVANDA',  s: ['BE', 'VAN', 'DA'],      img: '🥤',  diff: 2 },
+  { w: 'BISONTE',  s: ['BI', 'SON', 'TE'],      img: '🦬',  diff: 2 },
+  { w: 'BIDONE',   s: ['BI', 'DO', 'NE'],       img: '🗑️', diff: 1 },
+  { w: 'BIRILLO',  s: ['BI', 'RIL', 'LO'],      img: '🎳',  diff: 2 },
+  { w: 'BOTTONE',  s: ['BOT', 'TO', 'NE'],      img: '🔘',  diff: 1 },
+  { w: 'BUCO',     s: ['BU', 'CO'],             img: '🕳️', diff: 1 },
+  { w: 'BUSSOLA',  s: ['BUS', 'SO', 'LA'],      img: '🧭',  diff: 2 },
+  { w: 'BALCONE',  s: ['BAL', 'CO', 'NE'],      img: '🏠',  diff: 2 },
+
+  // --- C ---
+  { w: 'CULLA',    s: ['CUL', 'LA'],            img: '🛏️', diff: 2 },
+  { w: 'CUPOLA',   s: ['CU', 'PO', 'LA'],       img: '🏛️', diff: 2 },
+  { w: 'CUCULO',   s: ['CU', 'CU', 'LO'],       img: '🐦',  diff: 2 },
+  { w: 'CESTINO',  s: ['CE', 'STI', 'NO'],      img: '🗑️', diff: 1 },
+  { w: 'CIGNO',    s: ['CI', 'GNO'],            img: '🦢',  diff: 2 },
+  { w: 'COLLINA',  s: ['COL', 'LI', 'NA'],      img: '⛰️', diff: 2 },
+  { w: 'CACTUS',   s: ['CAC', 'TUS'],           img: '🌵',  diff: 2 },
+  { w: 'CASCATA',  s: ['CA', 'SCA', 'TA'],      img: '💦',  diff: 2 },
+  { w: 'COCCODRILLO', s: ['COC', 'COD', 'RIL', 'LO'], img: '🐊', diff: 2 },
+  { w: 'CAMPANA',  s: ['CAM', 'PA', 'NA'],      img: '🔔',  diff: 1 },
+
+  // --- D ---
+  { w: 'DUNA',     s: ['DU', 'NA'],             img: '🏖️', diff: 2 },
+  { w: 'DUCA',     s: ['DU', 'CA'],             img: '🤴',  diff: 2 },
+  { w: 'DENTI',    s: ['DEN', 'TI'],            img: '🦷',  diff: 1 },
+
+  // --- F ---
+  { w: 'FENICOTTERO', s: ['FE', 'NI', 'COT', 'TE', 'RO'], img: '🦩', diff: 2 },
+  { w: 'FENICE',   s: ['FE', 'NI', 'CE'],       img: '🐦‍🔥', diff: 2 },
+  { w: 'FELICE',   s: ['FE', 'LI', 'CE'],       img: '😊',  diff: 1 },
+  { w: 'FARO',     s: ['FA', 'RO'],             img: 'img/faro.svg', diff: 1 },
+  { w: 'FILO',     s: ['FI', 'LO'],             img: '🧵',  diff: 1 },
+  { w: 'FUMETTO',  s: ['FU', 'MET', 'TO'],      img: '📚',  diff: 2 },
+  { w: 'FUNAMBOLO',s: ['FU', 'NAM', 'BO', 'LO'],img: '🤹',  diff: 2 },
+  { w: 'FALCO',    s: ['FAL', 'CO'],            img: '🦅',  diff: 2 },
+  { w: 'FISCHIO',  s: ['FIS', 'CHIO'],          img: 'img/fischio.svg', diff: 2 },
+
+  // --- G ---
+  { w: 'GELO',     s: ['GE', 'LO'],             img: '❄️', diff: 1 },
+  { w: 'GEMELLI',  s: ['GE', 'MEL', 'LI'],      img: '👯',  diff: 2 },
+  { w: 'GUSCIO',   s: ['GU', 'SCIO'],           img: '🐚',  diff: 2 },
+  { w: 'GIRINO',   s: ['GI', 'RI', 'NO'],       img: '🐸',  diff: 1 },
+  { w: 'GONNA',    s: ['GON', 'NA'],            img: '👗',  diff: 2 },
+  { w: 'GALLINA',  s: ['GAL', 'LI', 'NA'],      img: '🐔',  diff: 1 },
+  { w: 'GRANCHIO', s: ['GRAN', 'CHIO'],         img: '🦀',  diff: 2 },
+  { w: 'GIRANDOLA',s: ['GI', 'RAN', 'DO', 'LA'],img: '🎡',  diff: 2 },
+
+  // --- L ---
+  { w: 'LONTRA',   s: ['LON', 'TRA'],           img: '🦦',  diff: 2 },
+  { w: 'LUCCHETTO',s: ['LUC', 'CHET', 'TO'],    img: '🔒',  diff: 2 },
+  { w: 'LATTA',    s: ['LAT', 'TA'],            img: '🥫',  diff: 1 },
+
+  // --- M ---
+  { w: 'MIRTILLO', s: ['MIR', 'TIL', 'LO'],     img: '🫐',  diff: 2 },
+  { w: 'MERCATO',  s: ['MER', 'CA', 'TO'],      img: '🛒',  diff: 2 },
+  { w: 'MANDORLA', s: ['MAN', 'DOR', 'LA'],     img: '🌰',  diff: 2 },
+  { w: 'MORA',     s: ['MO', 'RA'],             img: '🫐',  diff: 2 },
+  { w: 'MELAGRANA',s: ['ME', 'LA', 'GRA', 'NA'],img: '🍎',  diff: 2 },
+  { w: 'MELOGRANO',s: ['ME', 'LO', 'GRA', 'NO'],img: '🍎',  diff: 2 },
+
+  // --- N ---
+  { w: 'NUVOLE',   s: ['NU', 'VO', 'LE'],       img: '☁️',  diff: 1 },
+  { w: 'NUTRIA',   s: ['NU', 'TRIA'],           img: 'img/nutria.svg', diff: 2 },
+  { w: 'NOCE',     s: ['NO', 'CE'],             img: '🌰',  diff: 2 },
+  { w: 'NIPOTE',   s: ['NI', 'PO', 'TE'],       img: '🧒',  diff: 2 },
+
+  // --- P ---
+  { w: 'PUGNO',    s: ['PU', 'GNO'],            img: '✊',  diff: 1 },
+  { w: 'PUGILE',   s: ['PU', 'GI', 'LE'],       img: '🥊',  diff: 2 },
+  { w: 'PALLONE',  s: ['PAL', 'LO', 'NE'],      img: '⚽',  diff: 1 },
+  { w: 'PENNELLO', s: ['PEN', 'NEL', 'LO'],     img: '🖌️', diff: 2 },
+  { w: 'PIPISTRELLO', s: ['PI', 'PI', 'STREL', 'LO'], img: '🦇', diff: 2 },
+  { w: 'POMELO',   s: ['PO', 'ME', 'LO'],       img: '🍊',  diff: 2 },
+  { w: 'PATTINI',  s: ['PAT', 'TI', 'NI'],      img: '🛼',  diff: 2 },
+  { w: 'PASTA',    s: ['PA', 'STA'],            img: '🍝',  diff: 1 },
+
+  // --- Q ---
+  { w: 'QUADRO',   s: ['QUA', 'DRO'],           img: '🖼️', diff: 2 },
+  { w: 'QUADERNO', s: ['QUA', 'DER', 'NO'],     img: '📓',  diff: 2 },
+  { w: 'QUAGLIA',  s: ['QUA', 'GLIA'],          img: '🐦',  diff: 2 },
+  { w: 'QUADRETTO',s: ['QUA', 'DRET', 'TO'],    img: '🖼️', diff: 2 },
+  { w: 'QUESTO',   s: ['QUE', 'STO'],           img: '👉',  diff: 1 },
+  { w: 'QUI',      s: ['QUI'],                  img: '📍',  diff: 1 },
+  { w: 'QUOTA',    s: ['QUO', 'TA'],            img: 'img/quota.svg', diff: 2 },
+
+  // --- R ---
+  { w: 'RIGA',     s: ['RI', 'GA'],             img: '📏',  diff: 1 },
+  { w: 'RIVA',     s: ['RI', 'VA'],             img: '🏞️', diff: 2 },
+  { w: 'RUBINETTO',s: ['RU', 'BI', 'NET', 'TO'],img: '🚰',  diff: 2 },
+  { w: 'RUMORE',   s: ['RU', 'MO', 'RE'],       img: '🔊',  diff: 2 },
+  { w: 'RONDINE',  s: ['RON', 'DI', 'NE'],      img: '🐦',  diff: 2 },
+  { w: 'RAZZO',    s: ['RAZ', 'ZO'],            img: '🚀',  diff: 2 },
+  { w: 'RACCHETTA',s: ['RAC', 'CHET', 'TA'],    img: '🎾',  diff: 2 },
+
+  // --- S ---
+  { w: 'SUGHERO',  s: ['SU', 'GHE', 'RO'],      img: '🍾',  diff: 2 },
+  { w: 'SUSINA',   s: ['SU', 'SI', 'NA'],       img: 'img/susina.svg', diff: 2 },
+  { w: 'SEMAFORO', s: ['SE', 'MA', 'FO', 'RO'], img: '🚦',  diff: 1 },
+  { w: 'SEDANO',   s: ['SE', 'DA', 'NO'],       img: '🥬',  diff: 2 },
+  { w: 'SQUALO',   s: ['SQUA', 'LO'],           img: '🦈',  diff: 2 },
+  { w: 'SERPE',    s: ['SER', 'PE'],            img: '🐍',  diff: 2 },
+  { w: 'SCIARPA',  s: ['SCIAR', 'PA'],          img: '🧣',  diff: 2 },
+
+  // --- T ---
+  { w: 'TINOZZA',  s: ['TI', 'NOZ', 'ZA'],      img: '🛁',  diff: 2 },
+  { w: 'TIMO',     s: ['TI', 'MO'],             img: '🌿',  diff: 2 },
+  { w: 'TRONCO',   s: ['TRON', 'CO'],           img: '🪵',  diff: 2 },
+  { w: 'TIBURONE', s: ['TI', 'BU', 'RO', 'NE'], img: '🦈',  diff: 2 },
+  { w: 'TUCANO',   s: ['TU', 'CA', 'NO'],       img: '🦜',  diff: 2 },
+  { w: 'TARTINA',  s: ['TAR', 'TI', 'NA'],      img: '🥪',  diff: 2 },
+
+  // --- V ---
+  { w: 'VISO',     s: ['VI', 'SO'],             img: '🙂',  diff: 1 },
+  { w: 'VIGNA',    s: ['VI', 'GNA'],            img: '🍇',  diff: 2 },
+  { w: 'VAPORE',   s: ['VA', 'PO', 'RE'],       img: '💨',  diff: 2 },
+  { w: 'VULCANO',  s: ['VUL', 'CA', 'NO'],      img: '🌋',  diff: 2 },
+  { w: 'VOLANTE',  s: ['VO', 'LAN', 'TE'],      img: '🚗',  diff: 2 },
+
+  // --- Z ---
+  { w: 'ZEBRE',    s: ['ZE', 'BRE'],            img: '🦓',  diff: 1 },
+  { w: 'ZIA',      s: ['ZI', 'A'],              img: '👩',  diff: 1 },
+  { w: 'ZIO',      s: ['ZI', 'O'],              img: '👨',  diff: 1 },
+  { w: 'ZUFOLO',   s: ['ZU', 'FO', 'LO'],       img: 'img/zufolo.svg', diff: 2 },
+  { w: 'ZERO',     s: ['ZE', 'RO'],             img: '0️⃣', diff: 1 },
+  { w: 'ZUCCHERO', s: ['ZUC', 'CHE', 'RO'],     img: '🍬',  diff: 1 },
+  { w: 'ZIP',      s: ['ZIP'],                  img: 'img/zip.svg', diff: 2 },
+  { w: 'ZIBIBBO',  s: ['ZI', 'BIB', 'BO'],      img: '🍇',  diff: 2 },
+  { w: 'ZUMO',     s: ['ZU', 'MO'],             img: '🧃',  diff: 2 },
+
+  // --- vocale iniziale ---
+  { w: 'OSTRICA',  s: ['O', 'STRICA'],          img: '🦪',  diff: 2 }
 ];
 
 // Indice rapido per parola (maiuscole)
@@ -471,12 +609,8 @@ IAL.COMPLETE_EXTRA = [
   { w: 'PULCINO',    img: '🐤' },
 
   // --- Q ---
-  { w: 'QUADERNO',   img: '📓' },
-  { w: 'QUADRO',     img: '🖼️' },
-  { w: 'QUAGLIA',    img: '🐦' },
   { w: 'QUARZO',     img: '💎' },
   { w: 'QUATTRO',    img: '4️⃣' },
-  { w: 'QUADRETTO',  img: '🖼️' },
   { w: 'QUINDICI',   img: '🔢' },
   { w: 'QUIETE',     img: '😌' },
 
@@ -485,7 +619,6 @@ IAL.COMPLETE_EXTRA = [
   { w: 'RAMO',       img: '🌿' },
   { w: 'RAVIOLI',    img: '🥟' },
   { w: 'REGALO',     img: '🎁' },
-  { w: 'RIGA',       img: '📏' },
   { w: 'RIMORCHIO',  img: '🚛' },
   { w: 'RINOCERONTE',img: '🦏' },
   { w: 'RISOTTO',    img: '🍚' },
@@ -528,7 +661,6 @@ IAL.COMPLETE_EXTRA = [
   { w: 'TROMBA',     img: '🎺' },
   { w: 'TROTA',      img: '🐟' },
   { w: 'TUBETTO',    img: '🧴' },
-  { w: 'TUCANO',     img: '🦜' },
   { w: 'TRICICLO',   img: '🛺' },
 
   // --- V ---
@@ -543,16 +675,13 @@ IAL.COMPLETE_EXTRA = [
   { w: 'VIGILE',     img: '👮' },
   { w: 'VILLAGGIO',  img: '🏘️' },
   { w: 'VIPERA',     img: '🐍' },
-  { w: 'VULCANO',    img: '🌋' },
 
   // --- Z ---
   { w: 'ZAMPA',      img: '🐾' },
   { w: 'ZATTERA',    img: '🛶' },
   { w: 'ZENZERO',    img: '🫚' },
-  { w: 'ZERO',       img: '0️⃣' },
   { w: 'ZOCCOLO',    img: '👠' },
   { w: 'ZOLFO',      img: '🟡' },
-  { w: 'ZUCCHERO',   img: '🍬' },
   { w: 'ZOMBIE',     img: '🧟' }
 ];
 

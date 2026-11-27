@@ -101,7 +101,7 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    (prime due lettere), es. **PA / PE / MA / PU** per ⚽ PALLA.
 3. Le opzioni sono **solo sillabe studiate e attive** nell'Area Genitori.
 4. La parola deve iniziare con una sillaba conosciuta: il resto può contenere
-   lettere ancora da studiare → archivio molto ricco (oltre 270 parole, quasi tutte con immagine).
+   lettere ancora da studiare → archivio molto ricco (oltre 370 parole, quasi tutte con immagine).
 5. Risposta giusta → opzione **VERDE**, stellina, **parola completa rivelata**
    e pronunciata, poi **passaggio automatico** alla parola successiva.
 6. Risposta sbagliata → opzione **ROSSA** disabilitata; si riprova sulle altre.
@@ -245,8 +245,15 @@ Nessuna parola casuale: il motore verifica **prima** di proporre qualunque eserc
    **solo con sillabe studiate** e se per caso coincidono con una parola reale
    dell'archivio vengono classificate come reali (es. PUMA).
 
-Archivio incluso: oltre 270 parole italiane reali, classificate per lunghezza, difficoltà,
-struttura sillabica e disponibilità di immagine (`js/data/words.js`).
+Archivio incluso: **380 parole italiane reali**, di cui **364 con immagine**, più 172 parole
+aggiuntive per COMPLETA LA PAROLA (`js/data/words.js`). Tutte le **74 combinazioni
+consonante+vocale** (Q incluso) hanno almeno una parola illustrata e una parola che inizia
+con quella sillaba; 71 su 74 ne hanno almeno tre. Le combinazioni più rare sono coperte da
+parole concrete: QUOTA (QUO), QUI (QUI), QUESTO (QUE), VULCANO (VU), ZIA/ZIO/ZIBIBBO (ZI).
+
+Ogni parola illustrata ha il suo **MP3 preregistrato** (579 voci in `audio/w/`, manifesto
+`js/data/audio.js`): la voce neurale è sempre disponibile anche offline, senza ricorrere alla
+sintesi vocale del dispositivo.
 
 ---
 
@@ -327,12 +334,13 @@ Il progetto è già predisposto: schema completo, separazione netta tra dati
 
 Due pagine di collaudo automatico (apribili da browser, anche da `file://`):
 - `test.html` — motore di generazione: nessuna lettera non abilitata, nessuna combinazione
-  non studiata, correttezza reali/inventate, filtro lunghezza, zero esercizi se tutto spento
-  (69 controlli).
+  non studiata, correttezza reali/inventate, filtro lunghezza, zero esercizi se tutto spento,
+  copertura di tutte le 74 sillabe CV e audio preregistrato di tutte le parole illustrate
+  (81 controlli).
 - `uitest.html` — interfaccia completa: creazione profilo, 30 esercizi in SOLO LETTURA con
   controllo delle lettere, ciclo CORRETTO/AVANTI in LEGGI E GUARDA, tutte le schede
   dell'Area Genitori, PIN, stelline e statistiche, uso dell'audio preregistrato e
-  fallback alla sintesi vocale (124 controlli).
+  fallback alla sintesi vocale (144 controlli).
 
 Checklist manuale consigliata (2 minuti):
 - [ ] Attiva solo vocali + P: nessuna parola con altre lettere compare.

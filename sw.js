@@ -4,7 +4,7 @@
  *   una sola ricarica della pagina basta per vedere gli aggiornamenti.
  * - OFFLINE: usa la copia salvata in cache.
  */
-const CACHE_NAME = 'imparo-a-leggere-v33';
+const CACHE_NAME = 'imparo-a-leggere-v34';
 // Cache separata per i file del motore OCR (CDN): non vengono cancellati
 // a ogni aggiornamento dell'app, così la lettura da foto resta offline.
 const VENDOR_CACHE = 'imparo-a-leggere-vendor-v1';
@@ -46,6 +46,13 @@ const ASSETS = [
   './img/tetto.svg',
   './img/tettoia.svg',
   './img/tutu.svg',
+  './img/faro.svg',
+  './img/fischio.svg',
+  './img/nutria.svg',
+  './img/quota.svg',
+  './img/susina.svg',
+  './img/zufolo.svg',
+  './img/zip.svg',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
