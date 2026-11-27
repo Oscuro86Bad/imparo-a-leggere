@@ -29,7 +29,8 @@ inventate, associazione parola-immagine.
    studiate o attiva strutture speciali (doppie, gruppi, GN, GLI…).
 5. Il bambino usa **SOLO LETTURA**, **UNISCI LE SILLABE**, **LEGGI E GUARDA**, **DICO LA PAROLA**,
    **VEDI E SCEGLI**, **ASCOLTA E SELEZIONA**, **COMPLETA LA PAROLA**,
-   **COLLEGA L'IMMAGINE** e **LEGGI LA FRASE** (cinque sezioni con etichetta NEW).
+   **COLLEGA L'IMMAGINE**, **LEGGI LA FRASE** e **ASCOLTA LENTO**
+   (sei sezioni con etichetta NEW).
 
 > Nota: per l'installazione come PWA e l'offline completo serve servire l'app via `http(s)`
 > (GitHub Pages, o un mini-server locale, vedi sotto). Aprendo il file direttamente
@@ -63,14 +64,17 @@ In alternativa basta l'estensione *Live Server* di VS Code.
   (TATU, TATO, MIMI, LOLO…), sempre leggibili con le sillabe già studiate.
 
 ### UNISCI LE SILLABE (novità — NEW)
-1. Compaiono i riquadri delle sillabe di **una parola reale** (es. `[ MA ] + [ MMA ]`):
-   il bambino li tocca in ordine e si fondono nella parola completa **MAMMA**.
+1. Compaiono i riquadri delle sillabe di **una parola reale**, **sempre mescolati**
+   (es. `[ MMA ] + [ MA ]` invece di `[ MA ] + [ MMA ]`): il bambino deve
+   riconoscere l'ordine giusto e toccare i riquadri uno alla volta fino a formare
+   **MAMMA**. Non sono mai disegnati già in fila nell'ordine corretto.
 2. Le doppie compaiono solo se attivate nell'Area Genitori: con vocali + P/M/N/L/T
    si uniscono parole come `ME + LA = MELA`, `PA + NE = PANE`, `LU + NA = LUNA`.
 3. Vengono usate **solo parole reali interamente leggibili**, con 2–4 sillabe già
    studiate: nessuna parola inventata e nessuna lettera nuova può entrare di nascosto.
 4. Se l'ordine è sbagliato non c'è una X rossa: i riquadri si scuotono piano e
-   compare un suggerimento gentile («Prima MA, poi MMA»). Si riprova senza penalty.
+   compare un suggerimento gentile («Prima MA, poi MMA»). Si riprova senza penalty;
+   il riquadro già scelto resta evidenziato, così il bambino vede cosa manca.
 5. A fusione completata la parola viene **pronunciata** con l'audio preregistrato,
    compare l'immagine come premio (se disponibile) e arriva una stellina.
 6. **🔄 NUOVA** passa a un'altra parola; l'anti-ripetizione evita il ripetersi
@@ -202,6 +206,21 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    italiani curati (`tools/generate_sentences.py`), senza ripetere la stessa
    frase due volte di seguito.
 
+### ASCOLTA LENTO (novità — NEW)
+1. È una **voce propria nel menu** (colore corallo, accanto a LEGGI LA FRASE):
+   non va cercata dentro un'altra sezione. Un tocco apre una frase e la legge
+   subito piano, senza bisogno di premere un pulsante interno.
+2. Il titolo della schermata diventa **ASCOLTA LENTO** e compare la spiegazione
+   «La frase si legge piano 🐢 e le parole si illuminano».
+3. La parola pronunciata si illumina in giallo e, dentro di essa, si accende
+   anche la sillaba corrente. Se il browser non invia `onboundary` (tipico su
+   iOS), un timer interno avanza comunque parola per parola.
+4. **🔄 NUOVA** passa a un'altra frase e la rilegge piano automaticamente;
+   **✅ HO LETTO** dà la stellina e passa alla frase successiva sempre in
+   modalità lenta. Uscendo dalla schermata la voce si ferma.
+5. Lo stesso comando è disponibile anche come pulsante **🐢 ASCOLTA LENTO**
+   dentro LEGGI LA FRASE, per chi vuole alternare lettura normale e lenta.
+
 ### PAROLE PERSONALIZZATE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,
    parole del quaderno…): restano salvate sul dispositivo.
@@ -329,8 +348,8 @@ IMPARO A LEGGERE/
 │   ├── state/store.js      # profili, impostazioni, progressi (localStorage)
 │   ├── engine/generator.js # motore di generazione con controlli didattici
 │   ├── ui/*.js             # schermate: home, lettura, leggi e guarda, area genitori, parole personalizzate
-│   ├── ui/blend.js         # UNISCI LE SILLABE (riquadri da toccare in ordine)
-│   ├── ui/sentences.js     # LEGGI LA FRASE (solo testo, ASCOLTA LENTO con evidenziatore)
+│   ├── ui/blend.js         # UNISCI LE SILLABE (riquadri mescolati da toccare in ordine)
+│   ├── ui/sentences.js     # LEGGI LA FRASE + ASCOLTA LENTO (solo testo, evidenziatore)
 │   ├── ui/ocr.js           # lettura parole da FOTO (Tesseract.js, tutto in locale)
 │   └── app.js              # avvio
 ├── audio/w/                # 2252 MP3 preregistrati (voce neurale italiana)
@@ -400,14 +419,15 @@ Due pagine di collaudo automatico (apribili da browser, anche da `file://`):
 - `uitest.html` — interfaccia completa: creazione profilo, 30 esercizi in SOLO LETTURA con
   controllo delle lettere, ciclo CORRETTO/AVANTI in LEGGI E GUARDA, tutte le schede
   dell'Area Genitori, PIN, stelline e statistiche, uso dell'audio preregistrato e
-  fallback alla sintesi vocale (169 controlli).
+  fallback alla sintesi vocale, sillabe mescolate e sezione ASCOLTA LENTO
+  (173 controlli).
 
 Checklist manuale consigliata (2 minuti):
 - [ ] Attiva solo vocali + P: nessuna parola con altre lettere compare.
 - [ ] Disattiva PA: la sillaba PA sparisce dagli esercizi.
 - [ ] Attiva «Doppie»: compaiono MAMMA, MAPPA, LATTE…
-- [ ] UNISCI LE SILLABE: toccando i riquadri in ordine si forma la parola e si sente l'audio.
-- [ ] LEGGI LA FRASE → 🐢 ASCOLTA LENTO: la parola letta si illumina, senza immagini.
+- [ ] UNISCI LE SILLABE: i riquadri sono mescolati; toccandoli in ordine si forma la parola e si sente l'audio.
+- [ ] ASCOLTA LENTO: si apre direttamente dal menu (corallo); la parola letta si illumina, senza immagini.
 - [ ] Modalità «solo inventate»: le parole mostrano la dicitura «senza significato».
 - [ ] CORRETTO aumenta le stelline.
 - [ ] PIN: l'Area Genitori è inaccessibile ai bambini senza codice.

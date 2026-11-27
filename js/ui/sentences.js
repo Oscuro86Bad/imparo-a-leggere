@@ -14,6 +14,7 @@ IAL.Sentences = (function () {
   const el = IAL.UI.el;
   let current = null;
   let slowActive = false;
+  let slowMode = false;
   let sylTimer = null;
 
   const LEVEL_NAMES = {
@@ -55,12 +56,17 @@ IAL.Sentences = (function () {
     return out.filter(Boolean);
   }
 
-  function show() {
+  function show(opts) {
+    opts = opts || {};
+    slowMode = !!opts.slow;
     current = null;
     slowActive = false;
     render();
     next();
   }
+
+  // Voce dall'icona del menu: apre la frase e la legge subito piano.
+  function showSlow() { show({ slow: true }); }
 
   function hide() {
     IAL.UI.stopSpeech();
@@ -70,8 +76,9 @@ IAL.Sentences = (function () {
 
   function render() {
     const p = IAL.Store.active();
+    const back = function () { hide(); IAL.Home.show(); };
     const topbar = el('div', { class: 'topbar' }, [
-      el('button', { class: 'chip', onclick: function () { IAL.Home.show(); }, 'aria-label': 'Torna al menu' }, ['🏠 Menu'])
+      el('button', { class: 'chip', onclick: back, 'aria-label': 'Torna al menu' }, ['🏠 Menu'])
     ]);
 
     const card = el('div', { class: 'comic-card' }, [
@@ -94,10 +101,13 @@ IAL.Sentences = (function () {
 
     IAL.UI.renderScreen([
       topbar,
-      el('h1', { class: 'app-title' }, ['LEGGI LA FRASE']),
+      el('h1', { class: 'app-title' }, [slowMode ? 'ASCOLTA LENTO' : 'LEGGI LA FRASE']),
+      slowMode
+        ? el('p', { class: 'app-subtitle' }, ['La frase si legge piano 🐢 e le parole si illuminano'])
+        : null,
       card,
       note,
-      el('button', { class: 'btn btn-soft btn-block', style: 'margin-top:10px', onclick: function () { IAL.Home.show(); } }, ['🏠 TORNA AL MENU'])
+      el('button', { class: 'btn btn-soft btn-block', style: 'margin-top:10px', onclick: back }, ['🏠 TORNA AL MENU'])
     ]);
 
     updateNote();
@@ -190,6 +200,7 @@ IAL.Sentences = (function () {
     paintText(entry);
     if (msgEl) { msgEl.textContent = ''; msgEl.className = 'feedback-msg'; }
     updateNote();
+    if (slowMode) speakSlow();
   }
 
   function speakCurrent() {
@@ -216,6 +227,7 @@ IAL.Sentences = (function () {
 
   function markRead() {
     if (!current) return;
+    IAL.UI.stopSpeech();
     slowActive = false;
     clearHighlight();
     const p = IAL.Store.active();
@@ -229,13 +241,17 @@ IAL.Sentences = (function () {
     updateNote();
 
     const read = current;
-    IAL.UI.say(read.t, function () {
+    const advance = function () {
       setTimeout(function () {
         if (current !== read) return;
         if (!document.getElementById('sentence-text')) return;
         next();
       }, 450);
-    });
+    };
+    // In modalità lenta la frase successiva viene riletta piano da next():
+    // evitiamo di sovrapporre la voce normale a quella lenta.
+    if (slowMode) advance();
+    else IAL.UI.say(read.t, advance);
   }
 
   function updateNote() {
@@ -255,7 +271,7 @@ IAL.Sentences = (function () {
   function syllablesForTest(word) { return splitSyllables(word); }
 
   return {
-    show: show, hide: hide, currentForTest: currentForTest,
+    show: show, showSlow: showSlow, hide: hide, currentForTest: currentForTest,
     highlightedForTest: highlightedForTest, syllablesForTest: syllablesForTest
   };
 })();

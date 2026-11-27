@@ -21,6 +21,7 @@
   --indigo: #5A5FD0;
   --gold: #E2A72E;
   --lime: #8BC34A;
+  --coral: #F4511E;
   --ink: #3E3C46;
   --muted: #7A8494;
   --card: #FFFFFF;
@@ -145,6 +146,7 @@ body {
 .btn-indigo  { background: var(--indigo); }
 .btn-gold    { background: var(--gold); }
 .btn-lime    { background: var(--lime); }
+.btn-coral   { background: var(--coral); }
 .btn-soft {
   background: #fff;
   color: var(--primary-dark);

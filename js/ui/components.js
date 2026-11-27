@@ -35,7 +35,10 @@ IAL.UI = (function () {
     const app = document.getElementById('app');
     app.innerHTML = '';
     window.scrollTo(0, 0);
-    (Array.isArray(nodes) ? nodes : [nodes]).forEach(function (n) { app.appendChild(n); });
+    (Array.isArray(nodes) ? nodes : [nodes]).forEach(function (n) {
+      if (n === null || n === undefined || typeof n === 'boolean') return;
+      app.appendChild(n);
+    });
   }
 
   // ---------- Voce (sintesi vocale) ----------
