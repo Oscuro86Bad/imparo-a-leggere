@@ -199,10 +199,12 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 4. **Lunghezza e difficoltà crescono con le consonanti conosciute**: con 1
    consonante fino a 3 parole (livello 1); con 2–3 consonanti fino a 4 parole;
    con 4–5 fino a 5; con 6 fino a 6; con 7 o più fino a 9 parole e livello 4.
-5. L'archivio contiene **1597 frasi** (`js/data/sentences.js`): 337 brevi
-   (livello 1), 607 facili (livello 2), 402 più lunghe (livello 3) e 251
+5. L'archivio contiene **1775 frasi** (`js/data/sentences.js`): 377 brevi
+   (livello 1), 701 facili (livello 2), 446 più lunghe (livello 3) e 251
    ricche (livello 4). Le 1400 frasi storiche sono state conservate e si
-   aggiungono le 197 frasi chieste dall'utente (142 nuove dopo le prime 55).
+   aggiungono 375 frasi chieste dall'utente in tre blocchi (55 + 142 + 178
+   nuove). 80 del terzo blocco usano solo vocali + L/M/T/P: con queste
+   consonanti attive sono leggibili 116 frasi in totale.
    Ogni consonante, H e Q comprese, compare in almeno
    60 frasi. Niente virgole tra le parole, nessuna vignetta e nessun campo
    `e`/immagine nei dati. Le frasi sono generate da lessico e modelli
@@ -335,9 +337,9 @@ Ogni parola illustrata ha il suo **MP3 preregistrato** (2252 voci in `audio/w/`,
 `js/data/audio.js`): la voce neurale è sempre disponibile anche offline, senza ricorrere alla
 sintesi vocale del dispositivo.
 
-Per **LEGGI LA FRASE** l'archivio aggiunge **1597 frasi italiane compiute** in
-`js/data/sentences.js`: 337 brevi (livello 1), 607 facili (livello 2),
-402 più lunghe (livello 3) e 251 ricche (livello 4). Ogni frase richiede solo
+Per **LEGGI LA FRASE** l'archivio aggiunge **1775 frasi italiane compiute** in
+`js/data/sentences.js`: 377 brevi (livello 1), 701 facili (livello 2),
+446 più lunghe (livello 3) e 251 ricche (livello 4). Ogni frase richiede solo
 lettere già attivate, vocali comprese (H come consonante), e non contiene
 immagini. Le frasi non hanno MP3 dedicati: la lettura usa la voce del
 dispositivo, mentre le singole parole dell'archivio restano preregistrate.
@@ -355,7 +357,7 @@ IMPARO A LEGGERE/
 ├── js/
 │   ├── config.js           # alfabeto, sillabe, livelli, messaggi
 │   ├── data/words.js       # archivio parole reali (con immagini)
-│   ├── data/sentences.js   # 1597 frasi compiute, senza immagini
+│   ├── data/sentences.js   # 1775 frasi compiute, senza immagini
 │   ├── data/associations.js# associazioni sillaba→parola→immagine
 │   ├── data/audio.js       # elenco parole → audio preregistrato
 │   ├── state/store.js      # profili, impostazioni, progressi (localStorage)

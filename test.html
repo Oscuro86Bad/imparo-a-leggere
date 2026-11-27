@@ -15,7 +15,7 @@
 <pre id="out">In corso…</pre>
 <script src="js/config.js?v=11"></script>
 <script src="js/data/words.js?v=24"></script>
-<script src="js/data/sentences.js?v=5"></script>
+<script src="js/data/sentences.js?v=6"></script>
 <script src="js/data/associations.js?v=9"></script>
 <script src="js/data/audio.js?v=5"></script>
 <script src="js/state/store.js?v=8"></script>
@@ -587,7 +587,7 @@
 
   // 19. LEGGI LA FRASE: frasi compiute, TUTTE le lettere, H consonante, progressività
   const S = IAL.SENTENCES || [];
-  check('Frasi: archivio di 1597 frasi (attuali: ' + S.length + ')', S.length === 1597);
+  check('Frasi: archivio di 1775 frasi (attuali: ' + S.length + ')', S.length === 1775);
 
   const consAll = IAL.CONFIG.CONSONANTS.slice();          // H compresa
   const allLetters = consAll.concat(IAL.CONFIG.VOWELS);
@@ -656,7 +656,7 @@
   check('Frasi: solo lettere dell alfabeto', letterOk);
   check('Frasi: campo c = consonanti del testo, H inclusa', cOk);
   check('Frasi: nessun campo immagine/emoji', noImageOk);
-  const targets = { 1: 337, 2: 607, 3: 402, 4: 251 };
+  const targets = { 1: 377, 2: 701, 3: 446, 4: 251 };
   check('Frasi: conteggi esatti per livello [' +
     [1,2,3,4].map(function (d) { return 'd' + d + ':' + (byD[d] || 0); }).join(' ') + ']',
     [1,2,3,4].every(function (d) { return (byD[d] || 0) === targets[d]; }));
@@ -668,7 +668,10 @@
     ['IL NONNO AMA LA MATTINA.', 'LA MAMMA NOMINA NINA.', 'LA MENTE E LIMPIDA.',
      'IL PAPA E UN PAPA.', 'LA MAMMA MI AMA.', 'LA MAMMA PELA IL MELONE.',
      'LA MAMMA PULISCE LA PENTOLA.', 'IL MATTINO PORTA LA LUNA.',
-     'LA MAMMA AMA LA NOTTE.'].every(function (t) {
+     'LA MAMMA AMA LA NOTTE.',
+     'LA MAMMA PELA IL POMELO.', 'IL TOPO E PELOSO.',
+     'IL SOLE ILLUMINA IL MARE.', 'LA MAMMA PULI IL TAVOLO.',
+     'MILA E LIETA.'].every(function (t) {
       return S.some(function (s) { return s.t === t; });
     }));
   check('Frasi: livello 1 ≤ 4 parole e ≤ 3 consonanti',
@@ -724,6 +727,18 @@
     poolMed.every(function (s) { return s.w <= capMed.maxWords && s.d <= capMed.maxDiff; }));
   check('Availability: conta anche le frasi disponibili (' + E.availability(pfew).sentences + ')',
     E.availability(pfew).sentences === poolFew.length);
+
+  // Terzo blocco utente: frasi interamente leggibili con vocali + L/M/T/P.
+  const pLmtp = sentenceProfile(['L','M','T','P']);
+  const poolLmtp = E.sentencePool(pLmtp);
+  check('Frasi: con vocali + L/M/T/P ci sono ' + poolLmtp.length +
+    ' frasi leggibili (almeno 100)', poolLmtp.length >= 100 &&
+    poolLmtp.every(function (s) { return textLettersOk(s, pLmtp); }));
+  check('Frasi: con L/M/T/P compaiono le nuove frasi del terzo blocco',
+    ['LA MAMMA MI AMA.', 'LA MAMMA PELA IL POMELO.', 'MILA METTE IL TAPPETO.',
+     'IL TOPO E MATTO.'].every(function (t) {
+      return poolLmtp.some(function (s) { return s.t === t; });
+    }));
 
   // Una vocale disattivata nasconde la frase anche se le consonanti sono attive.
   const pML = sentenceProfile(['M','L']);
