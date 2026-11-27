@@ -162,23 +162,26 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    con tutte quelle che ci sono.
 
 ### LEGGI LA FRASE (novità — NEW)
-1. Compare **una frase italiana reale** in caratteri grandi dentro una nuvoletta
-   di fumetto, con sotto una **vignetta**: le emoji delle parole della frase
-   (es. «HO BEBE.» → 👶). La frase si può anche ascoltare con **🔊 SENTI LA FRASE**.
+1. Compare **una frase italiana compiuta** in caratteri grandi dentro una
+   nuvoletta di testo: soggetto + verbo + complemento, oppure una domanda
+   completa (es. «IO AMO LA MAMMA.», «CHI E?», «DOVE E LA MELA?»).
+   Per ora **non ci sono immagini**: le aggiungeremo in un secondo momento,
+   con qualcosa di più carino. La frase si può ascoltare con **🔊 SENTI LA FRASE**.
 2. **🔄 NUOVA** passa a un'altra frase; **✅ HO LETTO** dà una stellina e passa
    alla successiva dopo averla pronunciata.
-3. **Le vocali si danno per apprese**: il filtro riguarda solo le **consonanti**.
-   Una frase compare solo se tutte le sue consonanti sono state attivate
-   nell'Area Genitori (la H è muta e non conta).
-4. **Lunghezza e difficoltà crescono con le consonanti conosciute**: con 1–2
-   consonanti solo frasi brevi di 2–3 parole (livello 1); con 3–4 consonanti
-   fino a 4 parole e frasi di livello 2; con 5–6 fino a 6 parole (livello 3);
-   con 7 o più consonanti arrivano le frasi lunghe e ricche (livello 4).
-5. L'archivio contiene **1370 frasi** (`js/data/sentences.js`), distribuite su
-   tutte le consonanti: almeno 100 frasi per ogni livello, almeno 50 frasi
-   per consonante e almeno 5 frasi brevi per ogni coppia di consonanti. Le frasi sono generate da modelli italiani semplici con
-   parole dell'archivio illustrate (`tools/generate_sentences.py`), senza
-   ripetere la stessa frase due volte di seguito.
+3. La frase compare solo se **tutte le sue lettere** — vocali comprese — sono
+   attivate nell'Area Genitori. Se anche una sola lettera non è attiva, la
+   frase non viene proposta. La **H è una consonante** (muta), non una vocale.
+4. **Lunghezza e difficoltà crescono con le consonanti conosciute**: con 1
+   consonante fino a 3 parole (livello 1); con 2–3 consonanti fino a 4 parole;
+   con 4–5 fino a 5; con 6 fino a 6; con 7 o più fino a 9 parole e livello 4.
+5. L'archivio contiene **1400 frasi** (`js/data/sentences.js`): 300 brevi
+   (livello 1), 500 facili (livello 2), 350 più lunghe (livello 3) e 250
+   ricche (livello 4). Ogni consonante, H e Q comprese, compare in almeno
+   60 frasi. Niente virgole tra le parole, nessuna vignetta e nessun campo
+   `e`/immagine nei dati. Le frasi sono generate da lessico e modelli
+   italiani curati (`tools/generate_sentences.py`), senza ripetere la stessa
+   frase due volte di seguito.
 
 ### PAROLE PERSONALIZZATE
 1. Il genitore scrive le parole da far leggere (nomi della famiglia, oggetti,
@@ -278,11 +281,11 @@ Ogni parola illustrata ha il suo **MP3 preregistrato** (2235 voci in `audio/w/`,
 `js/data/audio.js`): la voce neurale è sempre disponibile anche offline, senza ricorrere alla
 sintesi vocale del dispositivo.
 
-Per **LEGGI LA FRASE** l'archivio aggiunge **1370 frasi italiane reali** in
-`js/data/sentences.js`: 720 brevi (livello 1), 400 facili (livello 2),
-150 più lunghe (livello 3) e 100 ricche (livello 4). Ogni frase ha la sua
-vignetta con emoji e richiede solo le consonanti già attivate; le vocali sono
-date per apprese. Le frasi non hanno MP3 dedicati: la lettura usa la voce del
+Per **LEGGI LA FRASE** l'archivio aggiunge **1400 frasi italiane compiute** in
+`js/data/sentences.js`: 300 brevi (livello 1), 500 facili (livello 2),
+350 più lunghe (livello 3) e 250 ricche (livello 4). Ogni frase richiede solo
+lettere già attivate, vocali comprese (H come consonante), e non contiene
+immagini. Le frasi non hanno MP3 dedicati: la lettura usa la voce del
 dispositivo, mentre le singole parole dell'archivio restano preregistrate.
 
 ---
@@ -298,13 +301,13 @@ IMPARO A LEGGERE/
 ├── js/
 │   ├── config.js           # alfabeto, sillabe, livelli, messaggi
 │   ├── data/words.js       # archivio parole reali (con immagini)
-│   ├── data/sentences.js   # 1370 frasi reali + vignette emoji
+│   ├── data/sentences.js   # 1400 frasi compiute, senza immagini
 │   ├── data/associations.js# associazioni sillaba→parola→immagine
 │   ├── data/audio.js       # elenco parole → audio preregistrato
 │   ├── state/store.js      # profili, impostazioni, progressi (localStorage)
 │   ├── engine/generator.js # motore di generazione con controlli didattici
 │   ├── ui/*.js             # schermate: home, lettura, leggi e guarda, area genitori, parole personalizzate
-│   ├── ui/sentences.js     # LEGGI LA FRASE (frase grande + vignetta fumetto)
+│   ├── ui/sentences.js     # LEGGI LA FRASE (solo frase grande, nessuna immagine)
 │   ├── ui/ocr.js           # lettura parole da FOTO (Tesseract.js, tutto in locale)
 │   └── app.js              # avvio
 ├── audio/w/                # 2235 MP3 preregistrati (voce neurale italiana)
@@ -312,7 +315,7 @@ IMPARO A LEGGERE/
 ├── img/                    # disegni delle parole (SVG: mimo, magia, lago, merenda, pirata)
 ├── scripts/make-icon.ps1   # rigenera le icone (Windows, senza dipendenze)
 ├── tools/generate_audio.py # rigenera gli audio delle parole (edge-tts)
-├── tools/generate_sentences.py # rigenera l'archivio frasi (da words.js)
+├── tools/generate_sentences.py # rigenera l'archivio frasi (lessico curato)
 ├── tools/audio-words.txt   # elenco delle parole da registrare
 ├── supabase/schema.sql     # schema database online (opzionale, vedi sotto)
 ├── .github/workflows/deploy.yml  # pubblicazione automatica su GitHub Pages

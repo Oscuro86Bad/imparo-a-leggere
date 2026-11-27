@@ -547,21 +547,24 @@ IAL.Engine = (function () {
   }
 
   // ---------- LEGGI LA FRASE ----------
-  // Qui le vocali si danno per apprese: il gating riguarda SOLO le consonanti.
-  // La difficoltà cresce con il numero di consonanti conosciute: all'inizio
-  // frasi brevi di 2-3 parole, poi frasi sempre più lunghe e articolate.
+  // Il gating controlla TUTTE le lettere del testo, vocali comprese:
+  // una frase non compare mai se contiene una lettera non attivata
+  // nell'Area Genitori. La H è una consonante e conta come tale.
+  // La difficoltà cresce con il numero di consonanti conosciute.
   function sentenceCap(p) {
-    const n = (p.letters.consonants || []).filter(function (c) { return c !== 'H'; }).length;
+    const n = (p.letters.consonants || []).length;
     return {
-      maxWords: Math.min(9, 2 + Math.ceil(n / 2)),
+      maxWords: Math.min(9, 2 + Math.ceil((n + 1) / 2)),
       maxDiff: Math.min(4, 1 + Math.floor(Math.max(0, n - 1) / 2))
     };
   }
 
   function canShowSentence(p, entry) {
-    if (!entry || !entry.c) return false;
+    if (!entry || typeof entry.t !== 'string' || !entry.t) return false;
     const letters = enabledLetters(p);
-    return entry.c.split('').every(function (ch) { return letters.has(ch); });
+    return entry.t.toUpperCase().split('').every(function (ch) {
+      return !/[A-Z]/.test(ch) || letters.has(ch);
+    });
   }
 
   function sentencePool(p) {

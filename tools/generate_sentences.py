@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
-"""Genera js/data/sentences.js a partire dall'archivio parole dell'app.
+"""Genera js/data/sentences.js con frasi italiane compiute e curate.
 
-Ogni frase è italiana, breve all'inizio e più lunga/collegata man mano che
-crescono le consonanti conosciute. Per ogni frase vengono memorizzate:
+Ogni frase è una frase completa (soggetto + verbo, oppure una domanda
+completa): niente elenchi di parole separati da virgole e niente vignette.
 
-  t = testo (maiuscolo, con punteggiatura)
-  c = consonanti distinte necessarie (H muta esclusa, Q inclusa)
-  d = difficoltà 1..4 (1 = 2-3 parole e al massimo 2 consonanti)
+Campi memorizzati:
+
+  t = testo (maiuscolo, senza accenti né apostrofi)
+  c = consonanti presenti nel testo, H compresa come consonante
+  d = difficoltà 1..4
   w = numero di parole
-  e = emoji della vignetta (una per parola "piena" della frase)
 
-Il gating della sezione LEGGI LA FRASE usa solo `c`: le vocali si danno per
-apprese. La lunghezza/difficoltà massima è invece calcolata dal motore in base
-al numero di consonanti attive del profilo (vedi IAL.Engine.sentenceCap).
+Il motore dell'app (IAL.Engine.canShowSentence) controlla TUTTE le lettere
+del testo — vocali comprese — rispetto a quelle attivate nell'Area Genitori.
+Una frase non compare mai se contiene una lettera non attivata.
 
 Uso: python tools/generate_sentences.py
 """
 import itertools
-import json
 import os
 import random
 import re
@@ -28,356 +28,347 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WORDS_JS = os.path.join(ROOT, 'js', 'data', 'words.js')
 OUT_JS = os.path.join(ROOT, 'js', 'data', 'sentences.js')
 
-CONS = set('BCDFGLMNPRSTVZQ')       # H è muta: non conta per il gating
-ALLOWED = set('AEIOUBCDFGHLMNPQRSTVZX')  # X solo nelle parole elencate sotto
-BLOCKED = {'CACCA', 'HORROR', 'HOT', 'TOKYO', 'DODA', 'DODI', 'DODO',
-           'BOMBA', 'BOMBE', 'DVD', 'DNA', 'DRACULA', 'BAGEL', 'ZIBIBBO',
-           'BUBBLE', 'DANCE', 'SUV', 'ZUMO', 'RAMEN'}
+CONS = set('BCDFGHLMNPQRSTVZ')       # H è una consonante, NON una vocale
+VOWELS = set('AEIOU')
+LETTERS = 'BCDFGHLMNPQRSTVZ'
+PRIORITY = ['Q', 'H', 'F', 'V', 'Z', 'G', 'B', 'C', 'D', 'L', 'M', 'N', 'P', 'R', 'S', 'T']
 
-# La X non è una consonante attivabile dall'Area Genitori: per le poche parole
-# straniere che la contengono dichiariamo esplicitamente la consonante che il
-# bambino deve conoscere, così la frase non appare mai con lettere non attive.
-FORCED = {
-    'FAX': 'F', 'REX': 'R', 'BOXER': 'BR', 'RELAX': 'RL',
-    'XILOFONO': 'FLN', 'SCOTTEX': 'SCTR'
+# ---------------------------------------------------------------------------
+# Lessico
+# ---------------------------------------------------------------------------
+
+# (parola, persona, genere). I dopci pronunci m/f servono a concordare
+# aggettivi come BUONO/BUONA; il testo duplicato viene eliminato dopo.
+PRONOUNS = [
+    ('IO', '1s', 'm'), ('IO', '1s', 'f'),
+    ('TU', '2s', 'm'), ('TU', '2s', 'f'),
+    ('LUI', '3s', 'm'), ('LEI', '3s', 'f'),
+    ('NOI', '1p', 'm'), ('NOI', '1p', 'f'),
+    ('VOI', '2p', 'm'), ('VOI', '2p', 'f'),
+    ('LORO', '3p', 'm'), ('LORO', '3p', 'f')
+]
+PRONOUNS_UNIQUE = [
+    ('IO', '1s'), ('TU', '2s'), ('LUI', '3s'), ('LEI', '3s'),
+    ('NOI', '1p'), ('VOI', '2p'), ('LORO', '3p')
+]
+
+PEOPLE = [
+    ('MAMMA', 'f'), ('PAPA', 'm'), ('NONNA', 'f'), ('NONNO', 'm'),
+    ('BAMBINA', 'f'), ('BAMBINO', 'm'), ('BEBE', 'm'),
+    ('ZIA', 'f'), ('ZIO', 'm'), ('AMICA', 'f'), ('AMICO', 'm')
+]
+ANIMALS = [
+    ('GATTO', 'm'), ('GATTA', 'f'), ('CANE', 'm'), ('GUFO', 'm'),
+    ('ORSO', 'm'), ('LEONE', 'm'), ('TOPO', 'm'), ('UCCELLO', 'm')
+]
+NOUN_SUBJECTS = [(w, '3s', g) for w, g in PEOPLE + ANIMALS]
+
+# Verbi transitivi con tutte le persone.
+VERBS = {
+    'AMO':     {'1s': 'AMO',     '2s': 'AMI',     '3s': 'AMA',     '1p': 'AMIAMO',  '2p': 'AMATE',  '3p': 'AMANO'},
+    'VEDO':    {'1s': 'VEDO',    '2s': 'VEDI',    '3s': 'VEDE',    '1p': 'VEDIAMO', '2p': 'VEDETE', '3p': 'VEDONO'},
+    'GUARDO':  {'1s': 'GUARDO',  '2s': 'GUARDI',  '3s': 'GUARDA',  '1p': 'GUARDIAMO','2p': 'GUARDATE','3p': 'GUARDANO'},
+    'SALUTO':  {'1s': 'SALUTO',  '2s': 'SALUTI',  '3s': 'SALUTA',  '1p': 'SALUTIAMO','2p': 'SALUTATE','3p': 'SALUTANO'},
+    'ASCOLTO': {'1s': 'ASCOLTO', '2s': 'ASCOLTI', '3s': 'ASCOLTA', '1p': 'ASCOLTIAMO','2p': 'ASCOLTATE','3p': 'ASCOLTANO'},
+    'PRENDO':  {'1s': 'PRENDO',  '2s': 'PRENDI',  '3s': 'PRENDE',  '1p': 'PRENDIAMO','2p': 'PRENDETE','3p': 'PRENDONO'},
+    'TOCCO':   {'1s': 'TOCCO',   '2s': 'TOCCI',   '3s': 'TOCCA',   '1p': 'TOCCIAMO', '2p': 'TOCCATE', '3p': 'TOCCANO'},
+}
+TRANSITIVE = list(VERBS)
+
+# Verbi intransitivi: frasi brevi e complete fin dal primo livello.
+INTRANS = {
+    'RIDERE':  {'1s': 'RIDO',   '2s': 'RIDI',   '3s': 'RIDE',   '1p': 'RIDIAMO',  '2p': 'RIDETE',  '3p': 'RIDONO'},
+    'CORRERE': {'1s': 'CORRO',  '2s': 'CORRI',  '3s': 'CORRE',  '1p': 'CORRIAMO', '2p': 'CORRETE', '3p': 'CORRONO'},
+    'GIOCARE': {'1s': 'GIOCO',  '2s': 'GIOCHI', '3s': 'GIOCA',  '1p': 'GIOCHIAMO','2p': 'GIOCATE', '3p': 'GIOCANO'},
+    'ANDARE':  {'1s': 'VADO',   '2s': 'VAI',    '3s': 'VA',     '1p': 'ANDIAMO',  '2p': 'ANDATE',  '3p': 'VANNO'},
+    'LEGGERE': {'1s': 'LEGGO',  '2s': 'LEGGI',  '3s': 'LEGGE',  '1p': 'LEGGIAMO', '2p': 'LEGGETE', '3p': 'LEGGONO'},
+    'NUOTARE': {'1s': 'NUOTO',  '2s': 'NUOTI',  '3s': 'NUOTA',  '1p': 'NUOTIAMO', '2p': 'NUOTATE', '3p': 'NUOTANO'},
+    'VIVERE':  {'1s': 'VIVO',   '2s': 'VIVI',   '3s': 'VIVE',   '1p': 'VIVIAMO',  '2p': 'VIVETE',  '3p': 'VIVONO'},
+    'BALLARE': {'1s': 'BALLO',  '2s': 'BALLI',  '3s': 'BALLA',  '1p': 'BALLIAMO', '2p': 'BALLATE', '3p': 'BALLANO'},
+    'SUONARE': {'1s': 'SUONO',  '2s': 'SUONI',  '3s': 'SUONA',  '1p': 'SUONIAMO', '2p': 'SUONATE', '3p': 'SUONANO'},
+    'GIRARE':  {'1s': 'GIRO',   '2s': 'GIRI',   '3s': 'GIRA',   '1p': 'GIRIAMO',  '2p': 'GIRATE',  '3p': 'GIRANO'},
+    'VOLARE':  {'1s': 'VOLO',   '2s': 'VOLI',   '3s': 'VOLA',   '1p': 'VOLIAMO',  '2p': 'VOLATE',  '3p': 'VOLANO'},
 }
 
+BE = {'1s': 'SONO', '2s': 'SEI', '3s': 'E', '1p': 'SIAMO', '2p': 'SIETE', '3p': 'SONO'}
+HAVE = {'1s': 'HO', '2s': 'HAI', '3s': 'HA', '1p': 'ABBIAMO', '2p': 'AVETE', '3p': 'HANNO'}
+
+# Complementi: (parola, articolo, genere). Articoli sempre pieni: nessuna
+# elisione (L', GLI…) da gestire nelle frasi lette ai bambini.
+OBJECTS = [
+    ('MAMMA', 'LA', 'f'), ('PAPA', 'IL', 'm'), ('NONNA', 'LA', 'f'),
+    ('NONNO', 'IL', 'm'), ('BAMBINA', 'LA', 'f'), ('BAMBINO', 'IL', 'm'),
+    ('BEBE', 'IL', 'm'), ('ZIA', 'LA', 'f'), ('ZIO', 'LO', 'm'),
+    ('AMICA', 'LA', 'f'), ('AMICO', 'IL', 'm'),
+    ('GATTO', 'IL', 'm'), ('GATTA', 'LA', 'f'), ('CANE', 'IL', 'm'),
+    ('GUFO', 'IL', 'm'), ('ORSO', 'IL', 'm'), ('LEONE', 'IL', 'm'),
+    ('TOPO', 'IL', 'm'), ('UCCELLO', 'IL', 'm'),
+    ('MELA', 'LA', 'f'), ('PERA', 'LA', 'f'), ('BANANA', 'LA', 'f'),
+    ('CIBO', 'IL', 'm'), ('DADO', 'IL', 'm'), ('BICI', 'LA', 'f'),
+    ('PALLONE', 'IL', 'm'), ('SOLE', 'IL', 'm'), ('LUNA', 'LA', 'f'),
+    ('STELLA', 'LA', 'f'), ('MARE', 'IL', 'm'), ('FIORE', 'IL', 'm'),
+    ('CASA', 'LA', 'f'), ('SCUOLA', 'LA', 'f'), ('LIBRO', 'IL', 'm'),
+    ('PENNA', 'LA', 'f'), ('MATITA', 'LA', 'f'), ('ZAINO', 'LO', 'm'),
+    ('TAVOLO', 'IL', 'm'), ('SEDIA', 'LA', 'f'), ('PORTA', 'LA', 'f'),
+    ('STRADA', 'LA', 'f'), ('GIARDINO', 'IL', 'm'), ('NUVOLA', 'LA', 'f'),
+    ('MUSICA', 'LA', 'f'), ('SUONO', 'IL', 'm'), ('QUADRO', 'IL', 'm'),
+    ('MAMME', 'LE', 'f'), ('DADI', 'I', 'm'), ('GATTI', 'I', 'm'),
+    ('CANI', 'I', 'm'), ('GUFI', 'I', 'm'), ('FIORI', 'I', 'm'),
+    ('UCCELLI', 'I', 'm'), ('MELE', 'LE', 'f'), ('STELLE', 'LE', 'f'),
+    ('CASE', 'LE', 'f'), ('SCUOLE', 'LE', 'f'), ('LIBRI', 'I', 'm'),
+    ('TAVOLI', 'I', 'm'), ('BICI', 'LE', 'f'), ('ZIE', 'LE', 'f')
+]
+
+BARE_OBJECTS = [
+    'MAMMA', 'PAPA', 'NONNA', 'NONNO', 'BEBE', 'ZIA', 'ZIO',
+    'GATTO', 'GATTA', 'CANE', 'GUFO', 'MELA', 'PERA', 'CIBO',
+    'DADO', 'BICI', 'SOLE', 'LUNA', 'CASA', 'MARE', 'FIORE',
+    'PENNA', 'QUADRO', 'MUSICA'
+]
+
+ADJECTIVES = [
+    ('BUONO', 'BUONA'), ('BELLO', 'BELLA'), ('PICCOLO', 'PICCOLA'),
+    ('GRANDE', 'GRANDE'), ('NUOVO', 'NUOVA'), ('VECCHIO', 'VECCHIA'),
+    ('ROSSO', 'ROSSA'), ('CALDO', 'CALDA'), ('FREDDO', 'FREDDA'),
+    ('ALTO', 'ALTA'), ('BASSO', 'BASSA'), ('LUNGO', 'LUNGA'),
+    ('CORTO', 'CORTA'), ('FELICE', 'FELICE'), ('CONTENTO', 'CONTENTA')
+]
+
+PEOPLE_WORDS = set(w for w, _ in PEOPLE)
+ANIMAL_WORDS = set(w for w, _ in ANIMALS)
+THING_WORDS = set(w for w, _, _ in OBJECTS) - PEOPLE_WORDS - ANIMAL_WORDS
+READERS = PEOPLE_WORDS - {'BEBE'}
+
+# Frasi esplicite che riproducono il modello chiesto dall'utente.
+MUST_HAVE = [
+    'IO AMO MAMMA.', 'IO AMO PAPA.',
+    'MAMMA AMA PAPA.', 'PAPA AMA MAMMA.',
+    'IO AMO LA MAMMA.', 'IO AMO IL PAPA.',
+    'IO AMO LA NONNA.', 'IO AMO IL NONNO.',
+    'TU AMI LA MAMMA.', 'LUI AMA LA MAMMA.'
+]
+
+# Accoppiamenti semanticamente plausibili: evita frasi del tipo
+# «IL CANE AMA LA BICI» mantenendo comunque molte combinazioni.
+SALUTO_OBJ = PEOPLE_WORDS | ANIMAL_WORDS
+ASCOLTO_OBJ = PEOPLE_WORDS | ANIMAL_WORDS | {'MUSICA', 'MARE', 'SUONO'}
+AMO_OBJ = PEOPLE_WORDS | ANIMAL_WORDS | {
+    'MELA', 'PERA', 'CIBO', 'SOLE', 'MARE', 'FIORE', 'CASA', 'SCUOLA',
+    'LIBRO', 'BICI', 'PALLONE', 'LUNA', 'STELLA', 'MUSICA', 'QUADRO'
+}
+TAKE_OBJ = {
+    'MELA', 'PERA', 'BANANA', 'CIBO', 'DADO', 'DADI', 'BICI', 'PALLONE',
+    'PENNA', 'MATITA', 'ZAINO', 'QUADRO', 'LIBRO', 'LIBRI', 'FIORE', 'FIORI',
+    'MELE'
+}
+SOUND_OBJ = {'MUSICA', 'SUONO'}
+VISIBLE_OBJ = (set(w for w, _, _ in OBJECTS) | set(BARE_OBJECTS)) - SOUND_OBJ
+ALLOWED_OBJ = {
+    'AMO': AMO_OBJ,
+    'VEDO': VISIBLE_OBJ,
+    'GUARDO': VISIBLE_OBJ,
+    'SALUTO': SALUTO_OBJ,
+    'ASCOLTO': ASCOLTO_OBJ,
+    'PRENDO': TAKE_OBJ,
+    'TOCCO': TAKE_OBJ | PEOPLE_WORDS
+}
+
+
+# ---------------------------------------------------------------------------
+# Costruzione delle frasi
+# ---------------------------------------------------------------------------
 
 def cons(text):
     return set(ch for ch in text.upper() if ch in CONS)
 
 
-def word_cons(w):
-    """Consonanti necessarie per una parola (X inclusa tramite FORCED)."""
-    return cons(w) | set(FORCED.get(w, ''))
-
-
-def clean_emoji(img):
-    """Restituisce una emoji semplice (non composta con ZWJ) oppure None."""
-    if not img or img == 'null' or img.startswith('img/') or '\u200d' in img:
-        return None
-    if any(ch.isalpha() for ch in img):
-        return None
-    # keycap (1️⃣, 2️⃣, 8️⃣): sostituite con un simbolo numerico stabile
-    if '\u20e3' in img:
-        return '🔢'
-    first = img[0]
-    if len(img) > 1 and ord(img[1]) == 0xFE0F:
-        first += img[1]
-    if not (ord(first[0]) >= 0x2300 or first[0].isalpha()):
-        return None
-    return first
-
-
-def load_words():
-    js = open(WORDS_JS, encoding='utf-8').read()
-    out = {}
-    for m in re.finditer(r"\{\s*w:\s*'([A-ZÀ-Ù]+)'[^}]*?img:\s*('(?:[^']*)'|null)[^}]*?diff:\s*(\d)", js):
-        w, img, diff = m.group(1), m.group(2).strip("'"), int(m.group(3))
-        if w in out or w in BLOCKED or img == 'null':
-            continue
-        # Anche le parole "medie" (diff 2) sono ammesse, purché corte: servono
-        # per copr consonanti (es. FAX per la F) e dare varietà con poche
-        # consonanti attive. Niente parole lunghe o complesse.
-        if diff > 2 or len(w) > 6 or not all(ch in ALLOWED for ch in w):
-            continue
-        if 'X' in w and w not in FORCED:
-            continue
-        e = clean_emoji(img)
-        if e:
-            out[w] = e
-    return out
-
-
-# ---------------------------------------------------------------------------
-# Template: {W}, {W2}, {W3} sono segnaposto per parole dell'archivio.
-# Le consonanti del testo fisso vengono calcolate automaticamente.
-# ---------------------------------------------------------------------------
-TEMPLATES = [
-    # --- brevissime (vocali + al massimo una consonante) ---
-    '{W} E {W2}.', 'HO {W}.', 'OH, {W}!', 'IO HO {W}.',
-    '{W}, {W2}!', '{W} O {W2}.', 'SÌ, {W}!', 'NO, {W}.', 'HAI {W}?',
-    'Ecco {W}!', "C'è {W}.", 'Ciao, {W}!', 'Cerca {W}.',
-    "Che cos'è {W}?", 'Chi ha {W}?', 'Dai {W} a {W2}.',
-    'Dove è {W}?', 'Mi piace {W}.', 'Non ho {W}.', 'Nuota {W}.',
-    'Per {W}.', 'Passa {W}.', 'Ride {W}.', 'Salta {W}.', 'Sotto {W}.',
-    'Tieni {W}.', 'Tocca {W}.', 'Trova {W}.', 'Vedi {W}.', 'Guarda {W}.',
-    'Gioca con {W}.', 'Lascia {W}.', 'Leggi {W}.',
-    'Metti {W} qui.', 'Scusa, {W}.', 'Spingi {W}.', 'Va bene, {W}.',
-    'Grazie, {W}!', 'Nascondi {W}.', 'Riguarda {W}.', 'Voglio {W}.',
-    'Dona {W} a {W2}.', 'Dorme {W}.', 'Porta {W} a {W2}.',
-    'Mostra {W} a {W2}.', 'Non mi piace {W}.', 'Basta {W}.',
-    'Qui {W}.',
-    # --- due parole (arrivano con due o tre consonanti) ---
-    'Guarda {W} e {W2}.', 'Ecco {W} e {W2}.', 'Vedi {W} e {W2}.',
-    'Cerca {W} e {W2}.', 'Prendi {W} e {W2}.', 'Trova {W} e {W2}.',
-    "C'è {W} e {W2}.", 'Porta {W} e {W2}.', 'Metti {W} e {W2} qui.',
-    'Mi piace {W} e {W2}.', 'Guarda {W} con {W2}.',
-    'Mi piace {W} con {W2}.', 'Dove sono {W} e {W2}?',
-    'Sì, voglio {W} e {W2}.', 'Non voglio {W} né {W2}.',
-    'Canta con {W} e {W2}.', 'Non ho {W} né {W2}.',
-    'Dai {W} a {W2} e a {W3}.', 'Ecco {W}, {W2} e {W3}!',
-    'Vedi {W}, {W2} e {W3}.', 'Voglio {W}, {W2} e {W3}.',
-    'Porta {W}, {W2} e {W3} a mamma.', 'Tieni {W}, {W2} e {W3}.',
-    # --- lunghe (ultimo livello: tante parole, tante consonanti) ---
-    'Guarda {W}, {W2} e {W3} con {W4} e {W5}.',
-    'Dai {W} e {W2} a {W3} e a {W4}.',
-    'Porta {W}, {W2}, {W3} e {W4} a mamma.',
-    'Mi piace {W}, {W2} e {W3}, non {W4}.',
-    'Vedi {W}, {W2}, {W3} e {W4}.',
-    'Ecco {W}, {W2}, {W3}, {W4} e {W5}.',
-    'Vedi {W}, {W2}, {W3}, {W4} e {W5}.',
-    'Voglio {W}, {W2}, {W3}, {W4} e {W5}.',
-    'Ho {W}, {W2}, {W3}, {W4} e {W5}.',
-    '{W}, {W2}, {W3}, {W4} e {W5}.',
-]
-
-SLOTS = [len(re.findall(r'\{W\d?\}', t)) for t in TEMPLATES]
-LIT_CONS = [cons(re.sub(r'\{W\d?\}', '', t)) for t in TEMPLATES]
-
-
-def difficulty(text, nwords, ncons):
-    if nwords <= 3 and ncons <= 2:
-        return 1
+def difficulty(nwords, ncons):
+    # Il livello 1 include il modello "IO AMO LA MAMMA." (4 parole, 2 consonanti)
+    # e frasi altrettanto brevi con al massimo 3 consonanti già studiate.
     if nwords <= 4 and ncons <= 3:
+        return 1
+    if nwords <= 5 and ncons <= 4:
         return 2
-    if nwords <= 6 and ncons <= 5:
+    if nwords <= 6 and ncons <= 6:
         return 3
     return 4
 
 
-def make_candidate(ti, words, emoji):
-    pattern = TEMPLATES[ti]
-    text = pattern
-    used = []
-    for i in range(1, SLOTS[ti] + 1):
-        key = '{W}' if i == 1 else '{W' + str(i) + '}'
-        w = words[i - 1]
-        text = text.replace(key, w, 1)
-        used.append(w)
-    base = re.sub(r'\{W\d?\}', '', pattern)
-    nwords = len(re.sub(r'[,!?.]', ' ', base).split()) + len(used)
+def make(text, kind):
+    text = re.sub(r'\s+', ' ', text.strip())
+    if ',' in text or ';' in text:
+        return None
+    if not re.fullmatch(r'[A-Z ?.]+', text):
+        return None
+    nwords = len(re.sub(r'[.?]', '', text).split())
+    if nwords < 2:
+        return None
     cset = cons(text)
-    for w in used:
-        cset |= word_cons(w)
-    d = difficulty(text, nwords, len(cset))
-    emos = [emoji[w] for w in used]
+    if not set(ch for ch in text if ch.isalpha()) <= (CONS | VOWELS):
+        return None
     return {
-        't': text, 'c': ''.join(sorted(cset)), 'd': d, 'w': nwords, 'e': emos,
-        'ti': ti
+        't': text,
+        'c': ''.join(sorted(cset)),
+        'd': difficulty(nwords, len(cset)),
+        'w': nwords,
+        'k': kind
     }
 
 
-def generate(pool):
-    """Genera candidati per sottoinsiemi di consonanti sempre più ampi."""
+def generate():
     out = {}
-    letters = 'BCDFGLMNPRSTVZQ'
-    subsets = []
-    for size, limit, per_subset in [(1, None, 10), (2, None, 5), (3, None, 3),
-                                    (4, 260, 2), (5, 130, 2), (6, 80, 2)]:
-        all_subs = list(itertools.combinations(letters, size))
-        if limit:
-            step = max(1, len(all_subs) // limit)
-            all_subs = all_subs[::step][:limit]
-        subsets.append((all_subs, per_subset))
 
-    rng = random.Random(20261127)
-    for group_idx, (subs, per_subset) in enumerate(subsets):
-        for si, sub in enumerate(subs):
-            S = set(sub)
-            usable = sorted([w for w in pool if word_cons(w) <= S],
-                            key=lambda w: (len(word_cons(w)), len(w), w))
-            if not usable:
-                continue
-            made = 0
-            # ruota i template: ogni sottoinsieme vede modelli diversi
-            order = list(range(len(TEMPLATES)))
-            rng.shuffle(order)
-            for ti in order:
-                if made >= per_subset:
-                    break
-                n = SLOTS[ti]
-                if LIT_CONS[ti] <= S and len(usable) >= n:
-                    start = (si * 3 + ti) % len(usable)
-                    chosen = [usable[(start + k) % len(usable)] for k in range(n)]
-                    if len(set(chosen)) != n:
-                        continue
-                    cand = make_candidate(ti, chosen, pool)
-                    if cand['t'] in out:
-                        continue
-                    out[cand['t']] = cand
-                    made += 1
+    def add(text, kind):
+        cand = make(text, kind)
+        if cand and cand['t'] not in out:
+            out[cand['t']] = cand
 
-    # Passata dedicata al primo livello: ogni consonante (e ogni coppia di
-    # consonanti) deve avere diverse frasi brevi, così anche chi conosce
-    # pochissime lettere trova varietà invece di una sola frase.
-    d1_templates = [i for i in range(len(TEMPLATES)) if SLOTS[i] <= 2]
-    d1_targets = [(c,) for c in letters] + list(itertools.combinations(letters, 2))
-    for sub in d1_targets:
-        S = set(sub)
-        target = ''.join(sorted(S))
-        usable = sorted([w for w in pool if word_cons(w) <= S],
-                        key=lambda w: (len(word_cons(w)), len(w), w))
-        if not usable:
-            continue
-        made = 0
-        per_target = {}
-        for exact_only in (True, False):
-            if made >= 6:
-                break
-            order = d1_templates[:]
-            rng.shuffle(order)
-            for ti in order:
-                if made >= 6:
-                    break
-                if not LIT_CONS[ti] <= S:
-                    continue
-                n = SLOTS[ti]
-                if len(usable) < n:
-                    continue
-                tries = len(usable) if n == 1 else min(18, len(usable))
-                for k in range(tries):
-                    start = (k + ti * 2) % len(usable)
-                    chosen = [usable[(start + j * 3) % len(usable)] for j in range(n)]
-                    if len(set(chosen)) != n:
-                        continue
-                    cand = make_candidate(ti, chosen, pool)
-                    if cand['d'] != 1:
-                        continue
-                    cset = set(cand['c'])
-                    if exact_only and cset != S:
-                        continue
-                    if not exact_only and not (cset <= S and cset):
-                        continue
-                    # La frase può già esistere (generata dalla passata
-                    # generale): in quel caso la "promuoviamo" a priority.
-                    item = out.get(cand['t'])
-                    if item is None:
-                        item = cand
-                        out[cand['t']] = item
-                    if not item.get('pri'):
-                        item['pri'] = True
-                        item['target'] = target
-                        per_target[cand['t']] = 1
-                        made += 1
-                    if made >= 6:
-                        break
+    subjects_all = PRONOUNS + NOUN_SUBJECTS
 
-    # Passata dedicata alle frasi lunghe: servono esempi ricchi anche quando
-    # il bambino conosce poche consonanti (la lunghezza resta filtrata dal
-    # motore in base al numero di consonanti attive).
-    long_idx = [i for i, t in enumerate(TEMPLATES) if SLOTS[i] >= 3]
-    long_subs = []
-    for size in (2, 3, 4, 5):
-        all_subs = list(itertools.combinations(letters, size))
-        step = max(1, len(all_subs) // (140 if size >= 4 else 90))
-        long_subs.extend(all_subs[::step][:(140 if size >= 4 else 90)])
-    for si, sub in enumerate(long_subs):
-        S = set(sub)
-        usable = sorted([w for w in pool if word_cons(w) <= S],
-                        key=lambda w: (len(word_cons(w)), len(w), w))
-        if len(usable) < 3:
-            continue
-        made = 0
-        for ti in long_idx:
-            if made >= 4:
-                break
-            if not LIT_CONS[ti] <= S:
-                continue
-            n = SLOTS[ti]
-            if len(usable) < n:
-                continue
-            for k in range(3):
-                start = (si * 5 + ti * 2 + k) % len(usable)
-                chosen = [usable[(start + j * 3) % len(usable)] for j in range(n)]
-                if len(set(chosen)) != n:
+    # 1. Soggetto + verbo transitivo + oggetto senza articolo.
+    for subj, person, _ in subjects_all:
+        for v in TRANSITIVE:
+            form = VERBS[v][person]
+            for obj in BARE_OBJECTS:
+                if obj == subj:
                     continue
-                cand = make_candidate(ti, chosen, pool)
-                if cand['t'] in out:
+                if obj in ALLOWED_OBJ[v]:
+                    add(subj + ' ' + form + ' ' + obj + '.', 'bare')
+
+    # 2. Soggetto + verbo transitivo + articolo + oggetto.
+    for subj, person, _ in subjects_all:
+        for v in TRANSITIVE:
+            form = VERBS[v][person]
+            for obj, art, _ in OBJECTS:
+                if obj == subj:
                     continue
-                out[cand['t']] = cand
-                made += 1
-                break
+                if obj in ALLOWED_OBJ[v]:
+                    add(subj + ' ' + form + ' ' + art + ' ' + obj + '.', 'svo')
+
+    # 3. Articolo + nome + verbo + articolo + oggetto.
+    for subj, art_s, _ in OBJECTS:
+        for v in TRANSITIVE:
+            form = VERBS[v]['3s']
+            for obj, art_o, _ in OBJECTS:
+                if subj == obj:
+                    continue
+                if obj not in ALLOWED_OBJ[v] or subj in THING_WORDS and v == 'SALUTO':
+                    continue
+                add(art_s + ' ' + subj + ' ' + form + ' ' + art_o + ' ' + obj + '.', 'nvo')
+
+    # 4. Verbi intransitivi: frasi complete e brevissime.
+    for subj, person in PRONOUNS_UNIQUE:
+        for forms in INTRANS.values():
+            add(subj + ' ' + forms[person] + '.', 'intrans')
+    for subj, _, _ in NOUN_SUBJECTS:
+        for name, forms in INTRANS.items():
+            if name == 'VOLARE' and subj != 'UCCELLO':
+                continue
+            if name == 'LEGGERE' and subj not in READERS:
+                continue
+            add(subj + ' ' + forms['3s'] + '.', 'intrans')
+
+    # 5. Verbo essere + aggettivo concordato.
+    for subj, person, gender in subjects_all:
+        for m, f in ADJECTIVES:
+            adj = f if gender == 'f' else m
+            add(subj + ' ' + BE[person] + ' ' + adj + '.', 'copula')
+    for noun, art, gender in OBJECTS:
+        for m, f in ADJECTIVES:
+            adj = f if gender == 'f' else m
+            add(art + ' ' + noun + ' E ' + adj + '.', 'nounadj')
+
+    # 6. "Qui/qua" con il verbo essere (copre Q anche nei primi livelli).
+    for subj, person, _ in subjects_all:
+        for place in ('QUI', 'QUA'):
+            add(subj + ' ' + BE[person] + ' ' + place + '.', 'place')
+
+    # 7. Verbo avere: copre H come consonante, non come vocale.
+    for subj, person in PRONOUNS_UNIQUE:
+        for obj, art, _ in OBJECTS:
+            add(subj + ' ' + HAVE[person] + ' ' + art + ' ' + obj + '.', 'have')
+        add(subj + ' ' + HAVE[person] + ' QUATTRO DADI.', 'have')
+    for subj, _, _ in NOUN_SUBJECTS:
+        for obj, art, _ in OBJECTS:
+            add(subj + ' ' + HAVE['3s'] + ' ' + art + ' ' + obj + '.', 'have')
+        add(subj + ' ' + HAVE['3s'] + ' QUATTRO DADI.', 'have')
+
+    # 8. Domande complete.
+    for v in TRANSITIVE:
+        add('COSA ' + VERBS[v]['2s'] + '?', 'question')
+        add('COSA ' + VERBS[v]['3s'] + '?', 'question')
+    for obj, art, _ in OBJECTS:
+        add('DOVE E ' + art + ' ' + obj + '?', 'question')
+        add('CHI E ' + art + ' ' + obj + '?', 'question')
+    for place in ('QUI', 'QUA'):
+        add('CHI E ' + place + '?', 'question')
+    for subj, _, gender in PRONOUNS + NOUN_SUBJECTS:
+        add('E ' + subj + ' ' + ('CONTENTA' if gender == 'f' else 'CONTENTO') + '?', 'question')
+    add('CHI E?', 'question')
+
     return list(out.values())
 
 
+# ---------------------------------------------------------------------------
+# Selezione con copertura garantita di tutte le consonanti
+# ---------------------------------------------------------------------------
+
 def select(candidates):
-    """Seleziona un insieme bilanciato: breve all'inizio, ricco dopo."""
+    targets = {1: 300, 2: 500, 3: 350, 4: 250}
+    rng = random.Random(20261128)
     bydiff = defaultdict(list)
     for c in candidates:
         bydiff[c['d']].append(c)
     for d in bydiff:
-        rng = random.Random(100 + d)
-        # Round-robin tra i modelli: evita che una frase lunga monopolizzi
-        # tutto il livello (es. tutte le d4 che iniziano con "Dai").
-        groups = defaultdict(list)
-        for c in bydiff[d]:
-            groups[c['ti']].append(c)
-        keys = list(groups)
-        rng.shuffle(keys)
-        for k in keys:
-            rng.shuffle(groups[k])
-        picked = []
-        while len(picked) < len(bydiff[d]):
-            progressed = False
-            for k in keys:
-                if groups[k] and len(picked) < len(bydiff[d]):
-                    picked.append(groups[k].pop(0))
-                    progressed = True
-            if not progressed:
-                break
-        bydiff[d] = picked
+        rng.shuffle(bydiff[d])
 
-    # Il livello 1 è il più importante: chi conosce poche consonanti può
-    # vedere SOLO frasi brevi. Prendiamo per prime le frasi "priority",
-    # generate apposta per ogni consonante e coppia di consonanti.
-    targets = {1: 720, 2: 400, 3: 150, 4: 100}
-    chosen = []
-    pri_by_target = defaultdict(list)
-    for c in bydiff[1]:
-        if c.get('pri'):
-            pri_by_target[c['target']].append(c)
-    d1picked = []
+    chosen_by_d = {d: [] for d in (1, 2, 3, 4)}
     seen = set()
-    for target in sorted(pri_by_target):
-        for c in pri_by_target[target][:6]:
+    counts = Counter()
+    min_per_letter = 60
+
+    # Modelli esplicitamente richiesti: "IO AMO LA MAMMA." e simili.
+    by_text = {c['t']: c for c in candidates}
+    for text in MUST_HAVE:
+        cand = by_text.get(text)
+        if not cand or text in seen or len(chosen_by_d[cand['d']]) >= targets[cand['d']]:
+            continue
+        chosen_by_d[cand['d']].append(cand)
+        seen.add(text)
+        for ch in cand['c']:
+            counts[ch] += 1
+
+    # Prisma le consonanti rare: ogni lettera compare in almeno 60 frasi.
+    for ch in PRIORITY:
+        for d in (1, 2, 3, 4):
+            for c in bydiff[d]:
+                if counts[ch] >= min_per_letter:
+                    break
+                if c['t'] in seen or len(chosen_by_d[d]) >= targets[d]:
+                    continue
+                if ch not in c['c']:
+                    continue
+                chosen_by_d[d].append(c)
+                seen.add(c['t'])
+                for ch2 in c['c']:
+                    counts[ch2] += 1
+
+    # Riempie le quote rimanenti con frasi non ancora scelte.
+    for d in (1, 2, 3, 4):
+        for c in bydiff[d]:
+            if len(chosen_by_d[d]) >= targets[d]:
+                break
             if c['t'] in seen:
                 continue
-            d1picked.append(c)
+            chosen_by_d[d].append(c)
             seen.add(c['t'])
-    for c in bydiff[1]:
-        if len(d1picked) >= targets[1]:
-            break
-        if c['t'] in seen:
-            continue
-        d1picked.append(c)
-        seen.add(c['t'])
-    chosen.extend(d1picked)
-    for d in (2, 3, 4):
-        chosen.extend(bydiff[d][:targets[d]])
-
-    # Bilancia le consonanti: ogni consonante deve comparire spesso.
-    counts = Counter()
-    for c in chosen:
-        for ch in c['c']:
-            counts[ch] += 1
-    already = set(c['t'] for c in chosen)
-    for ch in 'BCDFGLMNPRSTVZQ':
-        if counts[ch] >= 45:
-            continue
-        for c in candidates:
-            if ch in c['c'] and c['t'] not in already:
-                chosen.append(c)
-                already.add(c['t'])
+            for ch in c['c']:
                 counts[ch] += 1
-                if counts[ch] >= 45:
-                    break
 
-    # Ordine: difficoltà crescente, poi lunghezza, poi testo (affidabile)
-    chosen.sort(key=lambda c: (c['d'], c['w'], c['c'], c['t']))
+    chosen = [c for d in (1, 2, 3, 4) for c in chosen_by_d[d]]
+    chosen.sort(key=lambda c: (c['d'], c['w'], c['t']))
     return chosen, counts
 
 
@@ -386,18 +377,19 @@ def js_string(s):
 
 
 def main():
-    pool = load_words()
-    candidates = generate(pool)
+    candidates = generate()
     chosen, counts = select(candidates)
 
     lines = [
         '/* ============================================================',
-        '   IMPARO A LEGGERE — archivio frasi italiane reali',
-        '   Ogni voce: t = testo, c = consonanti richieste (H muta esclusa),',
-        '   d = difficoltà 1..4, w = numero di parole, e = emoji della vignetta.',
-        '   Le vocali si danno per apprese: il gating riguarda solo le consonanti.',
-        '   La lunghezza/difficoltà massima cresce con le consonanti attive',
-        '   (IAL.Engine.sentenceCap). File generato da tools/generate_sentences.py.',
+        '   IMPARO A LEGGERE — archivio di frasi italiane compiute',
+        '   Ogni voce: t = testo, c = consonanti richieste (H inclusa),',
+        '   d = difficoltà 1..4, w = numero di parole.',
+        '   Ogni frase ha soggetto e verbo (o è una domanda completa):',
+        '   nessun elenco di parole separate da virgole e nessuna immagine.',
+        '   L\'app controlla TUTTE le lettere del testo rispetto a quelle',
+        '   attivate nell\'Area Genitori (vocali comprese; H è consonante).',
+        '   File generato da tools/generate_sentences.py.',
         '   ============================================================ */',
         'window.IAL = window.IAL || {};',
         '',
@@ -405,32 +397,17 @@ def main():
     ]
     for i, c in enumerate(chosen):
         comma = ',' if i < len(chosen) - 1 else ''
-        lines.append('  { t: %s, c: %s, d: %d, w: %d, e: %s }%s' % (
-            js_string(c['t']), js_string(c['c']), c['d'], c['w'],
-            json.dumps(c['e'], ensure_ascii=False), comma))
+        lines.append('  { t: %s, c: %s, d: %d, w: %d }%s' % (
+            js_string(c['t']), js_string(c['c']), c['d'], c['w'], comma))
     lines.append('];')
     lines.append('')
     open(OUT_JS, 'w', encoding='utf-8', newline='\n').write('\n'.join(lines))
 
-    print('Parole utilizzabili:', len(pool))
     print('Candidati generati:', len(candidates))
     print('Frasi selezionate:', len(chosen))
     print('Per difficoltà:', dict(sorted(Counter(c['d'] for c in chosen).items())))
-    print('Per numero di consonanti:', dict(sorted(Counter(len(c['c']) for c in chosen).items())))
-    print('Per consonante:', ' '.join('%s:%d' % (ch, counts[ch]) for ch in 'BCDFGLMNPRSTVZQ'))
-    letter_counts = Counter()
-    pair_counts = Counter()
-    for c in chosen:
-        if c['d'] != 1:
-            continue
-        cs = tuple(sorted(c['c']))
-        if len(cs) == 1:
-            letter_counts[cs[0]] += 1
-        elif len(cs) == 2:
-            pair_counts[''.join(cs)] += 1
-    all_pairs = [''.join(p) for p in itertools.combinations('BCDFGLMNPRSTVZQ', 2)]
-    print('d1 per consonante singola:', ' '.join('%s:%d' % (ch, letter_counts[ch]) for ch in 'BCDFGLMNPRSTVZQ'))
-    print('d1 coppie con meno di 6 frasi:', sum(1 for p in all_pairs if pair_counts[p] < 6))
+    print('Per numero di parole:', dict(sorted(Counter(c['w'] for c in chosen).items())))
+    print('Per consonante:', ' '.join('%s:%d' % (ch, counts[ch]) for ch in LETTERS))
     for d in (1, 2, 3, 4):
         samples = [c['t'] for c in chosen if c['d'] == d][:8]
         print('d%d: %s' % (d, ' | '.join(samples)))

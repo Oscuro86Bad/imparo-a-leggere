@@ -1,8 +1,8 @@
 /* ============================================================
    IMPARO A LEGGERE — LEGGI LA FRASE
-   Una frase da leggere in caratteri grandi + una vignetta a fumetti
-   con le emoji delle parole della frase. Le vocali si danno per
-   apprese: filtrano solo le consonanti attive nell'Area Genitori.
+   Una frase italiana compiuta in caratteri grandi, senza immagini.
+   Compare solo se TUTTE le sue lettere (vocali comprese) sono attive
+   nell'Area Genitori; la H è trattata come consonante.
    ============================================================ */
 window.IAL = window.IAL || {};
 
@@ -36,7 +36,6 @@ IAL.Sentences = (function () {
     const card = el('div', { class: 'comic-card' }, [
       el('div', { class: 'exercise-type', id: 'sentence-level' }, ['…']),
       el('div', { class: 'comic-bubble', id: 'sentence-text' }, ['—']),
-      el('div', { class: 'comic-scene', id: 'sentence-scene' }, []),
       el('div', { class: 'word-tools' }, [
         el('button', { class: 'chip', onclick: speakCurrent, 'aria-label': 'Ascolta la frase' }, ['🔊 SENTI LA FRASE'])
       ]),
@@ -59,17 +58,8 @@ IAL.Sentences = (function () {
 
     updateNote();
     if (IAL.Engine.availability(p).sentences === 0) {
-      IAL.UI.toast('Attiva prima qualche consonante nell’Area Genitori 🔒');
+      IAL.UI.toast('Attiva prima qualche lettera nell’Area Genitori 🔒');
     }
-  }
-
-  function drawScene(entry) {
-    const scene = document.getElementById('sentence-scene');
-    if (!scene) return;
-    while (scene.firstChild) scene.removeChild(scene.firstChild);
-    (entry.e || []).forEach(function (emoji) {
-      scene.appendChild(el('span', { class: 'comic-pic' }, [emoji]));
-    });
   }
 
   function next() {
@@ -83,9 +73,8 @@ IAL.Sentences = (function () {
 
     if (!entry) {
       current = null;
-      drawScene({ e: [] });
       if (levelEl) levelEl.textContent = 'Nessuna frase disponibile';
-      if (textEl) textEl.textContent = '🤔';
+      if (textEl) textEl.textContent = '—';
       if (msgEl) { msgEl.textContent = 'Chiedi a un adulto di attivare le lettere!'; msgEl.className = 'feedback-msg'; }
       updateNote();
       return;
@@ -94,7 +83,6 @@ IAL.Sentences = (function () {
     current = entry;
     if (levelEl) levelEl.textContent = LEVEL_NAMES[entry.d] + ' · ' + entry.w + ' parole';
     if (textEl) textEl.textContent = entry.t;
-    drawScene(entry);
     if (msgEl) { msgEl.textContent = ''; msgEl.className = 'feedback-msg'; }
     updateNote();
   }
@@ -132,7 +120,7 @@ IAL.Sentences = (function () {
     if (!noteEl) return;
     const cap = IAL.Engine.sentenceCap(p);
     noteEl.textContent = '⭐ ' + p.stats.stars + ' stelline · ' + p.stats.correct +
-      ' esercizi corretti · frasi fino a ' + cap.maxWords + ' parole';
+      ' esercizi corretti · frasi fino a ' + cap.maxWords + ' parole · solo lettere attive';
   }
 
   function currentForTest() { return current; }

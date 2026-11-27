@@ -8,7 +8,8 @@ window.IAL = window.IAL || {};
 IAL.CONFIG = {
   VOWELS: ['A', 'E', 'I', 'O', 'U'],
 
-  // Consonanti dell'alfabeto italiano (H: muta, non genera sillabe)
+  // Consonanti dell'alfabeto italiano. H è una consonante muta: non genera
+  // sillabe, ma conta come consonante attiva per frasi e difficoltà.
   CONSONANTS: ['B', 'C', 'D', 'F', 'G', 'H', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'Z'],
 
   AVATARS: ['🐻', '🐰', '🦊', '🐱', '🐼', '🦁', '🐨', '🐯', '🐧', '🦄', '🐸', '🐵'],
