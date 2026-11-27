@@ -8,15 +8,15 @@
 <div id="overlay" class="overlay hidden"></div>
 <script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
 <script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push((e.message || 'errore') + ' @ riga ' + e.lineno + ' | ' + ((e.error && e.error.stack) || '').replace(/\n/g, ' ¦ ')); }); window.addEventListener('unhandledrejection', function (e) { window.__errs.push('PROMISE: ' + ((e.reason && (e.reason.stack || e.reason.message)) || e.reason)); });</script>
-<script src="js/config.js?v=10"></script>
+<script src="js/config.js?v=11"></script>
 <script src="js/data/words.js?v=24"></script>
 <script src="js/data/sentences.js?v=5"></script>
 <script src="js/data/associations.js?v=9"></script>
 <script src="js/state/store.js?v=8"></script>
 <script src="js/engine/generator.js?v=18"></script>
 <script src="js/ui/components.js?v=18"></script>
-<script src="js/ui/home.js?v=18"></script>
-<script src="js/ui/blend.js?v=2"></script>
+<script src="js/ui/home.js?v=19"></script>
+<script src="js/ui/blend.js?v=3"></script>
 <script src="js/ui/reading.js?v=12"></script>
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
@@ -24,7 +24,7 @@
 <script src="js/ui/listen.js?v=3"></script>
 <script src="js/ui/complete.js?v=6"></script>
 <script src="js/ui/link.js?v=1"></script>
-<script src="js/ui/sentences.js?v=4"></script>
+<script src="js/ui/sentences.js?v=5"></script>
 <script src="js/ui/ocr.js?v=14"></script>
 <script src="js/ui/custom.js?v=16"></script>
 <script src="js/ui/parent.js?v=9"></script>
@@ -52,7 +52,7 @@
   const menuBtns = Array.from(document.querySelectorAll('.menu .btn'));
   const bgSet = new Set(menuBtns.map(b => getComputedStyle(b).backgroundColor));
   const cNames = menuBtns.map(b => (b.className.match(/btn-(\w+)/) || [])[1]).join(',');
-  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 12 && bgSet.size === 12);
+  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 11 && bgSet.size === 11);
 
   // Home: UNISCI LE SILLABE subito dopo SOLO LETTURA, poi PAROLE PERSONALIZZATE
   const homeOrder = Array.from(document.querySelectorAll('.menu .btn .txt')).map(t => (t.firstChild.textContent || '').trim());
@@ -63,23 +63,21 @@
   const iComplete = homeOrder.indexOf('COMPLETA LA PAROLA');
   const iLink = homeOrder.indexOf('COLLEGA L’IMMAGINE');
   const iSent = homeOrder.indexOf('LEGGI LA FRASE');
-  const iSlow = homeOrder.indexOf('ASCOLTA LENTO');
   check('Home: ordine [' + homeOrder.join(' → ') + ']',
     iReading !== -1 && iBlend !== -1 && iCustom !== -1 && iListen !== -1 &&
-    iComplete !== -1 && iLink !== -1 && iSent !== -1 && iSlow !== -1 &&
+    iComplete !== -1 && iLink !== -1 && iSent !== -1 &&
     iReading < iBlend && iBlend < iCustom && iCustom < iListen &&
-    iListen < iComplete && iComplete < iLink && iLink < iSent && iSent < iSlow);
+    iListen < iComplete && iComplete < iLink && iLink < iSent);
 
   // Home: fumetto "NEW" solo sulle sezioni appena aggiunte
   const tagged = Array.from(document.querySelectorAll('.menu .btn')).filter(b => b.querySelector('.new-tag'));
   const taggedNames = tagged.map(b => (b.querySelector('.txt').firstChild.textContent || '').trim());
   check('Home: fumetto NEW solo sulle sezioni nuove [' + taggedNames.join(', ') + ']',
-    tagged.length === 6 && taggedNames.indexOf('UNISCI LE SILLABE') !== -1 &&
+    tagged.length === 5 && taggedNames.indexOf('UNISCI LE SILLABE') !== -1 &&
     taggedNames.indexOf('ASCOLTA E SELEZIONA') !== -1 &&
     taggedNames.indexOf('COMPLETA LA PAROLA') !== -1 &&
     taggedNames.indexOf('COLLEGA L’IMMAGINE') !== -1 &&
-    taggedNames.indexOf('LEGGI LA FRASE') !== -1 &&
-    taggedNames.indexOf('ASCOLTA LENTO') !== -1);
+    taggedNames.indexOf('LEGGI LA FRASE') !== -1);
 
   // Home: tutte le sezioni della stessa altezza (niente sezioni "giganti")
   const appEl = document.querySelector('.app');
@@ -97,9 +95,9 @@
   check('Home: nuova sezione UNISCI LE SILLABE con colore dedicato (lime)',
     body().indexOf('UNISCI LE SILLABE') !== -1 &&
     !!Array.from(document.querySelectorAll('.menu .btn')).find(b => b.classList.contains('btn-lime')));
-  check('Home: nuova sezione ASCOLTA LENTO ben visibile con colore dedicato (corallo)',
-    body().indexOf('ASCOLTA LENTO') !== -1 &&
-    !!Array.from(document.querySelectorAll('.menu .btn')).find(b => b.classList.contains('btn-coral')));
+  check('ASCOLTA LENTO: sezione nascosta nel menu per il momento',
+    body().indexOf('ASCOLTA LENTO') === -1 &&
+    !Array.from(document.querySelectorAll('.menu .btn')).some(b => b.classList.contains('btn-coral')));
   check('Home: nuova sezione ASCOLTA E SELEZIONA',
     body().indexOf('ASCOLTA E SELEZIONA') !== -1);
   check('Home: nuova sezione COMPLETA LA PAROLA',
@@ -157,6 +155,16 @@
     const t = String((u && u.text) || '').trim();
     if (t) spokenBlend.push(t.toUpperCase());
   };
+  const sentiWordBtn = btnWith('SENTI LA PAROLA');
+  check('UNISCI LE SILLABE: tasto SENTI LA PAROLA presente', !!sentiWordBtn);
+  if (sentiWordBtn && window.speechSynthesis) {
+    spokenBlend.length = 0;
+    sentiWordBtn.click();
+    await wait(30);
+    check('UNISCI LE SILLABE: SENTI ripete tutta la parola, non una sola sillaba',
+      spokenBlend.indexOf(blendEx.word) !== -1 &&
+      !spokenBlend.some(t => t !== blendEx.word && blendEx.syllables.indexOf(t) !== -1));
+  }
   // Tocchiamo il riquadro con il testo giusto, non quello in prima posizione.
   blendEx.syllables.forEach(function (syl) {
     const tile = Array.from(document.querySelectorAll('#blend-stage .syl-tile')).find(
@@ -771,31 +779,10 @@
   check('LEGGI LA FRASE: colore dedicato (oro) nella home',
     !!Array.from(document.querySelectorAll('.menu .btn')).find(b => b.classList.contains('btn-gold')));
 
-  // La sezione ASCOLTA LENTO deve essere visibile nel menu e partire subito.
-  const slowHomeBtn = Array.from(document.querySelectorAll('.menu .btn')).find(
-    b => b.textContent.indexOf('ASCOLTA LENTO') !== -1
-  );
-  check('ASCOLTA LENTO: sezione visibile nel menu con colore corallo e tag NEW',
-    !!slowHomeBtn && slowHomeBtn.classList.contains('btn-coral') && !!slowHomeBtn.querySelector('.new-tag'));
-  if (slowHomeBtn && window.speechSynthesis) {
-    const origSpeakHomeSlow = window.speechSynthesis.speak;
-    const ratesHomeSlow = [];
-    window.speechSynthesis.speak = function (u) {
-      if (!u) return;
-      if (typeof u.rate === 'number') ratesHomeSlow.push(u.rate);
-      if (u.onstart) u.onstart();
-      if (u.onboundary) u.onboundary({ charIndex: 0 });
-    };
-    slowHomeBtn.click();
-    await wait(60);
-    window.speechSynthesis.speak = origSpeakHomeSlow;
-    check('ASCOLTA LENTO dalla home: parte piano e illumina subito la prima parola',
-      ratesHomeSlow.length >= 1 && ratesHomeSlow.every(r => r < 0.85) &&
-      document.querySelector('.app-title').textContent === 'ASCOLTA LENTO' &&
-      IAL.Sentences.highlightedForTest() === 0 &&
-      !!document.querySelector('#sentence-text .word-token.active'));
-    IAL.UI.stopSpeech();
-  }
+  check('ASCOLTA LENTO: nessuna voce nel menu e nessun avvio automatico',
+    !Array.from(document.querySelectorAll('.menu .btn')).some(
+      b => b.textContent.indexOf('ASCOLTA LENTO') !== -1
+    ) && IAL.CONFIG.SHOW_SLOW_LISTEN === false);
 
   IAL.Sentences.show();
   await wait(80);
@@ -833,8 +820,13 @@
   check('LEGGI LA FRASE: sillabazione MAMMA = MA+MMA',
     IAL.Sentences.syllablesForTest('MAMMA').join('+') === 'MA+MMA' &&
     IAL.Sentences.syllablesForTest('MELONE').join('+') === 'ME+LO+NE');
-  check('LEGGI LA FRASE: pulsante 🐢 ASCOLTA LENTO presente', !!btnWith('ASCOLTA LENTO'));
+  check('LEGGI LA FRASE: pulsante 🐢 ASCOLTA LENTO nascosto per il momento',
+    !btnWith('ASCOLTA LENTO') && IAL.CONFIG.SHOW_SLOW_LISTEN === false);
 
+  // Il comando è nascosto, ma il codice resta pronto: lo riattiviamo solo
+  // nel test per controllare che funzioni ancora se verrà riacceso.
+  const slowFlagBefore = IAL.CONFIG.SHOW_SLOW_LISTEN;
+  IAL.CONFIG.SHOW_SLOW_LISTEN = true;
   if (window.speechSynthesis) {
     const origSpeakSlow = window.speechSynthesis.speak;
     const ratesSlow = [];
@@ -846,36 +838,41 @@
       if (u.onstart) u.onstart();
       if (u.onboundary) u.onboundary({ charIndex: 0 });
     };
-    btnWith('ASCOLTA LENTO').click();
+    IAL.Sentences.showSlow();
     await wait(60);
+    const curSlow = IAL.Sentences.currentForTest();
     window.speechSynthesis.speak = origSpeakSlow;
-    check('ASCOLTA LENTO: voce più lenta del normale [' + ratesSlow.join(',') + ']',
+    check('ASCOLTA LENTO (riattivato solo nel test): voce più lenta [' + ratesSlow.join(',') + ']',
       ratesSlow.length >= 1 && ratesSlow.every(r => r < 0.85));
-    check('ASCOLTA LENTO: prima parola e prima sillaba evidenziate',
+    check('ASCOLTA LENTO (riattivato solo nel test): parola e sillaba illuminate',
       IAL.Sentences.highlightedForTest() === 0 &&
       !!document.querySelector('#sentence-text .word-token.active .syl-token.active'));
     if (lastSlowUtterance && lastSlowUtterance.onboundary) {
-      lastSlowUtterance.onboundary({ charIndex: IAL.UI.wordSpans(curSent.t)[1].start });
+      const spansSlow = IAL.UI.wordSpans(curSlow.t);
+      if (spansSlow[1]) lastSlowUtterance.onboundary({ charIndex: spansSlow[1].start });
     }
     await wait(20);
-    check('ASCOLTA LENTO: l’evidenziazione segue la parola letta',
+    check('ASCOLTA LENTO (riattivato solo nel test): evidenziazione segue la parola',
       IAL.Sentences.highlightedForTest() === 1);
     IAL.UI.stopSpeech();
     await wait(10);
-    check('ASCOLTA LENTO: fermando la voce si pulisce l’evidenziazione',
+    check('ASCOLTA LENTO (riattivato solo nel test): fermando la voce si pulisce',
       IAL.Sentences.highlightedForTest() === -1 &&
       !document.querySelector('#sentence-text .word-token.active'));
 
     // iOS: niente onboundary → il timer avanza comunque alla prima parola
     const origSpeakFallback = window.speechSynthesis.speak;
     window.speechSynthesis.speak = function (u) { if (u && u.onstart) u.onstart(); };
-    btnWith('ASCOLTA LENTO').click();
+    IAL.Sentences.showSlow();
     await wait(1200);
     window.speechSynthesis.speak = origSpeakFallback;
-    check('ASCOLTA LENTO: senza onboundary il timer evidenzia comunque la parola',
+    check('ASCOLTA LENTO (riattivato solo nel test): senza onboundary il timer avanza',
       IAL.Sentences.highlightedForTest() === 0);
     IAL.UI.stopSpeech();
   }
+  IAL.CONFIG.SHOW_SLOW_LISTEN = slowFlagBefore;
+  IAL.Sentences.show();
+  await wait(40);
 
   const starsSent = IAL.Store.active().stats.stars;
   btnWith('HO LETTO').click(); await wait(40);

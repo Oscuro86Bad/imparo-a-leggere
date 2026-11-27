@@ -17,6 +17,9 @@ IAL.Sentences = (function () {
   let slowMode = false;
   let sylTimer = null;
 
+  // Il comando è disattivato per ora: il codice resta ma non appare nella UI.
+  function slowEnabled() { return IAL.CONFIG.SHOW_SLOW_LISTEN === true; }
+
   const LEVEL_NAMES = {
     1: 'Frase breve',
     2: 'Frase facile',
@@ -58,7 +61,7 @@ IAL.Sentences = (function () {
 
   function show(opts) {
     opts = opts || {};
-    slowMode = !!opts.slow;
+    slowMode = slowEnabled() && !!opts.slow;
     current = null;
     slowActive = false;
     render();
@@ -66,7 +69,8 @@ IAL.Sentences = (function () {
   }
 
   // Voce dall'icona del menu: apre la frase e la legge subito piano.
-  function showSlow() { show({ slow: true }); }
+  // Se il comando è nascosto non fa nulla.
+  function showSlow() { if (!slowEnabled()) return; show({ slow: true }); }
 
   function hide() {
     IAL.UI.stopSpeech();
@@ -88,7 +92,9 @@ IAL.Sentences = (function () {
       el('div', { class: 'comic-bubble', id: 'sentence-text' }, ['—']),
       el('div', { class: 'word-tools' }, [
         el('button', { class: 'chip', onclick: speakCurrent, 'aria-label': 'Ascolta la frase' }, ['🔊 SENTI LA FRASE']),
-        el('button', { class: 'chip chip-slow', onclick: speakSlow, 'aria-label': 'Ascolta la frase lentamente' }, ['🐢 ASCOLTA LENTO'])
+        slowEnabled()
+          ? el('button', { class: 'chip chip-slow', onclick: speakSlow, 'aria-label': 'Ascolta la frase lentamente' }, ['🐢 ASCOLTA LENTO'])
+          : null
       ]),
       el('div', { class: 'feedback-msg', id: 'sentence-msg' }, ['']),
       el('div', { class: 'actions' }, [
@@ -200,7 +206,7 @@ IAL.Sentences = (function () {
     paintText(entry);
     if (msgEl) { msgEl.textContent = ''; msgEl.className = 'feedback-msg'; }
     updateNote();
-    if (slowMode) speakSlow();
+    if (slowMode && slowEnabled()) speakSlow();
   }
 
   function speakCurrent() {

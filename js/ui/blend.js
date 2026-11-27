@@ -56,7 +56,7 @@ IAL.Blend = (function () {
       el('div', { class: 'blend-reward', id: 'blend-reward' }, []),
       el('div', { class: 'feedback-msg', id: 'blend-msg' }, ['']),
       el('div', { class: 'word-tools' }, [
-        el('button', { class: 'chip', onclick: speakHint, 'aria-label': 'Ascolta la sillaba' }, ['🔊 SENTI'])
+        el('button', { class: 'chip', onclick: speakWord, 'aria-label': 'Ascolta la parola da comporre' }, ['🔊 SENTI LA PAROLA'])
       ]),
       el('div', { class: 'actions' }, [
         el('button', { class: 'btn btn-lime', onclick: next }, ['🔄', 'NUOVA'])
@@ -175,9 +175,11 @@ IAL.Blend = (function () {
     updateNote(p);
   }
 
-  function speakHint() {
+  // Il pulsante SENTI pronuncia sempre la parola intera da comporre,
+  // non la sola prossima sillaba: così il bambino sa cosa deve ricostruire.
+  function speakWord() {
     if (!current) return;
-    IAL.UI.say(solved ? current.word : current.syllables[step]);
+    IAL.UI.say(current.word);
   }
 
   function updateNote(p) {

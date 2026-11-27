@@ -14,6 +14,11 @@ IAL.CONFIG = {
 
   AVATARS: ['🐻', '🐰', '🦊', '🐱', '🐼', '🦁', '🐨', '🐯', '🐧', '🦄', '🐸', '🐵'],
 
+  // Funzione "ASCOLTA LENTO": spenta per ora su richiesta. Il codice resta
+  // pronto: basta mettere true per far ricomparire voce nel menu e pulsante
+  // dentro LEGGI LA FRASE, senza toccare altro.
+  SHOW_SLOW_LISTEN: false,
+
   // Strutture ortografiche che NON sono semplici combinazioni consonante+vocale.
   // Ogni parola dell'archivio può richiedere una di queste per essere proposta.
   FLAGS: {

@@ -29,8 +29,9 @@ inventate, associazione parola-immagine.
    studiate o attiva strutture speciali (doppie, gruppi, GN, GLI…).
 5. Il bambino usa **SOLO LETTURA**, **UNISCI LE SILLABE**, **LEGGI E GUARDA**, **DICO LA PAROLA**,
    **VEDI E SCEGLI**, **ASCOLTA E SELEZIONA**, **COMPLETA LA PAROLA**,
-   **COLLEGA L'IMMAGINE**, **LEGGI LA FRASE** e **ASCOLTA LENTO**
-   (sei sezioni con etichetta NEW).
+   **COLLEGA L'IMMAGINE** e **LEGGI LA FRASE** (cinque sezioni con etichetta NEW).
+   **ASCOLTA LENTO** è temporaneamente nascosta: il codice è pronto e basta
+   `IAL.CONFIG.SHOW_SLOW_LISTEN = true` per farla ricomparire.
 
 > Nota: per l'installazione come PWA e l'offline completo serve servire l'app via `http(s)`
 > (GitHub Pages, o un mini-server locale, vedi sotto). Aprendo il file direttamente
@@ -75,7 +76,9 @@ In alternativa basta l'estensione *Live Server* di VS Code.
 4. Se l'ordine è sbagliato non c'è una X rossa: i riquadri si scuotono piano e
    compare un suggerimento gentile («Prima MA, poi MMA»). Si riprova senza penalty;
    il riquadro già scelto resta evidenziato, così il bambino vede cosa manca.
-5. A fusione completata la parola viene **pronunciata** con l'audio preregistrato,
+5. Il pulsante **🔊 SENTI LA PAROLA** pronuncia sempre **la parola intera da
+   comporre** (non la sola prossima sillaba), così il bambino sa cosa ricostruire.
+   A fusione completata la parola viene **pronunciata** con l'audio preregistrato,
    compare l'immagine come premio (se disponibile) e arriva una stellina.
 6. **🔄 NUOVA** passa a un'altra parola; l'anti-ripetizione evita il ripetersi
    della stessa parola due volte di seguito.
@@ -206,7 +209,9 @@ In alternativa basta l'estensione *Live Server* di VS Code.
    italiani curati (`tools/generate_sentences.py`), senza ripetere la stessa
    frase due volte di seguito.
 
-### ASCOLTA LENTO (novità — NEW)
+### ASCOLTA LENTO (codice pronto, nascosto per ora)
+> Temporaneamente disattivata su richiesta: né la voce nel menu né il pulsante
+> interno compaiono. Il codice resta integro; per riattivarla basta il flag.
 1. È una **voce propria nel menu** (colore corallo, accanto a LEGGI LA FRASE):
    non va cercata dentro un'altra sezione. Un tocco apre una frase e la legge
    subito piano, senza bisogno di premere un pulsante interno.
@@ -419,15 +424,15 @@ Due pagine di collaudo automatico (apribili da browser, anche da `file://`):
 - `uitest.html` — interfaccia completa: creazione profilo, 30 esercizi in SOLO LETTURA con
   controllo delle lettere, ciclo CORRETTO/AVANTI in LEGGI E GUARDA, tutte le schede
   dell'Area Genitori, PIN, stelline e statistiche, uso dell'audio preregistrato e
-  fallback alla sintesi vocale, sillabe mescolate e sezione ASCOLTA LENTO
-  (173 controlli).
+  fallback alla sintesi vocale, sillabe mescolate, SENTI LA PAROLA e
+  ASCOLTA LENTO nascosto ma pronto (174 controlli).
 
 Checklist manuale consigliata (2 minuti):
 - [ ] Attiva solo vocali + P: nessuna parola con altre lettere compare.
 - [ ] Disattiva PA: la sillaba PA sparisce dagli esercizi.
 - [ ] Attiva «Doppie»: compaiono MAMMA, MAPPA, LATTE…
-- [ ] UNISCI LE SILLABE: i riquadri sono mescolati; toccandoli in ordine si forma la parola e si sente l'audio.
-- [ ] ASCOLTA LENTO: si apre direttamente dal menu (corallo); la parola letta si illumina, senza immagini.
+- [ ] UNISCI LE SILLABE: i riquadri sono mescolati; **🔊 SENTI LA PAROLA** dice la parola intera; toccandoli in ordine si forma la parola e si sente l'audio.
+- [ ] ASCOLTA LENTO: per ora nascosta sia dal menu sia da LEGGI LA FRASE.
 - [ ] Modalità «solo inventate»: le parole mostrano la dicitura «senza significato».
 - [ ] CORRETTO aumenta le stelline.
 - [ ] PIN: l'Area Genitori è inaccessibile ai bambini senza codice.

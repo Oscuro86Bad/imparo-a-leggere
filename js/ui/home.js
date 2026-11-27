@@ -65,11 +65,11 @@ IAL.Home = (function () {
         el('span', { class: 'txt' }, ['LEGGI LA FRASE', el('span', { class: 'small' }, ['Leggi la frase e guarda il fumetto'])]),
         el('span', { class: 'new-tag' }, ['NEW'])
       ]),
-      el('button', { class: 'btn btn-coral btn-block', onclick: function () { IAL.Sentences.showSlow(); } }, [
+      IAL.CONFIG.SHOW_SLOW_LISTEN ? el('button', { class: 'btn btn-coral btn-block', onclick: function () { IAL.Sentences.showSlow(); } }, [
         el('span', { class: 'emoji' }, ['🐢']),
         el('span', { class: 'txt' }, ['ASCOLTA LENTO', el('span', { class: 'small' }, ['Frase lenta, parole illuminate'])]),
         el('span', { class: 'new-tag' }, ['NEW'])
-      ]),
+      ]) : null,
       el('button', { class: 'btn btn-slate btn-block', onclick: function () { IAL.Parent.show(); } }, [
         el('span', { class: 'emoji' }, ['🔒']),
         el('span', { class: 'txt' }, ['AREA GENITORI', el('span', { class: 'small' }, ['Lettere, livelli, progressi'])])
