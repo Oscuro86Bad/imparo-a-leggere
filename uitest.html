@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
-<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=23"></head>
+<head><meta charset="UTF-8"><title>Collaudo UI</title><link rel="stylesheet" href="css/style.css?v=24"></head>
 <body>
 <h1>Collaudo interfaccia</h1>
 <pre id="summary">in corso…</pre>
@@ -13,9 +13,10 @@
 <script src="js/data/sentences.js?v=5"></script>
 <script src="js/data/associations.js?v=9"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=17"></script>
-<script src="js/ui/components.js?v=15"></script>
-<script src="js/ui/home.js?v=16"></script>
+<script src="js/engine/generator.js?v=18"></script>
+<script src="js/ui/components.js?v=17"></script>
+<script src="js/ui/home.js?v=17"></script>
+<script src="js/ui/blend.js?v=1"></script>
 <script src="js/ui/reading.js?v=12"></script>
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
@@ -23,7 +24,7 @@
 <script src="js/ui/listen.js?v=3"></script>
 <script src="js/ui/complete.js?v=6"></script>
 <script src="js/ui/link.js?v=1"></script>
-<script src="js/ui/sentences.js?v=2"></script>
+<script src="js/ui/sentences.js?v=3"></script>
 <script src="js/ui/ocr.js?v=14"></script>
 <script src="js/ui/custom.js?v=16"></script>
 <script src="js/ui/parent.js?v=9"></script>
@@ -51,23 +52,28 @@
   const menuBtns = Array.from(document.querySelectorAll('.menu .btn'));
   const bgSet = new Set(menuBtns.map(b => getComputedStyle(b).backgroundColor));
   const cNames = menuBtns.map(b => (b.className.match(/btn-(\w+)/) || [])[1]).join(',');
-  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 10 && bgSet.size === 10);
+  check('Home: ' + menuBtns.length + ' sezioni, ognuna con colore unico [' + cNames + ']', menuBtns.length === 11 && bgSet.size === 11);
 
-  // Home: PAROLE PERSONALIZZATE viene prima delle sezioni nuove
+  // Home: UNISCI LE SILLABE subito dopo SOLO LETTURA, poi PAROLE PERSONALIZZATE
   const homeOrder = Array.from(document.querySelectorAll('.menu .btn .txt')).map(t => (t.firstChild.textContent || '').trim());
+  const iReading = homeOrder.indexOf('SOLO LETTURA');
+  const iBlend = homeOrder.indexOf('UNISCI LE SILLABE');
   const iCustom = homeOrder.indexOf('PAROLE PERSONALIZZATE');
   const iListen = homeOrder.indexOf('ASCOLTA E SELEZIONA');
   const iComplete = homeOrder.indexOf('COMPLETA LA PAROLA');
   const iLink = homeOrder.indexOf('COLLEGA L’IMMAGINE');
   check('Home: ordine [' + homeOrder.join(' → ') + ']',
-    iCustom !== -1 && iListen !== -1 && iComplete !== -1 && iLink !== -1 &&
-    iCustom < iListen && iListen < iComplete && iComplete < iLink);
+    iReading !== -1 && iBlend !== -1 && iCustom !== -1 && iListen !== -1 &&
+    iComplete !== -1 && iLink !== -1 &&
+    iReading < iBlend && iBlend < iCustom && iCustom < iListen &&
+    iListen < iComplete && iComplete < iLink);
 
   // Home: fumetto "NEW" solo sulle sezioni appena aggiunte
   const tagged = Array.from(document.querySelectorAll('.menu .btn')).filter(b => b.querySelector('.new-tag'));
   const taggedNames = tagged.map(b => (b.querySelector('.txt').firstChild.textContent || '').trim());
   check('Home: fumetto NEW solo sulle sezioni nuove [' + taggedNames.join(', ') + ']',
-    tagged.length === 4 && taggedNames.indexOf('ASCOLTA E SELEZIONA') !== -1 &&
+    tagged.length === 5 && taggedNames.indexOf('UNISCI LE SILLABE') !== -1 &&
+    taggedNames.indexOf('ASCOLTA E SELEZIONA') !== -1 &&
     taggedNames.indexOf('COMPLETA LA PAROLA') !== -1 &&
     taggedNames.indexOf('COLLEGA L’IMMAGINE') !== -1 &&
     taggedNames.indexOf('LEGGI LA FRASE') !== -1);
@@ -85,6 +91,9 @@
   // Home: nomi aggiornati e niente punteggio in alto
   check('Home: la sezione si chiama PAROLE PERSONALIZZATE',
     body().indexOf('PAROLE PERSONALIZZATE') !== -1 && body().indexOf('PAROLE MIE') === -1);
+  check('Home: nuova sezione UNISCI LE SILLABE con colore dedicato (lime)',
+    body().indexOf('UNISCI LE SILLABE') !== -1 &&
+    !!Array.from(document.querySelectorAll('.menu .btn')).find(b => b.classList.contains('btn-lime')));
   check('Home: nuova sezione ASCOLTA E SELEZIONA',
     body().indexOf('ASCOLTA E SELEZIONA') !== -1);
   check('Home: nuova sezione COMPLETA LA PAROLA',
@@ -100,6 +109,43 @@
     pr.letters = { vowels: ['A','E','I','O','U'], consonants: ['P','M','N'] };
     pr.syllables = { P: ['PA','PE','PI','PO','PU','RA','RE'], M: ['MA','ME','MI','MO','MU'], N: ['NA','NE','NI','NO','NU'] };
   });
+
+  // --- UNISCI LE SILLABE ---
+  IAL.Blend.show();
+  await wait(60);
+  const blendEx = IAL.Blend.currentForTest();
+  const blendTiles = Array.from(document.querySelectorAll('#blend-stage .syl-tile'));
+  check('UNISCI LE SILLABE: riquadri = sillabe della parola (' + (blendEx ? blendEx.word : 'nessuna') + ')',
+    !!blendEx && blendTiles.length === blendEx.syllables.length && blendTiles.length >= 2 &&
+    blendTiles.map(t => t.textContent).join('') === blendEx.word);
+  check('UNISCI LE SILLABE: solo parole reali con lettere e sillabe studiate',
+    !!blendEx && !blendEx.invented && !!IAL.WORDS_BY_KEY[blendEx.word] &&
+    blendEx.syllables.every(s => IAL.Engine.canShowSyllable(
+      IAL.Store.active(), s, IAL.Engine.enabledLetters(IAL.Store.active()))));
+  const starsBlend0 = IAL.Store.active().stats.stars;
+  if (blendTiles.length > 1) blendTiles[1].click();
+  await wait(20);
+  check('UNISCI LE SILLABE: ordine sbagliato → nessuna stella e suggerimento gentile',
+    IAL.Store.active().stats.stars === starsBlend0 &&
+    document.getElementById('blend-hint').textContent.indexOf('Prima ') === 0 &&
+    !IAL.Blend.stateForTest().solved);
+  const origSpeakBlend = window.speechSynthesis && window.speechSynthesis.speak;
+  const spokenBlend = [];
+  if (window.speechSynthesis) window.speechSynthesis.speak = function (u) {
+    const t = String((u && u.text) || '').trim();
+    if (t) spokenBlend.push(t.toUpperCase());
+  };
+  blendTiles.forEach(t => t.click());
+  await wait(60);
+  if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakBlend;
+  check('UNISCI LE SILLABE: unendo i riquadri si ottiene la parola',
+    IAL.Blend.stateForTest().solved &&
+    document.getElementById('blend-result').textContent === blendEx.word &&
+    document.getElementById('blend-result').classList.contains('done'));
+  check('UNISCI LE SILLABE: +1 stella e parola pronunciata',
+    IAL.Store.active().stats.stars === starsBlend0 + 1 &&
+    (!window.speechSynthesis || spokenBlend.indexOf(blendEx.word) !== -1));
+  IAL.Blend.hide();
 
   // --- SOLO LETTURA ---
   IAL.Reading.show();
@@ -723,6 +769,59 @@
   check('LEGGI LA FRASE: SENTI pronuncia la frase',
     !window.speechSynthesis || spokenSent.indexOf(curSent.t.toLowerCase()) !== -1);
   if (window.speechSynthesis) window.speechSynthesis.speak = origSpeakSent;
+
+  // --- ASCOLTA LENTO: parola/sillaba evidenziata durante la lettura ---
+  check('LEGGI LA FRASE: token parola per parola, testo invariato e senza immagini',
+    document.querySelectorAll('#sentence-text .word-token').length === curSent.t.split(/\s+/).length &&
+    document.getElementById('sentence-text').textContent === curSent.t &&
+    !!document.querySelector('#sentence-text .syl-token') &&
+    !document.querySelector('#sentence-text img'));
+  check('LEGGI LA FRASE: sillabazione MAMMA = MA+MMA',
+    IAL.Sentences.syllablesForTest('MAMMA').join('+') === 'MA+MMA' &&
+    IAL.Sentences.syllablesForTest('MELONE').join('+') === 'ME+LO+NE');
+  check('LEGGI LA FRASE: pulsante 🐢 ASCOLTA LENTO presente', !!btnWith('ASCOLTA LENTO'));
+
+  if (window.speechSynthesis) {
+    const origSpeakSlow = window.speechSynthesis.speak;
+    const ratesSlow = [];
+    let lastSlowUtterance = null;
+    window.speechSynthesis.speak = function (u) {
+      if (!u) return;
+      if (typeof u.rate === 'number') ratesSlow.push(u.rate);
+      lastSlowUtterance = u;
+      if (u.onstart) u.onstart();
+      if (u.onboundary) u.onboundary({ charIndex: 0 });
+    };
+    btnWith('ASCOLTA LENTO').click();
+    await wait(60);
+    window.speechSynthesis.speak = origSpeakSlow;
+    check('ASCOLTA LENTO: voce più lenta del normale [' + ratesSlow.join(',') + ']',
+      ratesSlow.length >= 1 && ratesSlow.every(r => r < 0.85));
+    check('ASCOLTA LENTO: prima parola e prima sillaba evidenziate',
+      IAL.Sentences.highlightedForTest() === 0 &&
+      !!document.querySelector('#sentence-text .word-token.active .syl-token.active'));
+    if (lastSlowUtterance && lastSlowUtterance.onboundary) {
+      lastSlowUtterance.onboundary({ charIndex: IAL.UI.wordSpans(curSent.t)[1].start });
+    }
+    await wait(20);
+    check('ASCOLTA LENTO: l’evidenziazione segue la parola letta',
+      IAL.Sentences.highlightedForTest() === 1);
+    IAL.UI.stopSpeech();
+    await wait(10);
+    check('ASCOLTA LENTO: fermando la voce si pulisce l’evidenziazione',
+      IAL.Sentences.highlightedForTest() === -1 &&
+      !document.querySelector('#sentence-text .word-token.active'));
+
+    // iOS: niente onboundary → il timer avanza comunque alla prima parola
+    const origSpeakFallback = window.speechSynthesis.speak;
+    window.speechSynthesis.speak = function (u) { if (u && u.onstart) u.onstart(); };
+    btnWith('ASCOLTA LENTO').click();
+    await wait(1200);
+    window.speechSynthesis.speak = origSpeakFallback;
+    check('ASCOLTA LENTO: senza onboundary il timer evidenzia comunque la parola',
+      IAL.Sentences.highlightedForTest() === 0);
+    IAL.UI.stopSpeech();
+  }
 
   const starsSent = IAL.Store.active().stats.stars;
   btnWith('HO LETTO').click(); await wait(40);

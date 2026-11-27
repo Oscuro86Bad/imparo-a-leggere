@@ -24,6 +24,11 @@ IAL.Home = (function () {
         el('span', { class: 'emoji' }, ['📖']),
         el('span', { class: 'txt' }, ['SOLO LETTURA', el('span', { class: 'small' }, ['Leggi sillabe e parole'])])
       ]),
+      el('button', { class: 'btn btn-lime btn-block', onclick: function () { IAL.Blend.show(); } }, [
+        el('span', { class: 'emoji' }, ['🧱']),
+        el('span', { class: 'txt' }, ['UNISCI LE SILLABE', el('span', { class: 'small' }, ['Metti insieme i pezzi delle parole'])]),
+        el('span', { class: 'new-tag' }, ['NEW'])
+      ]),
       el('button', { class: 'btn btn-green btn-block', onclick: function () { IAL.Match.show(); } }, [
         el('span', { class: 'emoji' }, ['🖼️']),
         el('span', { class: 'txt' }, ['LEGGI E GUARDA', el('span', { class: 'small' }, ['Leggi la parola e l’immagine'])])

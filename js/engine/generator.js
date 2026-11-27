@@ -587,6 +587,33 @@ IAL.Engine = (function () {
     return entry;
   }
 
+  // ---------- UNISCI LE SILLABE ----------
+  // Solo parole reali INTERAMENTE leggibili (stesse regole di LEGGI E GUARDA)
+  // e con 2–4 sillabe: il bambino unisce pezzi che già sa leggere. Nessuna
+  // parola inventata e nessuna lettera nuova può entrare di nascosto.
+  function blendPool(p) {
+    return realWords(p, null, true).filter(function (entry) {
+      return entry.s && entry.s.length >= 2 && entry.s.length <= 4;
+    });
+  }
+
+  const recentBlends = [];
+
+  function nextBlend(p) {
+    const pool = blendPool(p);
+    if (!pool.length) return null;
+    const fresh = pool.filter(function (e) { return recentBlends.indexOf(e.w) === -1; });
+    const list = fresh.length ? fresh : pool;
+    const entry = list[Math.floor(Math.random() * list.length)];
+    recentBlends.push(entry.w);
+    if (recentBlends.length > 12) recentBlends.shift();
+    return {
+      kind: 'blend', text: entry.w, word: entry.w, invented: false,
+      syllables: entry.s.slice(), img: entry.img || null,
+      typeLabel: 'Unisci le sillabe'
+    };
+  }
+
   // Descrizione leggibile di ciò che il profilo rende disponibile
   function availability(p) {
     const letters = enabledLetters(p);
@@ -598,7 +625,8 @@ IAL.Engine = (function () {
       syllables: usableSyllables.length,
       realWords: realWords(p, null).length,
       invented: usableSyllables.length >= 2,
-      sentences: sentencePool(p).length
+      sentences: sentencePool(p).length,
+      blends: blendPool(p).length
     };
   }
 
@@ -626,6 +654,8 @@ IAL.Engine = (function () {
     canShowSentence: canShowSentence,
     sentencePool: sentencePool,
     nextSentence: nextSentence,
+    blendPool: blendPool,
+    nextBlend: nextBlend,
     availability: availability
   };
 })();

@@ -19,7 +19,7 @@
 <script src="js/data/associations.js?v=9"></script>
 <script src="js/data/audio.js?v=4"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=17"></script>
+<script src="js/engine/generator.js?v=18"></script>
 <script>
 (function () {
   const out = [];
@@ -753,6 +753,33 @@
   }
   check('Frasi: 300 estrazioni solo tra lettere attive e difficoltà consentita', sGateOk && sCount === 300);
   check('Frasi: mai la stessa frase due volte di seguito', !sRepeat);
+
+  // UNISCI LE SILLABE: solo parole reali interamente leggibili, 2-4 sillabe.
+  const pBlendFew = sentenceProfile(['P','M']);
+  const pBlend = sentenceProfile(['P','M','N','L','T']);
+  const blendList = E.blendPool(pBlend);
+  check('Unisci le sillabe: bacino non vuoto con lettere studiate (' + blendList.length + ')',
+    blendList.length > 0);
+  check('Unisci le sillabe: solo parole reali con 2-4 sillabe e lettere attive',
+    blendList.length > 0 && blendList.every(function (e) {
+      return !!IAL.WORDS_BY_KEY[e.w] && e.s.length >= 2 && e.s.length <= 4 &&
+        e.s.join('') === e.w && E.canShowWord(pBlend, e);
+    }));
+  check('Unisci le sillabe: il bacino cresce con le consonanti apprese (' +
+    E.blendPool(pBlendFew).length + ' → ' + blendList.length + ')',
+    E.blendPool(pBlendFew).length < blendList.length);
+  IAL.Store.setActive(pBlend.id);
+  let blendOk = true, blendRepeat = false, prevBlend = '', blendCount = 0;
+  for (let i = 0; i < 100; i++) {
+    const ex = E.nextBlend(pBlend);
+    if (!ex || ex.invented || ex.syllables.join('') !== ex.word ||
+        !E.canShowWord(pBlend, IAL.WORDS_BY_KEY[ex.word])) { blendOk = false; break; }
+    if (ex.word === prevBlend) blendRepeat = true;
+    prevBlend = ex.word;
+    blendCount++;
+  }
+  check('Unisci le sillabe: 100 estrazioni valide senza ripetizioni consecutive',
+    blendOk && blendCount === 100 && !blendRepeat);
 
   out.push('');
   out.push(fail === 0 ? 'TUTTI I TEST SUPERATI (' + pass + ')' : 'TEST FALLITI: ' + fail + ' su ' + (pass + fail));

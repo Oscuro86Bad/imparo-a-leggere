@@ -157,6 +157,26 @@ IAL.UI = (function () {
     return s === s.toUpperCase() ? s.toLowerCase() : s;
   }
 
+  // Parole di un testo con la loro posizione in caratteri: serve per
+  // collegare la voce alla parola scritta (evidenziazione tipo karaoke).
+  function wordSpans(text) {
+    const s = String(text || '');
+    const out = [];
+    const re = /\S+/g;
+    let m;
+    while ((m = re.exec(s)) !== null) {
+      out.push({ text: m[0], start: m.index, end: m.index + m[0].length });
+    }
+    return out;
+  }
+
+  // Numero approssimato di sillabe di una parola: usato solo per scandire
+  // il fallback temporale quando il browser non invia onboundary.
+  function syllableGuess(text) {
+    const m = String(text || '').toUpperCase().match(/[AEIOU]+/g);
+    return m ? m.length : 1;
+  }
+
   function stopAudio() {
     if (!wordAudio) return;
     wordAudio.onended = null;
@@ -233,19 +253,51 @@ IAL.UI = (function () {
 
   // Sintesi vocale del dispositivo: fallback per sillabe, parole inventate,
   // parole personalizzate e testi non preregistrati.
-  function speakTTS(text, done) {
+  function speakTTS(text, done, opts) {
+    opts = opts || {};
     let finished = false;
     let started = false;
     let retried = false;
     let watchdog = null;
     let safety = null;
     let retryTimer = null;
+    let fallbackStart = null;
+    let fallbackTick = null;
+    let boundarySeen = false;
+    const rate = opts.rate || 0.85;
+    const words = opts.words || [];
+    let fbIndex = 0;
 
     const clearTimers = function () {
       if (watchdog) { clearTimeout(watchdog); watchdog = null; }
       if (safety) { clearTimeout(safety); safety = null; }
       if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+      if (fallbackStart) { clearTimeout(fallbackStart); fallbackStart = null; }
+      if (fallbackTick) { clearTimeout(fallbackTick); fallbackTick = null; }
     };
+    const stopFallback = function () {
+      if (fallbackStart) { clearTimeout(fallbackStart); fallbackStart = null; }
+      if (fallbackTick) { clearTimeout(fallbackTick); fallbackTick = null; }
+    };
+
+    const emitWord = function (i) {
+      if (opts.onWord && i >= 0 && i < words.length) opts.onWord(i, words[i].text);
+    };
+
+    // iOS spesso non emette onboundary: avanziamo comunque parola per parola.
+    function startFallback() {
+      if (finished || !words.length || boundarySeen) return;
+      function step() {
+        if (finished || boundarySeen) return;
+        if (fbIndex >= words.length) return;
+        emitWord(fbIndex);
+        const w = words[fbIndex].text;
+        fbIndex++;
+        const delay = Math.max(280, syllableGuess(w) * 300 / rate);
+        fallbackTick = setTimeout(step, delay);
+      }
+      step();
+    }
 
     // annullamento (cambio schermata): niente voce, niente done()
     const cancel = function () {
@@ -253,6 +305,7 @@ IAL.UI = (function () {
       finished = true;
       clearTimers();
       if (activeSay && activeSay.cancel === cancel) activeSay = null;
+      if (opts.onCancel) opts.onCancel();
     };
 
     const finish = function () {
@@ -260,6 +313,7 @@ IAL.UI = (function () {
       finished = true;
       clearTimers();
       if (activeSay && activeSay.cancel === cancel) activeSay = null;
+      if (opts.onWord) opts.onWord(-1, '');
       if (done) done();
     };
 
@@ -274,11 +328,27 @@ IAL.UI = (function () {
       if (finished) return;
       const u = new SpeechSynthesisUtterance(spokenText(text));
       u.lang = 'it-IT';
-      u.rate = 0.85;
+      u.rate = rate;
       u.pitch = 1;
       u.volume = 1;
       if (useVoice && voice) u.voice = voice;
-      u.onstart = function () { started = true; };
+      u.onstart = function () {
+        started = true;
+        if (opts.onWord && words.length && !fallbackStart) {
+          fallbackStart = setTimeout(startFallback, 1000);
+        }
+      };
+      u.onboundary = function (e) {
+        if (opts.onWord && words.length) {
+          const at = (e && typeof e.charIndex === 'number') ? e.charIndex : 0;
+          let idx = -1;
+          for (let k = 0; k < words.length; k++) {
+            if (words[k].start <= at) idx = k; else break;
+          }
+          if (idx >= 0) { boundarySeen = true; stopFallback(); emitWord(idx); }
+        }
+        if (opts.onBoundary) opts.onBoundary(e);
+      };
       u.onend = finish;
       u.onerror = function () {
         if (!started && !retried) retry();
@@ -309,7 +379,7 @@ IAL.UI = (function () {
       retryTimer = setTimeout(function () { attempt(false); }, 160);
     }
 
-    safety = setTimeout(finish, 6000);
+    safety = setTimeout(finish, Math.max(6000, words.length * 900 / rate));
 
     let busy = false;
     try { busy = synth.speaking || synth.pending; } catch (e) { busy = false; }
@@ -319,6 +389,20 @@ IAL.UI = (function () {
     } else {
       attempt(true);
     }
+  }
+
+  // Lettura lenta con evidenziazione: restituisce la parola corrente
+  // tramite onWord(i). Le frasi non hanno MP3: si usa la voce del
+  // dispositivo, più lenta e sincronizzata con il testo scritto.
+  function readAloud(text, opts) {
+    opts = opts || {};
+    return speakTTS(text, opts.onDone, {
+      rate: opts.rate || 0.6,
+      words: wordSpans(text),
+      onWord: opts.onWord,
+      onBoundary: opts.onBoundary,
+      onCancel: opts.onCancel
+    });
   }
 
   // Pronuncia un testo e chiama done() quando ha finito. Le parole reali
@@ -424,6 +508,7 @@ IAL.UI = (function () {
     el: el, renderScreen: renderScreen,
     modal: modal, alertModal: alertModal, confirmModal: confirmModal, closeModal: closeModal,
     toast: toast, starBurst: starBurst, praise: praise, retryMsg: retryMsg,
-    rand: rand, pic: pic, say: say, stopSpeech: stopSpeech, speechInfo: speechInfo
+    rand: rand, pic: pic, say: say, stopSpeech: stopSpeech, speechInfo: speechInfo,
+    wordSpans: wordSpans, readAloud: readAloud
   };
 })();

@@ -20,6 +20,7 @@
   --slate: #5C738C;
   --indigo: #5A5FD0;
   --gold: #E2A72E;
+  --lime: #8BC34A;
   --ink: #3E3C46;
   --muted: #7A8494;
   --card: #FFFFFF;
@@ -143,6 +144,7 @@ body {
 .btn-slate   { background: var(--slate); }
 .btn-indigo  { background: var(--indigo); }
 .btn-gold    { background: var(--gold); }
+.btn-lime    { background: var(--lime); }
 .btn-soft {
   background: #fff;
   color: var(--primary-dark);
@@ -303,6 +305,64 @@ body {
   border-top: 15px solid #fff;
   z-index: 1;
 }
+
+/* ---------- UNISCI LE SILLABE ---------- */
+.blend-hint {
+  font-size: clamp(16px, 4vw, 22px);
+  color: var(--muted);
+  font-weight: bold;
+  margin: 4px 0 16px;
+}
+.blend-stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.blend-stage.shake { animation: shake 0.45s; }
+.syl-tile {
+  font-family: var(--font);
+  font-size: clamp(30px, 8vw, 52px);
+  font-weight: bold;
+  color: #2F6B3B;
+  background: #F1FBE4;
+  border: 4px solid var(--lime);
+  border-radius: 20px;
+  min-width: 92px;
+  min-height: 92px;
+  padding: 10px 14px;
+  box-shadow: 0 6px 0 rgba(139, 195, 74, 0.30);
+  transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+.syl-tile:active { transform: translateY(3px); }
+.syl-tile.chosen {
+  background: #DDF3B8;
+  border-color: var(--green-dark);
+  transform: scale(0.94);
+  opacity: 0.85;
+}
+.blend-plus { font-size: clamp(24px, 6vw, 38px); color: var(--lime); font-weight: bold; }
+.blend-result {
+  font-size: clamp(40px, 11vw, 68px);
+  font-weight: bold;
+  line-height: 1.1;
+  color: var(--muted);
+  min-height: clamp(70px, 18vw, 110px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 2px;
+}
+.blend-result.done {
+  color: var(--green-dark);
+  animation: pop 0.5s ease;
+  letter-spacing: 0;
+}
+.blend-reward { font-size: clamp(56px, 16vw, 96px); line-height: 1.1; }
+.blend-reward .pic { height: clamp(80px, 22vw, 120px); }
+
 /* ---------- DICO LA PAROLA (microfono) ---------- */
 .speech-status {
   display: inline-flex;
@@ -479,9 +539,29 @@ body {
 .word-tools {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
   margin: -6px 0 10px;
 }
 .word-tools .chip { font-size: 16px; }
+.chip-slow {
+  background: #FFF3D6;
+  color: #8A5A00;
+  border: 2px solid var(--gold);
+}
+
+/* Parola/sillaba evidenziata durante "ASCOLTA LENTO" */
+.word-token {
+  border-radius: 8px;
+  padding: 0 2px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.word-token.active {
+  background: #FDE68A;
+  box-shadow: 0 0 0 3px #FDE68A;
+}
+.syl-token { border-radius: 5px; padding: 0 1px; }
+.syl-token.active { background: #FFB74D; color: #6B3E00; }
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-12px); }
@@ -1068,4 +1148,14 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 @keyframes linkReady {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.035); }
+}
+
+/* Rispetta le preferenze di sistema: niente animazioni per chi le disattiva */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
