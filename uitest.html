@@ -9,14 +9,14 @@
 <script>try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }</script>
 <script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push((e.message || 'errore') + ' @ riga ' + e.lineno + ' | ' + ((e.error && e.error.stack) || '').replace(/\n/g, ' ¦ ')); }); window.addEventListener('unhandledrejection', function (e) { window.__errs.push('PROMISE: ' + ((e.reason && (e.reason.stack || e.reason.message)) || e.reason)); });</script>
 <script src="js/config.js?v=11"></script>
-<script src="js/data/words.js?v=24"></script>
+<script src="js/data/words.js?v=25"></script>
 <script src="js/data/sentences.js?v=6"></script>
 <script src="js/data/associations.js?v=9"></script>
 <script src="js/state/store.js?v=8"></script>
-<script src="js/engine/generator.js?v=18"></script>
+<script src="js/engine/generator.js?v=19"></script>
 <script src="js/ui/components.js?v=19"></script>
 <script src="js/ui/home.js?v=19"></script>
-<script src="js/ui/blend.js?v=3"></script>
+<script src="js/ui/blend.js?v=4"></script>
 <script src="js/ui/reading.js?v=12"></script>
 <script src="js/ui/match.js?v=12"></script>
 <script src="js/ui/speech.js?v=12"></script>
@@ -130,17 +130,20 @@
   const blendDisplay = IAL.Blend.displayForTest();
   check('UNISCI LE SILLABE: riquadri = sillabe della parola, ma mescolate (' +
     blendDisplay.join('+') + ' → ' + (blendEx ? blendEx.word : 'nessuna') + ')',
-    !!blendEx && blendTiles.length === blendEx.syllables.length && blendTiles.length >= 2 &&
+    !!blendEx && blendTiles.length === blendEx.syllables.length && blendTiles.length >= 3 &&
     blendDisplay.slice().sort().join('|') === blendEx.syllables.slice().sort().join('|') &&
     (blendDisplay.join('|') !== blendEx.syllables.join('|') ||
       blendEx.syllables.every(s => s === blendEx.syllables[0])));
   check('UNISCI LE SILLABE: la mescolatura non lascia mai l’ordine corretto',
     IAL.Blend.shuffleForTest(['MA', 'MMA', 'PA']).join('|') !== 'MA|MMA|PA' &&
     IAL.Blend.shuffleForTest(['ME', 'LA']).join('|') !== 'ME|LA');
-  check('UNISCI LE SILLABE: solo parole reali con lettere e sillabe studiate',
-    !!blendEx && !blendEx.invented && !!IAL.WORDS_BY_KEY[blendEx.word] &&
+  check('UNISCI LE SILLABE: almeno 3 sillabe, solo lettere e sillabe studiate',
+    !!blendEx && !blendEx.invented && blendEx.syllables.length >= 3 &&
+    (!!IAL.WORDS_BY_KEY[blendEx.word] || !!IAL.BLEND_WORDS_BY_KEY[blendEx.word]) &&
     blendEx.syllables.every(s => IAL.Engine.canShowSyllable(
-      IAL.Store.active(), s, IAL.Engine.enabledLetters(IAL.Store.active()))));
+      IAL.Store.active(), s, IAL.Engine.enabledLetters(IAL.Store.active())) ||
+      (s.length === 2 && IAL.lettersOf(s).every(ch => IAL.isVowel(ch) &&
+        IAL.Engine.enabledLetters(IAL.Store.active()).has(ch)))));
   const starsBlend0 = IAL.Store.active().stats.stars;
   const wrongTile = blendTiles.find(t => t.textContent !== blendEx.syllables[0]);
   if (wrongTile) wrongTile.click();

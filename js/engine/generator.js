@@ -588,23 +588,53 @@ IAL.Engine = (function () {
   }
 
   // ---------- UNISCI LE SILLABE ----------
-  // Solo parole reali INTERAMENTE leggibili (stesse regole di LEGGI E GUARDA)
-  // e con 2–4 sillabe: il bambino unisce pezzi che già sa leggere. Nessuna
-  // parola inventata e nessuna lettera nuova può entrare di nascosto.
+  // Parole reali e catene di sillabe dedicate: solo voci INTERAMENTE
+  // leggibili con lettere e sillabe studiate. Nessuna lettera nuova entra
+  // di nascosto. Le voci con almeno 3 sillabe sono privilegiate; quelle
+  // a 2 sillabe restano come fallback per i primissimi passi.
+  function canShowBlendSyllable(p, syl, letters) {
+    // Due vocali attive (es. IA) si leggono senza studio aggiuntivo.
+    const chars = IAL.lettersOf(syl);
+    if (syl.length <= 2 && chars.length === syl.length &&
+        chars.every(function (ch) { return letters.has(ch); }) &&
+        chars.every(function (ch) { return IAL.isVowel(ch); })) return true;
+    return canShowSyllable(p, syl, letters);
+  }
+
+  function canShowBlendEntry(p, entry, letters) {
+    letters = letters || enabledLetters(p);
+    return IAL.lettersOf(entry.w).every(function (ch) { return letters.has(ch); }) &&
+      entry.s.every(function (syl) { return canShowBlendSyllable(p, syl, letters); });
+  }
+
   function blendPool(p) {
-    return realWords(p, null, true).filter(function (entry) {
+    const letters = enabledLetters(p);
+    const real = realWords(p, null, true).filter(function (entry) {
       return entry.s && entry.s.length >= 2 && entry.s.length <= 4;
     });
+    const chains = (IAL.BLEND_WORDS || []).filter(function (entry) {
+      return entry.s && entry.s.length >= 2 && entry.s.length <= 4 &&
+        canShowBlendEntry(p, entry, letters);
+    });
+    return real.concat(chains);
+  }
+
+  // Parole complesse: almeno tre sillabe. Se il profilo non ne ha ancora,
+  // nextBlend ricade sulle parole a due sillabe senza lasciare la sezione vuota.
+  function complexBlendPool(p) {
+    return blendPool(p).filter(function (entry) { return entry.s.length >= 3; });
   }
 
   const recentBlends = [];
 
   function nextBlend(p) {
-    const pool = blendPool(p);
-    if (!pool.length) return null;
-    const fresh = pool.filter(function (e) { return recentBlends.indexOf(e.w) === -1; });
-    const list = fresh.length ? fresh : pool;
-    const entry = list[Math.floor(Math.random() * list.length)];
+    const full = blendPool(p);
+    if (!full.length) return null;
+    const complex = complexBlendPool(p);
+    const list = complex.length ? complex : full;
+    const fresh = list.filter(function (e) { return recentBlends.indexOf(e.w) === -1; });
+    const candidates = fresh.length ? fresh : list;
+    const entry = candidates[Math.floor(Math.random() * candidates.length)];
     recentBlends.push(entry.w);
     if (recentBlends.length > 12) recentBlends.shift();
     return {
@@ -655,6 +685,7 @@ IAL.Engine = (function () {
     sentencePool: sentencePool,
     nextSentence: nextSentence,
     blendPool: blendPool,
+    complexBlendPool: complexBlendPool,
     nextBlend: nextBlend,
     availability: availability
   };

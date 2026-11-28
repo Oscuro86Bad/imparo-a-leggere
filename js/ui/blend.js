@@ -102,7 +102,7 @@ IAL.Blend = (function () {
       return;
     }
 
-    if (typeEl) typeEl.textContent = ex.syllables.length + ' sillabe · parola reale';
+    if (typeEl) typeEl.textContent = ex.syllables.length + ' sillabe · unisci i pezzi';
     if (hintEl) hintEl.textContent = 'Le sillabe sono mescolate: tocca quella giusta 👆';
     if (msgEl) { msgEl.textContent = ''; msgEl.className = 'feedback-msg'; }
     if (resultEl) { resultEl.textContent = '—'; resultEl.classList.remove('done'); }
@@ -187,7 +187,7 @@ IAL.Blend = (function () {
     if (!noteEl) return;
     const avail = IAL.Engine.availability(p);
     noteEl.textContent = '⭐ ' + p.stats.stars + ' stelline · ' + p.stats.correct +
-      ' esercizi corretti · ' + avail.blends + ' parole da unire · solo sillabe studiate';
+      ' esercizi corretti · ' + avail.blends + ' parole da unire · almeno 3 sillabe quando disponibili';
   }
 
   function currentForTest() { return current; }
